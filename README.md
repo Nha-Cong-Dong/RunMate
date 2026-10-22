@@ -30,12 +30,12 @@ Mục tiêu chính: học qua vibe code. Hiểu được thứ AI viết ra quan
 ## Tính năng
 
 ### MVP
-- [ ] **Lên kế hoạch chạy:** chọn ngày, giờ và vị trí
+- [ ] **Lên kế hoạch chạy:** chọn ngày, giờ, vị trí và mục tiêu (số km hoặc thời gian chạy)
 - [ ] **Đánh giá thời tiết** tại thời điểm và vị trí đã chọn
   - Dự báo: nhiệt độ, khả năng mưa, gió, chỉ số UV
   - Cảnh báo khi thời tiết xấu (mưa, quá nóng, gió mạnh, UV cao)
   - Gợi ý vật dụng nên mang (áo mưa, mũ, kem chống nắng, nước…)
-- [ ] **Ghi một buổi chạy:** GPS, quãng đường, thời gian, pace
+- [ ] **Ghi một buổi chạy:** theo kế hoạch hoặc chạy tự do. GPS, quãng đường, thời gian, pace, tiến độ so với mục tiêu
 - [ ] **Xem lại quỹ đạo** sau khi chạy (vẽ đường chạy, chưa có bản đồ nền)
 - [ ] **Lưu lịch sử** các buổi chạy
 
@@ -46,18 +46,22 @@ Mục tiêu chính: học qua vibe code. Hiểu được thứ AI viết ra quan
 
 ## Công nghệ
 
-| Thành phần  | Công nghệ                                                                                                        | Lý do chọn                                           |
-| ----------- | ---------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------- |
-| Ngôn ngữ    | Kotlin                                                                                                           | Ngôn ngữ chính thức cho Android                      |
-| Build       | Gradle (Kotlin DSL)                                                                                              | Mặc định của Android Studio                          |
-| UI          | [Jetpack Compose](https://developer.android.com/compose)                                                         | Google khuyến nghị cho app mới, viết UI ít code hơn  |
-| Kiến trúc   | [MVVM](https://developer.android.com/topic/architecture) (ViewModel + StateFlow)                                 | Đơn giản, đúng hướng dẫn chính thức                  |
-| Lưu trữ     | [Room](https://developer.android.com/training/data-storage/room)                                                 | Lưu offline kế hoạch, buổi chạy và điểm GPS          |
-| Thời tiết   | [Open-Meteo API](https://open-meteo.com/)                                                                        | Không cần API key, có dự báo theo giờ đến 16 ngày    |
-| Gọi mạng    | [Retrofit](https://square.github.io/retrofit/) + kotlinx.serialization                                           | Phổ biến, có nhiều tài liệu                          |
-| Vị trí      | [Fused Location Provider](https://developer.android.com/develop/sensors-and-location/location)                   | Chính xác và tiết kiệm pin                           |
-| Ghi GPS nền | [Foreground Service loại `location`](https://developer.android.com/about/versions/14/changes/fgs-types-required) | Bắt buộc từ Android 14                               |
-| Vẽ quỹ đạo  | Compose Canvas                                                                                                   | Không cần API key, không phụ thuộc dịch vụ bên ngoài |
+| Thành phần     | Công nghệ                                                                                                        | Lý do chọn                                           |
+| -------------- | ---------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------- |
+| Ngôn ngữ       | Kotlin                                                                                                           | Ngôn ngữ chính thức cho Android                      |
+| Build          | Gradle (Kotlin DSL)                                                                                              | Mặc định của Android Studio                          |
+| UI             | [Jetpack Compose](https://developer.android.com/compose)                                                         | Google khuyến nghị cho app mới, viết UI ít code hơn  |
+| Điều hướng     | [Navigation Compose](https://developer.android.com/guide/navigation)                                             | Thư viện chính thức, dùng cùng Compose               |
+| Kiến trúc      | [MVVM](https://developer.android.com/topic/architecture) (ViewModel + StateFlow)                                 | Đơn giản, đúng hướng dẫn chính thức                  |
+| Bất đồng bộ    | [Kotlin Coroutines + Flow](https://kotlinlang.org/docs/coroutines-overview.html)                                 | Room, Retrofit và ViewModel đều hỗ trợ sẵn           |
+| Lưu trữ        | [Room](https://developer.android.com/training/data-storage/room)                                                 | Lưu offline kế hoạch, buổi chạy và điểm GPS          |
+| Thời tiết      | [Open-Meteo API](https://open-meteo.com/)                                                                        | Không cần API key, có dự báo theo giờ đến 16 ngày    |
+| Tìm địa điểm   | [Open-Meteo Geocoding API](https://open-meteo.com/en/docs/geocoding-api)                                         | Tìm vị trí theo tên, không cần API key               |
+| Gọi mạng       | [Retrofit](https://square.github.io/retrofit/) + kotlinx.serialization                                           | Phổ biến, có nhiều tài liệu                          |
+| Vị trí         | [Fused Location Provider](https://developer.android.com/develop/sensors-and-location/location)                   | Chính xác và tiết kiệm pin                           |
+| Ghi GPS nền    | [Foreground Service loại `location`](https://developer.android.com/about/versions/14/changes/fgs-types-required) | Bắt buộc từ Android 14                               |
+| Vẽ quỹ đạo     | Compose Canvas                                                                                                   | Không cần API key, không phụ thuộc dịch vụ bên ngoài |
+| Tiêm phụ thuộc | [Tự tạo thủ công](https://developer.android.com/training/dependency-injection/manual) (`AppContainer`)           | App nhỏ, dễ thấy mọi thứ được tạo ở đâu              |
 
 > **Lưu ý:** Open-Meteo miễn phí cho mục đích phi thương mại. Nếu RunMate kiếm tiền, cần chuyển sang gói trả phí.
 
@@ -65,9 +69,9 @@ Mục tiêu chính: học qua vibe code. Hiểu được thứ AI viết ra quan
 
 ### Yêu cầu
 
-- Android Studio <!-- TODO: phiên bản -->
+- Android Studio bản ổn định mới nhất (phiên bản cụ thể ghi lại khi tạo project)
 - JDK 17
-- Android SDK, `minSdk` <!-- TODO --> / `targetSdk` <!-- TODO -->
+- Android SDK: `minSdk` 26 (Android 8.0) / `targetSdk` 35 (Android 15)
 
 ### Cài đặt
 

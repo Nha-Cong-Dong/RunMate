@@ -1,6 +1,6 @@
 # RunMate: Đặc tả sản phẩm (SPEC)
 
-> Trạng thái: **đang viết**. Đã xong mục 1–6. Các mục còn lại sẽ bổ sung sau.
+> Trạng thái: **chờ duyệt**. Đã viết xong mục 1–10.
 
 ## Mục lục
 
@@ -10,10 +10,10 @@
 4. [Use case và sơ đồ flow](#4-use-case-và-sơ-đồ-flow)
 5. [Quy tắc nghiệp vụ](#5-quy-tắc-nghiệp-vụ)
 6. [Trạng thái kế hoạch](#6-trạng-thái-kế-hoạch)
-7. Mô hình dữ liệu / ERD *(chưa viết)*
-8. API và công nghệ *(chưa viết)*
-9. Danh sách màn hình *(chưa viết)*
-10. Yêu cầu phi chức năng *(chưa viết)*
+7. [Mô hình dữ liệu / ERD](#7-mô-hình-dữ-liệu--erd)
+8. [API và công nghệ](#8-api-và-công-nghệ)
+9. [Danh sách màn hình](#9-danh-sách-màn-hình)
+10. [Yêu cầu phi chức năng](#10-yêu-cầu-phi-chức-năng)
 
 ---
 
@@ -240,10 +240,11 @@ flowchart TD
 | BR-06 | Vị trí kế hoạch là một toạ độ (vĩ độ, kinh độ) kèm tên hiển thị | Bắt buộc. Chọn vị trí hiện tại hoặc tự chọn |
 | BR-07 | Không giới hạn số kế hoạch cùng lúc, và cho phép trùng giờ | Không giới hạn |
 | BR-08 | Chỉ **một** buổi chạy được diễn ra tại một thời điểm | Tối đa 1 buổi chạy `IN_PROGRESS` |
+| BR-09 | **Ân hạn:** kế hoạch chỉ bị coi là **quá giờ** khi giờ hiện tại > giờ bắt đầu + ân hạn. Mọi chỗ trong SPEC nói "quá giờ" đều theo quy tắc này | **30 phút** |
 
 ### 5.2 Thời tiết, cảnh báo và gợi ý vật dụng
 
-**Mốc thời gian dự báo:** lấy dự báo theo giờ của **giờ bắt đầu**, làm tròn xuống giờ chẵn. Với chạy tự do, giờ bắt đầu là bây giờ. App chưa ước tính giờ kết thúc (xem Q5).
+**Mốc thời gian dự báo:** lấy dự báo theo giờ của **giờ bắt đầu**, làm tròn xuống giờ chẵn. Với chạy tự do, giờ bắt đầu là bây giờ. App chưa ước tính giờ kết thúc.
 
 **Ngưỡng cảnh báo:**
 
@@ -272,6 +273,7 @@ flowchart TD
 **Dữ liệu thời tiết:**
 - Lưu cùng kế hoạch hoặc buổi chạy kèm **thời điểm lấy**, để dùng khi không có mạng.
 - Mở chi tiết kế hoạch và có mạng thì lấy lại nếu dữ liệu đã lưu **hơn 3 giờ**.
+- Kế hoạch `COMPLETED` hoặc `CANCELLED` thì **không lấy lại** thời tiết, chỉ hiện dữ liệu đã lưu.
 - Không có mạng thì hiện dữ liệu đã lưu kèm nhãn "cập nhật lúc …". Chưa từng có dữ liệu thì hiện thông báo không có thời tiết.
 - Lỗi thời tiết **không chặn** lưu kế hoạch hay bắt đầu chạy.
 
@@ -301,6 +303,7 @@ flowchart TD
 | BR-41 | Vị trí: mặc định là vị trí hiện tại, người dùng đổi được. Bắt buộc có vị trí để lấy thời tiết |
 | BR-42 | Mục tiêu bắt buộc, theo cùng quy tắc BR-03 đến BR-05 |
 | BR-43 | Không tạo kế hoạch và không có trạng thái kế hoạch. Buổi chạy lưu thẳng vào lịch sử |
+| BR-44 | **Gợi ý chạy theo kế hoạch:** khi mở S5, nếu có kế hoạch `PLANNED` mà giờ hiện tại nằm trong **khoảng gợi ý** (từ giờ bắt đầu − **30 phút** (đề xuất) đến giờ bắt đầu + ân hạn BR-09), app hiện gợi ý "Bạn có kế hoạch lúc 06:00 · 5 km. Chạy theo kế hoạch này?". **Chạy theo kế hoạch** thì chuyển sang S4 của kế hoạch đó. **Bỏ qua** thì ở lại S5 và chạy tự do. Có nhiều kế hoạch khớp thì chỉ gợi ý kế hoạch có giờ bắt đầu gần bây giờ nhất. Quá ân hạn thì kế hoạch là `MISSED`, app không gợi ý, và buổi chạy là chạy tự do |
 
 ### 5.5 Lịch sử và xoá dữ liệu
 
@@ -308,8 +311,8 @@ flowchart TD
 |---|---|
 | BR-50 | Lịch sử sắp xếp **mới nhất trước** |
 | BR-51 | Không tự xoá dữ liệu cũ. Chỉ xoá khi người dùng xoá |
-| BR-52 | Xoá kế hoạch `COMPLETED` thì xoá luôn buổi chạy và các điểm GPS, có cảnh báo (Q1) |
-| BR-53 | Xoá riêng buổi chạy của một kế hoạch thì kế hoạch về `PLANNED` hoặc `MISSED`, có cảnh báo (Q3, Q5) |
+| BR-52 | Xoá kế hoạch `COMPLETED` thì xoá luôn buổi chạy và các điểm GPS, có cảnh báo |
+| BR-53 | Xoá riêng buổi chạy của một kế hoạch thì kế hoạch về `PLANNED` hoặc `MISSED`, có cảnh báo |
 | BR-54 | Mọi thao tác xoá đều **hỏi xác nhận** và không khôi phục được |
 
 ## 6. Trạng thái kế hoạch
@@ -320,10 +323,10 @@ Chỉ **kế hoạch** có trạng thái. Chạy tự do không có kế hoạch
 
 | Trạng thái | Ý nghĩa | Hiển thị |
 |---|---|---|
-| `PLANNED` | Đã lên kế hoạch, chưa đến giờ hoặc chưa chạy, giờ bắt đầu còn ở tương lai | Đã lên kế hoạch |
+| `PLANNED` | Đã lên kế hoạch, chưa chạy và chưa quá giờ (BR-09) | Đã lên kế hoạch |
 | `IN_PROGRESS` | Đang có một buổi chạy gắn với kế hoạch | Đang chạy |
 | `COMPLETED` | Đã chạy xong và có buổi chạy được lưu | Hoàn thành |
-| `MISSED` | Quá giờ bắt đầu mà chưa chạy | Bỏ lỡ |
+| `MISSED` | Quá giờ (BR-09) mà chưa chạy | Bỏ lỡ |
 | `CANCELLED` | Người dùng chủ động huỷ kế hoạch | Đã huỷ |
 
 ### 6.2 Sơ đồ chuyển trạng thái
@@ -355,7 +358,7 @@ stateDiagram-v2
 |---|---|---|
 | (mới) | `PLANNED` | Lưu kế hoạch hợp lệ (BR-01 đến BR-06) |
 | `PLANNED` | `IN_PROGRESS` | Bấm Bắt đầu chạy, và chưa có buổi chạy nào khác đang diễn ra (BR-08) |
-| `PLANNED` | `MISSED` | Giờ hiện tại > giờ bắt đầu (Q5) |
+| `PLANNED` | `MISSED` | Quá giờ (BR-09) |
 | `PLANNED` | `CANCELLED` | Người dùng bấm Huỷ kế hoạch |
 | `MISSED` | `IN_PROGRESS` | Bấm Bắt đầu chạy muộn |
 | `MISSED` | `PLANNED` | Sửa sang giờ bắt đầu ở tương lai |
@@ -363,7 +366,7 @@ stateDiagram-v2
 | `CANCELLED` | `PLANNED` | Sửa sang giờ bắt đầu ở tương lai (coi như lên lại kế hoạch) |
 | `IN_PROGRESS` | `COMPLETED` | Bấm Kết thúc, buổi chạy ≥ 100 m và ≥ 1 phút (BR-36) |
 | `IN_PROGRESS` | `PLANNED` hoặc `MISSED` | Buổi chạy quá ngắn nên không lưu. Chưa quá giờ thì về `PLANNED`, quá rồi thì về `MISSED` |
-| `COMPLETED` | `PLANNED` hoặc `MISSED` | Xoá riêng buổi chạy (Q3). Chưa quá giờ thì về `PLANNED`, quá rồi thì về `MISSED` |
+| `COMPLETED` | `PLANNED` hoặc `MISSED` | Xoá riêng buổi chạy. Chưa quá giờ thì về `PLANNED`, quá rồi thì về `MISSED` |
 
 **Cách phát hiện `MISSED`:** app so giờ hiện tại với giờ bắt đầu mỗi khi mở app và mỗi khi hiển thị danh sách hoặc chi tiết kế hoạch, rồi cập nhật trạng thái. MVP chưa cần tác vụ chạy nền. Thông báo trước giờ chạy ở v1.1 mới cần hẹn giờ.
 
@@ -373,7 +376,7 @@ stateDiagram-v2
 |---|---|---|---|
 | `PLANNED` | Được | Được | Hỏi xác nhận khi xoá |
 | `IN_PROGRESS` | **Không** | **Không** | Phải kết thúc buổi chạy trước. Nút bị vô hiệu hoá, kèm giải thích |
-| `COMPLETED` | **Không** | Được, **xoá luôn buổi chạy** | Cảnh báo "không khôi phục được" (Q1) |
+| `COMPLETED` | **Không** | Được, **xoá luôn buổi chạy** | Cảnh báo "không khôi phục được" |
 | `MISSED` | Được | Được | Sửa sang giờ ở tương lai thì về `PLANNED` |
 | `CANCELLED` | Được | Được | Sửa sang giờ ở tương lai thì về `PLANNED` |
 
@@ -381,5 +384,362 @@ stateDiagram-v2
 - Sửa kế hoạch gồm đổi ngày, giờ, vị trí và mục tiêu. Sau khi sửa thì lấy lại thời tiết.
 - Khi `MISSED` hoặc `CANCELLED` được sửa mà giờ mới vẫn ở quá khứ thì **không cho lưu** (BR-01).
 - Kế hoạch `COMPLETED` không cho sửa vì sẽ làm kế hoạch lệch với buổi chạy thật.
-- Nếu app bị hệ thống tắt giữa lúc chạy, kế hoạch vẫn là `IN_PROGRESS`. Lần mở app sau hỏi người dùng tiếp tục hay kết thúc buổi chạy. Phần này sẽ nói kỹ hơn ở mục 10.
+- Nếu app bị hệ thống tắt giữa lúc chạy, kế hoạch vẫn là `IN_PROGRESS`. Lần mở app sau hỏi người dùng tiếp tục hay kết thúc buổi chạy. Xem mục 10.1.
 
+## 7. Mô hình dữ liệu / ERD
+
+Toàn bộ dữ liệu lưu bằng Room trên máy (mục 2). Có 3 bảng. Thời tiết là một nhóm cột gộp chung vào bảng (`@Embedded`), không phải bảng riêng.
+
+### 7.1 Sơ đồ ERD
+
+```mermaid
+erDiagram
+    RUN_PLAN ||--o| RUN_SESSION : "có tối đa 1"
+    RUN_SESSION ||--o{ TRACK_POINT : "gồm nhiều"
+
+    RUN_PLAN {
+        Long id PK
+        Long startTime
+        String locationName
+        Double latitude
+        Double longitude
+        String goalType
+        Int goalValue
+        String status
+        Long createdAt
+        Long weatherFetchedAt "nullable"
+        Double temperatureC "nullable"
+        Int precipitationProb "nullable"
+        Double windSpeedKmh "nullable"
+        Double uvIndex "nullable"
+    }
+    RUN_SESSION {
+        Long id PK
+        Long planId FK "nullable, unique"
+        String status
+        Long startedAt
+        Long endedAt "nullable"
+        String locationName
+        Double latitude
+        Double longitude
+        String goalType
+        Int goalValue
+        Double distanceMeters
+        Long activeDurationSec
+        Long goalReachedAt "nullable"
+        Long weatherFetchedAt "nullable"
+        Double temperatureC "nullable"
+        Int precipitationProb "nullable"
+        Double windSpeedKmh "nullable"
+        Double uvIndex "nullable"
+    }
+    TRACK_POINT {
+        Long id PK
+        Long sessionId FK
+        Int segmentIndex
+        Long timestamp
+        Double latitude
+        Double longitude
+        Float accuracyM
+    }
+```
+
+### 7.2 Bảng `run_plan`: kế hoạch chạy
+
+| Cột | Kiểu | Bắt buộc | Ý nghĩa |
+|---|---|---|---|
+| `id` | Long, tự tăng | Có | Khoá chính |
+| `startTime` | Long (epoch millis) | Có | Giờ bắt đầu (BR-01, BR-02) |
+| `locationName` | String | Có | Tên hiển thị của vị trí (BR-06) |
+| `latitude`, `longitude` | Double | Có | Toạ độ (BR-06) |
+| `goalType` | String (`DISTANCE` / `DURATION`) | Có | Loại mục tiêu (BR-03) |
+| `goalValue` | Int | Có | `DISTANCE`: **mét** (500–100 000). `DURATION`: **giây** (300–43 200) |
+| `status` | String (`PlanStatus`) | Có | Trạng thái (mục 6) |
+| `createdAt` | Long | Có | Lúc tạo |
+| Nhóm thời tiết | `WeatherSnapshot`, nullable | Không | Rỗng khi chưa lấy được thời tiết (mục 5.2) |
+
+### 7.3 Bảng `run_session`: buổi chạy
+
+| Cột | Kiểu | Bắt buộc | Ý nghĩa |
+|---|---|---|---|
+| `id` | Long, tự tăng | Có | Khoá chính |
+| `planId` | Long, nullable | Không | Rỗng nghĩa là chạy tự do. **Unique**: mỗi kế hoạch có tối đa 1 buổi chạy |
+| `status` | String (`SessionStatus`) | Có | `RECORDING`, `PAUSED` hoặc `FINISHED` |
+| `startedAt` | Long | Có | Lúc bấm Bắt đầu |
+| `endedAt` | Long, nullable | Không | Lúc bấm Kết thúc |
+| `locationName`, `latitude`, `longitude` | | Có | Chép từ kế hoạch, hoặc chọn khi chạy tự do (BR-41) |
+| `goalType`, `goalValue` | | Có | Chép từ kế hoạch, hoặc nhập khi chạy tự do (BR-42) |
+| `distanceMeters` | Double | Có | Quãng đường (BR-33), cập nhật dần trong lúc chạy |
+| `activeDurationSec` | Long | Có | Thời gian chạy, không tính lúc tạm dừng (BR-34) |
+| `goalReachedAt` | Long, nullable | Không | Lúc đạt mục tiêu. Dùng để chỉ báo một lần (BR-38) |
+| Nhóm thời tiết | `WeatherSnapshot`, nullable | Không | Chép từ kế hoạch, hoặc lấy mới khi chạy tự do |
+
+Pace không lưu mà tính khi hiển thị: `activeDurationSec ÷ distanceMeters` (BR-35).
+
+### 7.4 Bảng `track_point`: điểm GPS
+
+| Cột | Kiểu | Ý nghĩa |
+|---|---|---|
+| `id` | Long, tự tăng | Khoá chính |
+| `sessionId` | Long, có index | Thuộc buổi chạy nào |
+| `segmentIndex` | Int | Đánh dấu chỗ có tạm dừng, để app biết **không nối** hai đoạn. Bắt đầu từ 0, tăng thêm 1 sau mỗi lần tạm dừng rồi tiếp tục. Không nối và không cộng quãng đường giữa hai đoạn khác nhau (BR-33) |
+| `timestamp` | Long | Thời điểm ghi |
+| `latitude`, `longitude` | Double | Toạ độ |
+| `accuracyM` | Float | Sai số (m) |
+
+Chỉ lưu điểm đã qua bộ lọc BR-30 và BR-31.
+
+### 7.5 Nhóm thời tiết `WeatherSnapshot` (embedded)
+
+| Cột | Kiểu | Đơn vị |
+|---|---|---|
+| `weatherFetchedAt` | Long | Thời điểm gọi Open-Meteo thành công, không phải giờ dự báo. Dùng cho 2 việc: quyết định có cần gọi lại API không (quy tắc 3 giờ, mục 5.2) và hiện nhãn "cập nhật lúc …" khi không có mạng |
+| `temperatureC` | Double | °C |
+| `precipitationProb` | Int | % |
+| `windSpeedKmh` | Double | km/h |
+| `uvIndex` | Double | |
+
+Cảnh báo và gợi ý vật dụng **không lưu**. Mỗi lần hiển thị, app tính lại từ các số này theo BR-10 đến BR-24.
+
+### 7.6 Enum
+
+| Enum | Giá trị |
+|---|---|
+| `GoalType` | `DISTANCE`, `DURATION` |
+| `PlanStatus` | `PLANNED`, `IN_PROGRESS`, `COMPLETED`, `MISSED`, `CANCELLED` |
+| `SessionStatus` | `RECORDING`, `PAUSED`, `FINISHED` |
+
+Enum lưu dạng chuỗi qua `TypeConverter`, để có đổi thứ tự trong code thì dữ liệu cũ cũng không sai.
+
+### 7.7 Quy tắc lưu và xoá
+
+| Quy tắc | Cách làm trong Room |
+|---|---|
+| Xoá kế hoạch thì xoá luôn buổi chạy (BR-52) | `run_session.planId` → `run_plan.id`, `onDelete = CASCADE` |
+| Xoá buổi chạy thì xoá luôn điểm GPS | `track_point.sessionId` → `run_session.id`, `onDelete = CASCADE` |
+| Xoá buổi chạy của kế hoạch thì kế hoạch về `PLANNED` hoặc `MISSED` (BR-53) | Một transaction: xoá buổi chạy rồi cập nhật `status` của kế hoạch |
+| Chỉ 1 buổi chạy đang diễn ra (BR-08) | Trước khi bắt đầu, kiểm tra không có `run_session` nào ở `RECORDING` hoặc `PAUSED` |
+| Lưu điểm trong lúc chạy | Tạo dòng `run_session` (`RECORDING`) **ngay khi bấm Bắt đầu**. Điểm GPS ghi dần vào Room để app có bị tắt giữa chừng cũng không mất (mục 6.4) |
+| Buổi chạy quá ngắn (BR-36) | Khi Kết thúc mà chưa đạt ngưỡng thì xoá dòng `run_session` (điểm GPS bị xoá theo) |
+
+## 8. API và công nghệ
+
+### 8.1 Open-Meteo Forecast API
+
+| Mục | Giá trị |
+|---|---|
+| Endpoint | `GET https://api.open-meteo.com/v1/forecast` |
+| Tài liệu | https://open-meteo.com/en/docs |
+| API key | Không cần |
+| Tham số | `latitude`, `longitude`, `hourly=temperature_2m,precipitation_probability,wind_speed_10m,uv_index`, `forecast_days=16`, `timeformat=unixtime` |
+| Chọn giờ | Trong mảng `hourly.time`, lấy phần tử bằng giờ bắt đầu làm tròn xuống giờ chẵn (mục 5.2) |
+| Đơn vị mặc định | °C, %, km/h: khớp với ngưỡng BR-10 đến BR-13, không cần đổi |
+| Timeout | 10 giây (đề xuất) |
+| Lỗi | Mất mạng, timeout hoặc mã HTTP khác 2xx thì đều coi là "không lấy được dự báo" (UC1, mục 5.2) |
+
+Dùng `timeformat=unixtime` để so thẳng với `startTime` (epoch), khỏi phải xử lý múi giờ.
+
+### 8.2 Chọn vị trí
+
+| Cách chọn | Cách làm | Tên hiển thị |
+|---|---|---|
+| Vị trí hiện tại | Fused Location Provider, lấy một lần | "Vị trí hiện tại", người dùng sửa được |
+| Tìm theo tên | Open-Meteo Geocoding API: `GET https://geocoding-api.open-meteo.com/v1/search?name=…&language=vi` ([tài liệu](https://open-meteo.com/en/docs/geocoding-api)) | Tên địa điểm trả về |
+
+MVP không có bản đồ, nên không chọn vị trí bằng cách chạm lên bản đồ.
+
+### 8.3 Quyền Android
+
+| Quyền | Vì sao |
+|---|---|
+| `INTERNET` | Gọi Open-Meteo |
+| `ACCESS_FINE_LOCATION`, `ACCESS_COARSE_LOCATION` | GPS khi chạy, lấy vị trí hiện tại |
+| `FOREGROUND_SERVICE`, `FOREGROUND_SERVICE_LOCATION` | Ghi GPS khi tắt màn hình (bắt buộc từ Android 14) |
+| `POST_NOTIFICATIONS` | Hiện thông báo của service (xin lúc chạy, từ Android 13) |
+
+**Không cần** `ACCESS_BACKGROUND_LOCATION`, vì service luôn được khởi động khi người dùng đang mở app và bấm Bắt đầu.
+Tài liệu: https://developer.android.com/develop/background-work/services/fgs/service-types#location
+
+### 8.4 Công nghệ
+
+> Phiên bản cụ thể **chưa chốt**. Khi tạo project ở bước 3 sẽ lấy bản ổn định mới nhất lúc đó và ghi lại ở đây.
+
+| Thành phần | Kỹ thuật / thư viện | Nguồn tài liệu | Lý do chọn | Phương án khác |
+|---|---|---|---|---|
+| UI | Jetpack Compose (Compose BOM) | https://developer.android.com/compose | Google khuyến nghị cho app mới, viết UI ít code hơn | XML View: cũ hơn, nhiều code hơn |
+| Điều hướng | Navigation Compose | https://developer.android.com/guide/navigation | Chính thức, dùng cùng Compose | Tự quản lý màn hình bằng state: khó mở rộng |
+| Kiến trúc | MVVM: ViewModel + StateFlow | https://developer.android.com/topic/architecture | Đúng hướng dẫn chính thức, dễ hiểu | MVI: thêm khái niệm, khó hơn cho người học |
+| Bất đồng bộ | Kotlin Coroutines + Flow | https://kotlinlang.org/docs/coroutines-overview.html | Room, Retrofit và ViewModel đều hỗ trợ sẵn | RxJava: nặng, ít dùng cho app mới |
+| Lưu trữ | Room, sinh code bằng KSP | https://developer.android.com/training/data-storage/room | Kiểm tra SQL lúc biên dịch, trả về Flow | SQLDelight: viết SQL tay, ít tài liệu tiếng Việt |
+| Gọi mạng | Retrofit + converter kotlinx.serialization | https://square.github.io/retrofit/ | Phổ biến, nhiều tài liệu | Ktor Client: cấu hình nhiều hơn cho Android |
+| JSON | kotlinx.serialization | https://kotlinlang.org/docs/serialization.html | Của JetBrains, không dùng reflection | Gson: không hiểu kiểu null của Kotlin |
+| Vị trí | Fused Location Provider (`play-services-location`) | https://developer.android.com/develop/sensors-and-location/location | Chính xác, tiết kiệm pin | `LocationManager`: không cần Google Play services nhưng phải tự cân chính xác và pin |
+| GPS nền | Foreground Service loại `location` | https://developer.android.com/develop/background-work/services/fgs | Bắt buộc để ghi khi tắt màn hình | WorkManager: không chạy liên tục được |
+| Vẽ quỹ đạo | Compose Canvas | https://developer.android.com/develop/ui/compose/graphics/draw/overview | Không cần API key | Google Maps SDK: cần key, để v1.2 |
+| Tiêm phụ thuộc | Tự tạo thủ công (một `AppContainer`) | https://developer.android.com/training/dependency-injection/manual | App nhỏ, dễ thấy mọi thứ được tạo ở đâu | Hilt: gọn khi app lớn, nhưng nhiều annotation khó hiểu lúc học |
+
+### 8.5 Kiến trúc và luồng dữ liệu
+
+```mermaid
+flowchart LR
+    UI[Màn hình Compose] <--> VM[ViewModel]
+    VM --> RP[Repository]
+    SVC[RunTrackingService<br/>Foreground Service] --> RP
+    RP --> DB[(Room)]
+    RP --> API[Retrofit<br/>Open-Meteo]
+    SVC --> LOC[Fused Location]
+```
+
+- Service ghi điểm GPS và số liệu vào Room. Màn hình đang chạy đọc lại từ Room qua Flow, nên tắt rồi mở lại app vẫn thấy đúng số liệu.
+- Cảnh báo và gợi ý vật dụng là hàm thuần (đầu vào là `WeatherSnapshot` và mục tiêu), dễ viết unit test.
+
+## 9. Danh sách màn hình
+
+### 9.1 Danh sách màn hình
+
+| Mã | Màn hình | Use case | Nội dung chính | Hành động |
+|---|---|---|---|---|
+| S1 | **Kế hoạch** (màn hình chính) | UC1, UC3 | Danh sách kế hoạch, sắp theo giờ bắt đầu, kèm nhãn trạng thái (mục 6.1). Có băng "Đang có buổi chạy" khi tồn tại buổi chạy `RECORDING` hoặc `PAUSED` | Tạo kế hoạch (nút +), mở một kế hoạch, bấm băng để về S6 |
+| S2 | **Tạo / Sửa kế hoạch** | UC1, UC2, UC3 | Form gồm ngày, giờ, vị trí, loại và giá trị mục tiêu. Khi đủ thông tin thì hiện thời tiết, cảnh báo và gợi ý vật dụng | Chọn vị trí (sang S3), Lưu |
+| S3 | **Chọn vị trí** | UC1, UC4 | Nút "Dùng vị trí hiện tại", ô tìm theo tên và danh sách kết quả (mục 8.2) | Chọn một vị trí rồi quay lại màn hình trước |
+| S4 | **Chi tiết kế hoạch** | UC2, UC3, UC4 | Thông tin kế hoạch, trạng thái, thời tiết, cảnh báo, gợi ý vật dụng. Áp dụng quy tắc 3 giờ và nhãn "cập nhật lúc …" (mục 5.2) | Bắt đầu chạy, Sửa, Huỷ, Xoá (bật hoặc tắt theo mục 6.4). Kế hoạch `COMPLETED` có thêm "Xem buổi chạy" |
+| S5 | **Chuẩn bị chạy tự do** | UC2, UC4 | Vị trí (mặc định là vị trí hiện tại), mục tiêu, thời tiết, cảnh báo, gợi ý vật dụng (mục 5.4). Gợi ý kế hoạch đang trong khoảng gợi ý (BR-44) | Đổi vị trí (sang S3), Chạy theo kế hoạch (sang S4), Bắt đầu chạy |
+| S6 | **Đang chạy** | UC4 | Quãng đường, thời gian chạy, pace, tiến độ so với mục tiêu, trạng thái ghi hoặc tạm dừng | Tạm dừng, Tiếp tục, Kết thúc |
+| S7 | **Chi tiết buổi chạy** | UC5, UC6 | Quỹ đạo vẽ bằng Canvas, chia theo `segmentIndex`. Quãng đường, thời gian, pace trung bình, tỷ lệ đạt mục tiêu, thời tiết đã lưu | Xoá buổi chạy |
+| S8 | **Lịch sử** | UC6 | Danh sách buổi chạy, mới nhất trước (BR-50). Trạng thái trống khi chưa có buổi nào | Mở một buổi chạy (sang S7), Xoá |
+
+S2 dùng chung cho cả tạo và sửa. Khi sửa, form được điền sẵn dữ liệu cũ (UC3). S5 là màn hình riêng vì chạy tự do không có ngày giờ và không lưu kế hoạch, nhưng dùng lại các thành phần giao diện của S2 (vị trí, mục tiêu, khối thời tiết).
+
+### 9.2 Hộp thoại
+
+Đây là các hộp thoại nổi trên màn hình, không phải màn hình riêng:
+
+| Hộp thoại | Xuất hiện ở | Khi nào |
+|---|---|---|
+| Xác nhận xoá | S4, S7, S8 | Mọi thao tác xoá (BR-54) |
+| Cảnh báo xoá kèm dữ liệu | S4 | Xoá kế hoạch `COMPLETED` thì xoá luôn buổi chạy (BR-52) |
+| Cảnh báo kế hoạch đổi trạng thái | S7, S8 | Xoá buổi chạy thuộc một kế hoạch (BR-53) |
+| Giải thích quyền | S4, S5 | Người dùng từ chối quyền vị trí hoặc thông báo (UC4) |
+| Xác nhận kết thúc | S6 | Bấm Kết thúc, để tránh bấm nhầm |
+| Buổi chạy quá ngắn | S6 | Kết thúc mà chưa đạt ngưỡng lưu (BR-36) |
+| Lỗi thời tiết | S2, S4, S5 | Không lấy được dự báo: Thử lại, hoặc tiếp tục không có thời tiết (UC1) |
+| Khôi phục buổi chạy dở | S1 | Mở app khi còn buổi chạy chưa kết thúc (mục 6.4, chi tiết ở mục 10.1) |
+
+### 9.3 Điều hướng
+
+Thanh điều hướng dưới cùng có **3 mục**: **Kế hoạch** (S1), **Chạy** (ở giữa, nổi bật) và **Lịch sử** (S8).
+
+- Kế hoạch và Lịch sử là 2 tab. Bấm thì chuyển qua lại, thanh dưới vẫn hiện.
+- **Chạy** là nút hành động, giống nút Tạo bài (+) của Instagram. Bấm vào thì mở S5 chồng lên trên. Nếu đang có buổi chạy dở (`RECORDING` hoặc `PAUSED`), nút này mở thẳng S6, vì mỗi lúc chỉ có một buổi chạy (BR-08).
+- Các màn hình khác (S2 đến S7) mở chồng lên trên và không hiện thanh dưới.
+
+```mermaid
+flowchart TD
+    S1[S1 Kế hoạch] -- Tạo kế hoạch --> S2[S2 Tạo / Sửa kế hoạch]
+    S1 -- Mở kế hoạch --> S4[S4 Chi tiết kế hoạch]
+    S1 -- Băng đang chạy --> S6[S6 Đang chạy]
+    S1 <-- Tab --> S8[S8 Lịch sử]
+
+    NAV((Nút Chạy<br/>thanh dưới)) -- Không có buổi chạy dở --> S5[S5 Chuẩn bị chạy tự do]
+    NAV -- Đang có buổi chạy dở --> S6
+
+    S2 -- Chọn vị trí --> S3[S3 Chọn vị trí]
+    S5 -- Đổi vị trí --> S3
+    S2 -- Lưu khi tạo --> S1
+    S2 -- Lưu khi sửa --> S4
+
+    S4 -- Sửa --> S2
+    S4 -- Bắt đầu chạy --> S6
+    S4 -- Xem buổi chạy --> S7[S7 Chi tiết buổi chạy]
+    S5 -- Chạy theo kế hoạch --> S4
+    S5 -- Bắt đầu chạy --> S6
+
+    S6 -- Kết thúc, đã lưu --> S7
+    S8 -- Mở buổi chạy --> S7
+```
+
+**Quy tắc điều hướng:**
+- Lưu kế hoạch mới thì về S1. Lưu khi sửa thì về S4.
+- Kết thúc buổi chạy thì sang S7 và **bỏ S6 khỏi lịch sử điều hướng**, để bấm Back không quay lại màn hình đang chạy.
+- Đang ở S6 mà bấm Back hoặc thoát app thì **buổi chạy vẫn tiếp tục** (Service vẫn ghi). Có 2 cách quay lại S6: bấm băng "Đang có buổi chạy" ở S1, hoặc bấm vào thông báo của Service.
+- Buổi chạy quá ngắn thì không có S7. App báo rồi quay về màn hình đã mở S6.
+- Xoá kế hoạch ở S4 thì về S1. Xoá buổi chạy ở S7 thì về màn hình trước đó.
+
+## 10. Yêu cầu phi chức năng
+
+Phần này không thêm tính năng mới, mà nói app phải chạy **như thế nào**: bền, tiết kiệm pin, riêng tư, dễ dùng.
+
+### 10.1 Khôi phục buổi chạy bị gián đoạn
+
+**Khi nào buổi chạy bị gián đoạn:**
+
+| Tình huống | Service còn chạy không |
+|---|---|
+| Bấm Back, về màn hình chính, khoá màn hình | Còn, vẫn ghi bình thường |
+| Vuốt app khỏi danh sách đa nhiệm | Thường vẫn còn trên Android gốc. Một số hãng (Xiaomi, Oppo…) có thể tắt. **Chưa chắc**, cần thử trên máy thật |
+| Hệ thống thiếu bộ nhớ, tắt tiến trình app | Mất |
+| App bị lỗi (crash), điện thoại hết pin hoặc khởi động lại | Mất |
+
+**Dữ liệu không bị mất:** `run_session` được tạo ngay khi bấm Bắt đầu, và điểm GPS ghi dần vào Room (mục 7.7). Service cập nhật `distanceMeters` và `activeDurationSec` mỗi khi lưu điểm. Nếu bị tắt, chỉ mất phần sau điểm cuối cùng.
+
+**Không tự khởi động lại Service.** Từ Android 12, app bị hạn chế khởi động foreground service khi đang chạy nền. Với loại `location`, app còn phải đang được người dùng sử dụng thì mới được nhận vị trí, trừ khi có quyền vị trí nền, mà RunMate không xin (mục 8.3). Vì vậy buổi chạy chỉ được tiếp tục khi **người dùng mở app**.
+
+**Khi mở app:** nếu có `run_session` ở `RECORDING` hoặc `PAUSED` mà Service không chạy, app hiện hộp thoại "Buổi chạy lúc 06:02 chưa kết thúc (3,2 km · 18:40). Tiếp tục hay kết thúc?":
+
+| Chọn | App làm gì |
+|---|---|
+| **Tiếp tục** | Khởi động lại Service, mở S6. Điểm mới thuộc đoạn mới (`segmentIndex` lớn nhất + 1), nên khoảng bị gián đoạn không tính quãng đường (BR-33) và không tính thời gian (BR-34). Buổi đang `PAUSED` thì mở lại vẫn ở `PAUSED` |
+| **Kết thúc** | `endedAt` = thời điểm của điểm GPS cuối cùng (không phải lúc bấm), rồi xử lý như bấm Kết thúc bình thường: xét ngưỡng lưu BR-36 và cập nhật trạng thái kế hoạch (mục 6.3) |
+
+| Mã | Quy tắc | Giá trị (đề xuất) |
+|---|---|---|
+| BR-60 | Nếu điểm GPS cuối cùng đã cách bây giờ quá lâu, hộp thoại chỉ còn nút **Kết thúc**. Tiếp tục một buổi chạy bị gián đoạn quá lâu không còn ý nghĩa | **1 giờ** |
+
+### 10.2 Pin và hiệu năng
+
+- Chỉ nhận vị trí liên tục khi đang ở `RECORDING`. **Tạm dừng thì ngừng nhận vị trí** nhưng Service vẫn chạy (giữ thông báo), để tiết kiệm pin.
+- Kết thúc buổi chạy thì dừng Service và bỏ thông báo ngay.
+- Ngoài lúc chạy, app chỉ lấy vị trí **một lần** khi người dùng chọn "Vị trí hiện tại" (mục 8.2).
+- Đọc và ghi Room không chạy trên luồng giao diện. Room mặc định cũng báo lỗi nếu làm vậy.
+- Chưa đặt con số mức tiêu thụ pin. Sẽ đo trên máy thật khi chỉnh BR-32.
+- Buổi chạy dài nhất 12 giờ (BR-05), với 2 giây một điểm là khoảng 21 600 điểm. S7 phải vẽ được mà không giật. Nếu chậm, có thể giảm bớt điểm khi vẽ, việc này để sau khi đo.
+
+### 10.3 Hoạt động khi không có mạng
+
+| Chức năng | Không có mạng |
+|---|---|
+| Tạo, sửa, xoá kế hoạch | Được, lưu kế hoạch không có thời tiết (UC1) |
+| Ghi buổi chạy, xem quỹ đạo, lịch sử | Được hoàn toàn, vì GPS không cần mạng |
+| Thời tiết | Hiện dữ liệu đã lưu kèm "cập nhật lúc …", hoặc báo không có thời tiết (mục 5.2) |
+| Tìm vị trí theo tên | Không được, báo lỗi mạng. Vẫn dùng được "Vị trí hiện tại" |
+
+### 10.4 Quyền riêng tư
+
+- Dữ liệu chỉ nằm trên máy (mục 2). App không có quảng cáo, không có thư viện thống kê hay báo lỗi gửi dữ liệu ra ngoài.
+- Chỉ gửi ra ngoài: toạ độ địa điểm đã chọn (tới Open-Meteo Forecast) và chữ người dùng gõ để tìm địa điểm (tới Open-Meteo Geocoding). **Không gửi** điểm GPS lúc chạy.
+- Tắt sao lưu tự động của Android (`android:allowBackup="false"` trong `AndroidManifest.xml`), để khớp mục 2: dữ liệu, kể cả quỹ đạo chạy, không rời khỏi máy. Đổi lại, gỡ app hoặc đổi máy thì mất lịch sử.
+
+### 10.5 Giao diện và tương thích
+
+- Chạy được từ Android 8.0 (API 26) đến Android 15 (API 35) (mục 1).
+- Từ Android 15, app nhắm `targetSdk` 35 sẽ **bắt buộc hiển thị tràn viền** (edge-to-edge). Giao diện phải chừa chỗ cho thanh trạng thái và thanh điều hướng của hệ thống.
+- Chỉ có tiếng Việt. Chữ hiển thị để trong `strings.xml`, không viết cứng trong code, để sau này dịch được.
+- Đơn vị: km, phút/km, °C, km/h. Số thập phân dùng dấu phẩy (5,2 km).
+- Chỉ màn hình dọc trong MVP.
+- Sáng hoặc tối theo cài đặt hệ thống, dùng Material 3 với hai bảng màu.
+
+### 10.6 Dễ sử dụng khi đang chạy
+
+- Nút Tạm dừng, Tiếp tục, Kết thúc ở S6 phải **lớn**, dễ bấm khi đang vận động. Tối thiểu 48 dp, theo hướng dẫn khả năng truy cập của Android.
+- Số liệu ở S6 dùng chữ to, đọc được khi liếc nhanh.
+- Biểu tượng không có chữ phải có mô tả (`contentDescription`) cho trình đọc màn hình.
+
+### 10.7 Kiểm thử
+
+| Phần | Cách kiểm thử |
+|---|---|
+| Cảnh báo, gợi ý vật dụng (BR-10 đến BR-24) | Unit test hàm thuần (mục 8.5) |
+| Lọc điểm, tính quãng đường, pace (BR-30 đến BR-35), tách đoạn theo `segmentIndex` | Unit test với danh sách điểm giả |
+| Chuyển trạng thái kế hoạch, ân hạn BR-09, khoảng gợi ý BR-44 | Unit test, truyền giờ hiện tại vào hàm thay vì đọc đồng hồ hệ thống |
+| Ghi GPS thật | Máy thật (mục 1). Chạy một đường đã biết độ dài, ví dụ 1 vòng sân điền kinh 400 m, để so quãng đường |
+| Khôi phục buổi chạy (10.1) | Máy thật: đang chạy thì buộc dừng app bằng Cài đặt → Ứng dụng → Buộc dừng, rồi mở lại |
