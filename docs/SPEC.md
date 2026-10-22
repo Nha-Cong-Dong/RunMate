@@ -224,6 +224,25 @@ flowchart TD
 - Mục tiêu chỉ để theo dõi tiến độ và so sánh khi tổng kết. Đạt mục tiêu thì báo cho người chạy, app không tự dừng buổi chạy.
 
 
+### 4.5 User stories
+
+Tất cả user story đều là của **người chạy** (tác nhân duy nhất, mục 4). Từ US2 trở đi lược phần "Là người chạy" cho gọn. Tiêu chí chấp nhận trỏ tới BR thay vì chép lại con số, để khi đổi số chỉ cần sửa ở mục 5.
+
+| Mã | User story | Tiêu chí chấp nhận | Liên quan |
+|---|---|---|---|
+| US1 | Là người chạy, tôi muốn **đặt kế hoạch** với ngày giờ, vị trí và mục tiêu, để chủ động sắp xếp lịch tập | Không chọn được giờ trong quá khứ hoặc quá 16 ngày (BR-01, BR-02). Mục tiêu nằm trong giới hạn (BR-04, BR-05). Lưu xong thì thấy kế hoạch ở S1 với nhãn "Đã lên kế hoạch" | UC1 |
+| US2 | Tôi muốn **chọn vị trí** bằng vị trí hiện tại hoặc gõ tên, để không phải nhập toạ độ | Có cả 2 cách (mục 8.2). Mất mạng thì tìm theo tên báo lỗi nhưng vẫn dùng được vị trí hiện tại (10.3) | UC1 |
+| US3 | Tôi muốn **xem dự báo thời tiết** đúng giờ và nơi sẽ chạy, để quyết định có chạy hay không | Hiện nhiệt độ, mưa, gió, UV của giờ bắt đầu (5.2). Không có mạng thì hiện "cập nhật lúc …". Lỗi thời tiết không chặn việc lưu | UC2 |
+| US4 | Tôi muốn **được cảnh báo và gợi ý vật dụng**, để chuẩn bị đồ phù hợp | Cảnh báo theo BR-10 đến BR-13, nhiều cảnh báo thì hiện tất cả. Gợi ý theo BR-20 đến BR-24 | UC2 |
+| US5 | Tôi muốn **sửa, huỷ hoặc xoá kế hoạch** khi lịch thay đổi | Nút bật hoặc tắt đúng bảng 6.4, nút bị tắt có giải thích. Xoá kế hoạch `COMPLETED` thì có cảnh báo mất buổi chạy | UC3 |
+| US6 | Tôi muốn **thấy kế hoạch nào đã bỏ lỡ**, để biết mình giữ lịch tốt đến đâu | Quá ân hạn (BR-09) mà chưa chạy thì hiện "Bỏ lỡ". Vẫn chạy muộn được từ S4 | Mục 6 |
+| US7 | Tôi muốn **bấm Chạy là chạy ngay**, không cần lên kế hoạch trước | Vị trí mặc định là vị trí hiện tại, mục tiêu bắt buộc (BR-41, BR-42). Có kế hoạch trong khoảng gợi ý thì hiện gợi ý (BR-44) | UC4 |
+| US8 | Trong lúc chạy, tôi muốn **thấy quãng đường, thời gian, pace và tiến độ**, để giữ nhịp | Pace hiện "--" khi chưa đủ 100 m (BR-35). Đạt mục tiêu thì báo một lần, không tự dừng (BR-38). Tắt màn hình vẫn ghi | UC4 |
+| US9 | Tôi muốn **tạm dừng** khi dừng đèn đỏ hay nghỉ, để số liệu không bị tính sai | Lúc tạm dừng không tính thời gian (BR-34) và không cộng quãng đường (BR-33). Quỹ đạo đứt tại chỗ dừng (`segmentIndex`) | UC4 |
+| US10 | Tôi muốn **không mất buổi chạy** nếu app bị tắt giữa chừng | Mở lại app thì có hộp thoại Tiếp tục hoặc Kết thúc (10.1). Quá 1 giờ thì chỉ còn Kết thúc (BR-60) | Mục 10.1 |
+| US11 | Sau khi chạy, tôi muốn **xem quỹ đạo và tổng kết**, để biết mình chạy so với mục tiêu ra sao | Có quãng đường, thời gian, pace trung bình, tỷ lệ đạt mục tiêu (có thể trên 100%). Quá ít điểm thì báo thiếu dữ liệu | UC5 |
+| US12 | Tôi muốn **xem và xoá lịch sử** các buổi chạy | Mới nhất trước (BR-50). Xoá thì hỏi xác nhận (BR-54). Xoá buổi thuộc kế hoạch thì kế hoạch về `PLANNED` hoặc `MISSED` (BR-53) | UC6 |
+
 ## 5. Quy tắc nghiệp vụ
 
 > Các con số dưới đây là **đề xuất**, chưa kiểm chứng bằng thực tế. Mỗi số sẽ được đặt thành hằng số trong code để chỉnh dễ. Sau khi chạy thử bằng máy thật có thể phải đổi.
@@ -584,12 +603,14 @@ Tài liệu: https://developer.android.com/develop/background-work/services/fgs/
 flowchart LR
     UI[Màn hình Compose] <--> VM[ViewModel]
     VM --> RP[Repository]
+    VM -- Bắt đầu / Tạm dừng / Tiếp tục / Kết thúc --> SVC
     SVC[RunTrackingService<br/>Foreground Service] --> RP
     RP --> DB[(Room)]
     RP --> API[Retrofit<br/>Open-Meteo]
     SVC --> LOC[Fused Location]
 ```
 
+- ViewModel của S4, S5 và S6 **ra lệnh** cho Service: Bắt đầu, Tạm dừng, Tiếp tục, Kết thúc. Service **không gửi số liệu ngược lên** ViewModel, mà ghi vào Room như gạch dưới.
 - Service ghi điểm GPS và số liệu vào Room. Màn hình đang chạy đọc lại từ Room qua Flow, nên tắt rồi mở lại app vẫn thấy đúng số liệu.
 - Cảnh báo và gợi ý vật dụng là hàm thuần (đầu vào là `WeatherSnapshot` và mục tiêu), dễ viết unit test.
 
