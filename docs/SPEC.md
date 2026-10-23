@@ -25,8 +25,8 @@
 | Ngôn ngữ | Kotlin | |
 | Build | Gradle (Kotlin DSL), JDK 17 | |
 | `minSdk` | **26** (Android 8.0) | Máy Android 7.1 trở xuống không cài được |
-| `targetSdk` | **35** (Android 15) |  |
-| `compileSdk` | Bằng `targetSdk` | |
+| `targetSdk` | **36** (Android 16) | Google Play yêu cầu app mới nhắm API 36 trở lên từ 31/08/2026 ([nguồn](https://developer.android.com/google/play/requirements/target-sdk)) |
+| `compileSdk` | Mức thấp nhất mà thư viện yêu cầu (36 hoặc 37) | Thư viện mới có thể yêu cầu cao hơn `targetSdk`. Con số chính xác chốt khi build ở bước 3.2 |
 | Thiết bị kiểm thử | Máy thật cho phần GPS | Máy ảo chỉ giả lập vị trí, không phản ánh đúng thực tế |
 
 **Vì sao `minSdk` 26:** từ Android 8.0 có sẵn các API thời gian (`java.time`) và kênh thông báo (notification channel). Cả hai đều cần cho kế hoạch theo giờ và thông báo của foreground service. Nhờ vậy không phải xử lý thêm cho các bản Android cũ.
@@ -581,18 +581,21 @@ Tài liệu: https://developer.android.com/develop/background-work/services/fgs/
 
 ### 8.4 Công nghệ
 
-> Phiên bản cụ thể **chưa chốt**. Khi tạo project ở bước 3 sẽ lấy bản ổn định mới nhất lúc đó và ghi lại ở đây.
+> Phiên bản chốt ngày 23/10/2026: bản ổn định mới nhất trên trang phát hành chính thức. Còn 3 điểm sẽ kiểm chứng khi build ở bước 3.2: KSP 2.3.12 chạy với Kotlin 2.4.21, bản Kotlin tích hợp sẵn trong AGP 9.4, và `compileSdk` chính xác.
 
 | Thành phần | Kỹ thuật / thư viện | Nguồn tài liệu | Lý do chọn | Phương án khác |
 |---|---|---|---|---|
-| UI | Jetpack Compose (Compose BOM) | https://developer.android.com/compose | Google khuyến nghị cho app mới, viết UI ít code hơn | XML View: cũ hơn, nhiều code hơn |
-| Điều hướng | Navigation Compose | https://developer.android.com/guide/navigation | Chính thức, dùng cùng Compose | Tự quản lý màn hình bằng state: khó mở rộng |
-| Kiến trúc | MVVM: ViewModel + StateFlow | https://developer.android.com/topic/architecture | Đúng hướng dẫn chính thức, dễ hiểu | MVI: thêm khái niệm, khó hơn cho người học |
+| IDE | Android Studio Rabbit 1 (2026.2.1) | https://developer.android.com/studio/releases | Bản ổn định mới nhất, hỗ trợ AGP 7.1–9.4 | Quail 4 (2026.1.4): cũng chạy AGP 9.4 nhưng cũ hơn |
+| Build | AGP 9.4.0, Gradle 9.6.0, JDK 17 | https://developer.android.com/build/releases/gradle-plugin | Mới nhất, hỗ trợ đến API 37. Từ AGP 9.0 Kotlin được tích hợp sẵn, không cần plugin `kotlin-android` | AGP 9.3: không có lợi gì thêm |
+| Ngôn ngữ | Kotlin 2.4.21 | https://kotlinlang.org/docs/releases.html | Bản ổn định mới nhất | Kotlin 2.3.x: cũ hơn |
+| UI | Jetpack Compose, Compose BOM 2026.09.00 (ui 1.12.1, material3 1.4.0) | https://developer.android.com/compose | Google khuyến nghị cho app mới, viết UI ít code hơn | XML View: cũ hơn, nhiều code hơn |
+| Điều hướng | Navigation Compose 2.10.2 | https://developer.android.com/guide/navigation | Hướng dẫn chính thức vẫn khuyên dùng cho app thuần Compose, nhiều tài liệu | Navigation 3 (1.2.0): mới ổn định, ít tài liệu, cần `compileSdk` 37 |
+| Kiến trúc | MVVM: ViewModel + StateFlow, Lifecycle 2.11.0 | https://developer.android.com/topic/architecture | Đúng hướng dẫn chính thức, dễ hiểu | MVI: thêm khái niệm, khó hơn cho người học |
 | Bất đồng bộ | Kotlin Coroutines + Flow | https://kotlinlang.org/docs/coroutines-overview.html | Room, Retrofit và ViewModel đều hỗ trợ sẵn | RxJava: nặng, ít dùng cho app mới |
-| Lưu trữ | Room, sinh code bằng KSP | https://developer.android.com/training/data-storage/room | Kiểm tra SQL lúc biên dịch, trả về Flow | SQLDelight: viết SQL tay, ít tài liệu tiếng Việt |
-| Gọi mạng | Retrofit + converter kotlinx.serialization | https://square.github.io/retrofit/ | Phổ biến, nhiều tài liệu | Ktor Client: cấu hình nhiều hơn cho Android |
-| JSON | kotlinx.serialization | https://kotlinlang.org/docs/serialization.html | Của JetBrains, không dùng reflection | Gson: không hiểu kiểu null của Kotlin |
-| Vị trí | Fused Location Provider (`play-services-location`) | https://developer.android.com/develop/sensors-and-location/location | Chính xác, tiết kiệm pin | `LocationManager`: không cần Google Play services nhưng phải tự cân chính xác và pin |
+| Lưu trữ | Room 3.0.3, sinh code bằng KSP 2.3.12 | https://developer.android.com/training/data-storage/room | Kiểm tra SQL lúc biên dịch, trả về Flow. Tài liệu chính thức mặc định dùng Room 3, thiết kế ưu tiên coroutine | Room 2.8.5: tài liệu chính thức đã gọi là legacy. SQLDelight: viết SQL tay |
+| Gọi mạng | Retrofit 3.0.0 + `converter-kotlinx-serialization` | https://square.github.io/retrofit/ | Phổ biến, nhiều tài liệu | Ktor Client: cấu hình nhiều hơn cho Android |
+| JSON | kotlinx.serialization 1.12.0 | https://kotlinlang.org/docs/serialization.html | Của JetBrains, không dùng reflection | Gson: không hiểu kiểu null của Kotlin |
+| Vị trí | Fused Location Provider (`play-services-location` 21.4.0) | https://developer.android.com/develop/sensors-and-location/location | Chính xác, tiết kiệm pin | `LocationManager`: không cần Google Play services nhưng phải tự cân chính xác và pin |
 | GPS nền | Foreground Service loại `location` | https://developer.android.com/develop/background-work/services/fgs | Bắt buộc để ghi khi tắt màn hình | WorkManager: không chạy liên tục được |
 | Vẽ quỹ đạo | Compose Canvas | https://developer.android.com/develop/ui/compose/graphics/draw/overview | Không cần API key | Google Maps SDK: cần key, để v1.2 |
 | Tiêm phụ thuộc | Tự tạo thủ công (một `AppContainer`) | https://developer.android.com/training/dependency-injection/manual | App nhỏ, dễ thấy mọi thứ được tạo ở đâu | Hilt: gọn khi app lớn, nhưng nhiều annotation khó hiểu lúc học |
@@ -742,8 +745,8 @@ Phần này không thêm tính năng mới, mà nói app phải chạy **như th
 
 ### 10.5 Giao diện và tương thích
 
-- Chạy được từ Android 8.0 (API 26) đến Android 15 (API 35) (mục 1).
-- Từ Android 15, app nhắm `targetSdk` 35 sẽ **bắt buộc hiển thị tràn viền** (edge-to-edge). Giao diện phải chừa chỗ cho thanh trạng thái và thanh điều hướng của hệ thống.
+- Chạy được từ Android 8.0 (API 26), nhắm Android 16 (API 36) (mục 1).
+- Từ Android 15, app nhắm `targetSdk` 35 trở lên sẽ **bắt buộc hiển thị tràn viền** (edge-to-edge). Giao diện phải chừa chỗ cho thanh trạng thái và thanh điều hướng của hệ thống.
 - Chỉ có tiếng Việt. Chữ hiển thị để trong `strings.xml`, không viết cứng trong code, để sau này dịch được.
 - Đơn vị: km, phút/km, °C, km/h. Số thập phân dùng dấu phẩy (5,2 km).
 - Chỉ màn hình dọc trong MVP.

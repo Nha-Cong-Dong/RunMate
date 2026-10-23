@@ -54,7 +54,7 @@ Mục tiêu chính: học qua vibe code. Hiểu được thứ AI viết ra quan
 | Điều hướng     | [Navigation Compose](https://developer.android.com/guide/navigation)                                             | Thư viện chính thức, dùng cùng Compose               |
 | Kiến trúc      | [MVVM](https://developer.android.com/topic/architecture) (ViewModel + StateFlow)                                 | Đơn giản, đúng hướng dẫn chính thức                  |
 | Bất đồng bộ    | [Kotlin Coroutines + Flow](https://kotlinlang.org/docs/coroutines-overview.html)                                 | Room, Retrofit và ViewModel đều hỗ trợ sẵn           |
-| Lưu trữ        | [Room](https://developer.android.com/training/data-storage/room)                                                 | Lưu offline kế hoạch, buổi chạy và điểm GPS          |
+| Lưu trữ        | [Room 3](https://developer.android.com/training/data-storage/room)                                               | Lưu offline kế hoạch, buổi chạy và điểm GPS          |
 | Thời tiết      | [Open-Meteo API](https://open-meteo.com/)                                                                        | Không cần API key, có dự báo theo giờ đến 16 ngày    |
 | Tìm địa điểm   | [Open-Meteo Geocoding API](https://open-meteo.com/en/docs/geocoding-api)                                         | Tìm vị trí theo tên, không cần API key               |
 | Gọi mạng       | [Retrofit](https://square.github.io/retrofit/) + kotlinx.serialization                                           | Phổ biến, có nhiều tài liệu                          |
@@ -69,9 +69,9 @@ Mục tiêu chính: học qua vibe code. Hiểu được thứ AI viết ra quan
 
 ### Yêu cầu
 
-- Android Studio bản ổn định mới nhất (phiên bản cụ thể ghi lại khi tạo project)
+- Android Studio Rabbit 1 (2026.2.1) trở lên
 - JDK 17
-- Android SDK: `minSdk` 26 (Android 8.0) / `targetSdk` 35 (Android 15)
+- Android SDK: `minSdk` 26 (Android 8.0) / `targetSdk` 36 (Android 16)
 
 ### Cài đặt
 
