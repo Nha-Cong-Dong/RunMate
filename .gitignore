@@ -33,3 +33,6 @@ google-services.json
 
 # Android Profiling
 *.hprof
+
+# Kế hoạch làm việc (chỉ lưu trên máy, không commit)
+docs/PLAN.md
