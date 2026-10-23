@@ -43,7 +43,7 @@
 | Backend | Không có |
 | Đồng bộ nhiều thiết bị | Không có |
 | Sao lưu | Không có. Gỡ app hoặc xoá dữ liệu app thì mất lịch sử |
-| Quyền riêng tư | Dữ liệu vị trí không rời khỏi máy. Chỉ gửi toạ độ của địa điểm đã chọn tới Open-Meteo để lấy thời tiết |
+| Quyền riêng tư | Điểm GPS lúc chạy không rời khỏi máy. Chỉ gửi toạ độ địa điểm đã chọn tới Open-Meteo để lấy thời tiết, và chữ người dùng gõ khi tìm địa điểm (mục 8.2, 10.4) |
 
 **Lý do:**
 - README không có backend, và MVP không có chia sẻ hay bảng xếp hạng nên không cần danh tính người dùng.
@@ -563,7 +563,12 @@ Dùng `timeformat=unixtime` để so thẳng với `startTime` (epoch), khỏi p
 | Cách chọn | Cách làm | Tên hiển thị |
 |---|---|---|
 | Vị trí hiện tại | Fused Location Provider, lấy một lần | "Vị trí hiện tại", người dùng sửa được |
-| Tìm theo tên | Open-Meteo Geocoding API: `GET https://geocoding-api.open-meteo.com/v1/search?name=…&language=vi` ([tài liệu](https://open-meteo.com/en/docs/geocoding-api)) | Tên địa điểm trả về |
+| Tìm theo tên | **Chính:** `android.location.Geocoder` (ngôn ngữ `vi-VN`), tìm được cả địa điểm cụ thể như hồ, công viên. **Dự phòng:** khi `Geocoder.isPresent()` là `false` hoặc Geocoder báo lỗi thì dùng Open-Meteo Geocoding API `GET https://geocoding-api.open-meteo.com/v1/search?name=…&language=vi` ([tài liệu](https://open-meteo.com/en/docs/geocoding-api)), sau khi **bỏ dấu tiếng Việt** | Tên địa điểm trả về |
+
+**Vì sao dùng hai nguồn** (kết quả chạy thử 23/10 trên Samsung):
+- Open-Meteo Geocoding không tìm được tên có dấu ("Hà Nội" ra 0 kết quả, "Ha Noi" thì có), và chỉ có thành phố, quận, khu dân cư, không có địa điểm cụ thể như "Hồ Gươm".
+- Android Geocoder tìm được "Hồ Gươm" (ra Hồ Hoàn Kiếm) và gõ có dấu vẫn được, mất khoảng 0,2 giây mỗi lần. Nhưng Geocoder cần dịch vụ phía sau không có sẵn trong Android, nên có máy không dùng được ([tài liệu](https://developer.android.com/reference/android/location/Geocoder)).
+- Dùng Open-Meteo làm dự phòng thì máy nào cũng tìm được, ít nhất tới cấp quận. Với thời tiết, cấp quận là đủ chính xác.
 
 MVP không có bản đồ, nên không chọn vị trí bằng cách chạm lên bản đồ.
 
@@ -596,6 +601,7 @@ Tài liệu: https://developer.android.com/develop/background-work/services/fgs/
 | Gọi mạng | Retrofit 3.0.0 + `converter-kotlinx-serialization` | https://square.github.io/retrofit/ | Phổ biến, nhiều tài liệu | Ktor Client: cấu hình nhiều hơn cho Android |
 | JSON | kotlinx.serialization 1.12.0 | https://kotlinlang.org/docs/serialization.html | Của JetBrains, không dùng reflection | Gson: không hiểu kiểu null của Kotlin |
 | Vị trí | Fused Location Provider (`play-services-location` 21.4.0) | https://developer.android.com/develop/sensors-and-location/location | Chính xác, tiết kiệm pin | `LocationManager`: không cần Google Play services nhưng phải tự cân chính xác và pin |
+| Tìm địa điểm | `android.location.Geocoder`, dự phòng Open-Meteo Geocoding (bỏ dấu) | https://developer.android.com/reference/android/location/Geocoder | Có sẵn trong Android, không cần key hay thư viện, tìm được địa điểm cụ thể | Chỉ Open-Meteo: không có địa điểm cụ thể. Nominatim: giới hạn 1 yêu cầu/giây, thêm một dịch vụ ngoài |
 | GPS nền | Foreground Service loại `location` | https://developer.android.com/develop/background-work/services/fgs | Bắt buộc để ghi khi tắt màn hình | WorkManager: không chạy liên tục được |
 | Vẽ quỹ đạo | Compose Canvas | https://developer.android.com/develop/ui/compose/graphics/draw/overview | Không cần API key | Google Maps SDK: cần key, để v1.2 |
 | Tiêm phụ thuộc | Tự tạo thủ công (một `AppContainer`) | https://developer.android.com/training/dependency-injection/manual | App nhỏ, dễ thấy mọi thứ được tạo ở đâu | Hilt: gọn khi app lớn, nhưng nhiều annotation khó hiểu lúc học |
@@ -740,7 +746,7 @@ Phần này không thêm tính năng mới, mà nói app phải chạy **như th
 ### 10.4 Quyền riêng tư
 
 - Dữ liệu chỉ nằm trên máy (mục 2). App không có quảng cáo, không có thư viện thống kê hay báo lỗi gửi dữ liệu ra ngoài.
-- Chỉ gửi ra ngoài: toạ độ địa điểm đã chọn (tới Open-Meteo Forecast) và chữ người dùng gõ để tìm địa điểm (tới Open-Meteo Geocoding). **Không gửi** điểm GPS lúc chạy.
+- Chỉ gửi ra ngoài: toạ độ địa điểm đã chọn (tới Open-Meteo Forecast) và chữ người dùng gõ để tìm địa điểm. Chữ tìm kiếm đi tới **dịch vụ Geocoder của máy** (máy có Google Play thường là Google), hoặc tới Open-Meteo Geocoding khi dùng dự phòng (mục 8.2). **Không gửi** điểm GPS lúc chạy.
 - Tắt sao lưu tự động của Android (`android:allowBackup="false"` trong `AndroidManifest.xml`), để khớp mục 2: dữ liệu, kể cả quỹ đạo chạy, không rời khỏi máy. Đổi lại, gỡ app hoặc đổi máy thì mất lịch sử.
 
 ### 10.5 Giao diện và tương thích
