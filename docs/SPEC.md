@@ -302,7 +302,7 @@ Tất cả user story đều là của **người chạy** (tác nhân duy nhấ
 |---|---|---|
 | BR-30 | **Lọc điểm kém chính xác:** bỏ điểm GPS có sai số lớn hơn | **30 m** |
 | BR-31 | **Lọc điểm nhảy bất thường:** bỏ điểm khiến tốc độ giữa hai điểm liên tiếp vượt | **12 m/s** (khoảng 43 km/h) |
-| BR-32 | Tần suất yêu cầu vị trí | Khoảng **2 giây** một lần. Chưa chắc, cần thử trên máy thật để cân bằng chính xác và pin |
+| BR-32 | Tần suất yêu cầu vị trí | Khoảng **2 giây** một lần. Chạy thử 24/10 (Samsung S23+, máy đứng yên): thực tế khoảng 6–7 giây một điểm, bật hay khoá màn hình đều như nhau. Cần đo lại khi di chuyển (mục 10.7) |
 | BR-33 | Quãng đường | Tổng khoảng cách giữa các điểm hợp lệ liên tiếp, **không** tính đoạn nối qua lúc tạm dừng |
 | BR-34 | Thời gian chạy | Chỉ tính lúc đang ghi, **không** tính lúc tạm dừng |
 | BR-35 | Pace | **Phút/km** = thời gian chạy ÷ quãng đường. Chỉ hiện khi đã chạy ≥ **100 m**, trước đó hiện "--" |
@@ -653,6 +653,7 @@ S2 dùng chung cho cả tạo và sửa. Khi sửa, form được điền sẵn 
 | Xác nhận kết thúc | S6 | Bấm Kết thúc, để tránh bấm nhầm |
 | Buổi chạy quá ngắn | S6 | Kết thúc mà chưa đạt ngưỡng lưu (BR-36) |
 | Lỗi thời tiết | S2, S4, S5 | Không lấy được dự báo: Thử lại, hoặc tiếp tục không có thời tiết (UC1) |
+| Cảnh báo tiết kiệm pin | S4, S5, S6 | Tiết kiệm pin đang bật và làm ảnh hưởng vị trí (BR-61). Chỉ cảnh báo, vẫn cho chạy |
 | Khôi phục buổi chạy dở | S1 | Mở app khi còn buổi chạy chưa kết thúc (mục 6.4, chi tiết ở mục 10.1) |
 
 ### 9.3 Điều hướng
@@ -706,7 +707,9 @@ Phần này không thêm tính năng mới, mà nói app phải chạy **như th
 | Tình huống | Service còn chạy không |
 |---|---|
 | Bấm Back, về màn hình chính, khoá màn hình | Còn, vẫn ghi bình thường |
-| Vuốt app khỏi danh sách đa nhiệm | Thường vẫn còn trên Android gốc. Một số hãng (Xiaomi, Oppo…) có thể tắt. **Chưa chắc**, cần thử trên máy thật |
+| Vuốt app khỏi danh sách đa nhiệm | Còn. Đã thử trên Samsung Galaxy S23+ (cài đặt pin mặc định): thông báo vẫn hiện, điểm vẫn ghi tiếp. Máy hãng khác (Xiaomi, Oppo…) chưa thử, có thể tắt |
+| Buộc dừng app (Cài đặt → Buộc dừng) | Mất ngay. Đã thử: các điểm ghi trước lúc dừng vẫn còn |
+| Bật tiết kiệm pin rồi khoá màn hình | Service còn, nhưng **GPS bị tắt**, chỉ còn vị trí qua mạng: thưa và kém chính xác (xem BR-61) |
 | Hệ thống thiếu bộ nhớ, tắt tiến trình app | Mất |
 | App bị lỗi (crash), điện thoại hết pin hoặc khởi động lại | Mất |
 
@@ -731,8 +734,14 @@ Phần này không thêm tính năng mới, mà nói app phải chạy **như th
 - Kết thúc buổi chạy thì dừng Service và bỏ thông báo ngay.
 - Ngoài lúc chạy, app chỉ lấy vị trí **một lần** khi người dùng chọn "Vị trí hiện tại" (mục 8.2).
 - Đọc và ghi Room không chạy trên luồng giao diện. Room mặc định cũng báo lỗi nếu làm vậy.
-- Chưa đặt con số mức tiêu thụ pin. Sẽ đo trên máy thật khi chỉnh BR-32.
+- Mức hao pin đo khi chạy thử (máy đứng yên, khoá màn hình): khoảng 1–2% mỗi 10 phút, tức khoảng 6–12% mỗi giờ. Chỉ để tham khảo, đo lại khi chạy thật.
 - Buổi chạy dài nhất 12 giờ (BR-05), với 2 giây một điểm là khoảng 21 600 điểm. S7 phải vẽ được mà không giật. Nếu chậm, có thể giảm bớt điểm khi vẽ, việc này để sau khi đo.
+
+| Mã | Quy tắc |
+|---|---|
+| BR-61 | **Cảnh báo tiết kiệm pin:** nếu `PowerManager.isPowerSaveMode()` là `true`, và chế độ vị trí khi tiết kiệm pin (`getLocationPowerSaveMode()`, từ Android 9) khác `NO_CHANGE`, thì hiện cảnh báo ở S4, S5 trước khi chạy và ở S6 nếu bật giữa chừng: "Tiết kiệm pin đang bật. GPS có thể bị tắt khi khoá màn hình, quãng đường sẽ không chính xác. Nên tắt khi chạy." Android 8.x không có hàm thứ hai thì chỉ cần `isPowerSaveMode()` là `true`. Chỉ cảnh báo, không chặn |
+
+**Vì sao cần BR-61** (chạy thử 23–24/10, Samsung S23+, khoá màn hình 10 phút, không cắm sạc): tiết kiệm pin tắt thì nhận khoảng 75–94 điểm, khoảng trống lớn nhất khoảng 10 giây, sai số 3 m. Tiết kiệm pin bật (máy báo `GPS_DISABLED_WHEN_SCREEN_OFF`) thì chỉ 21–27 điểm, có lúc mất tới 327 giây không có điểm nào, sai số 12–13 m. Foreground Service không tránh được giới hạn này.
 
 ### 10.3 Hoạt động khi không có mạng
 
@@ -771,5 +780,5 @@ Phần này không thêm tính năng mới, mà nói app phải chạy **như th
 | Cảnh báo, gợi ý vật dụng (BR-10 đến BR-24) | Unit test hàm thuần (mục 8.5) |
 | Lọc điểm, tính quãng đường, pace (BR-30 đến BR-35), tách đoạn theo `segmentIndex` | Unit test với danh sách điểm giả |
 | Chuyển trạng thái kế hoạch, ân hạn BR-09, khoảng gợi ý BR-44 | Unit test, truyền giờ hiện tại vào hàm thay vì đọc đồng hồ hệ thống |
-| Ghi GPS thật | Máy thật (mục 1). Chạy một đường đã biết độ dài, ví dụ 1 vòng sân điền kinh 400 m, để so quãng đường |
+| Ghi GPS thật | Máy thật (mục 1), **rút cáp khi thử** (cắm sạc thì giới hạn tiết kiệm pin không áp dụng, kết quả sai). Chạy một đường đã biết độ dài, ví dụ 1 vòng sân điền kinh 400 m, để so quãng đường và đo lại BR-32 |
 | Khôi phục buổi chạy (10.1) | Máy thật: đang chạy thì buộc dừng app bằng Cài đặt → Ứng dụng → Buộc dừng, rồi mở lại |
