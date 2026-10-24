@@ -93,14 +93,24 @@ cd RunMate
 
 ```
 RunMate/
-├── app/            # Mã nguồn ứng dụng (TODO)
+├── app/
+│   └── src/main/
+│       ├── java/com/nhacongdong/runmate/
+│       │   ├── ui/          # Màn hình Compose, ViewModel, điều hướng, theme
+│       │   ├── domain/      # Quy tắc nghiệp vụ (BR-xx), use case
+│       │   ├── data/        # Repository, Room, Retrofit
+│       │   └── service/     # Ghi GPS chạy nền (Foreground Service)
+│       ├── res/             # Chữ hiển thị, theme, icon
+│       └── AndroidManifest.xml
 ├── docs/
 │   └── SPEC.md     # Đặc tả sản phẩm
 ├── gradle/
+│   └── libs.versions.toml   # Phiên bản thư viện
 ├── build.gradle.kts
 └── settings.gradle.kts
 ```
-<!-- TODO: cập nhật khi đã có code -->
+
+Hiện mới có `ui/`. Các thư mục `domain/`, `data/`, `service/` sẽ có khi làm các tính năng. Chi tiết kiến trúc xem `docs/SPEC.md` mục 8.5.
 
 ## Lộ trình
 
