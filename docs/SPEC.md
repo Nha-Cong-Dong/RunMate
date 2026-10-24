@@ -595,7 +595,7 @@ Tài liệu: https://developer.android.com/develop/background-work/services/fgs/
 | Ngôn ngữ | Kotlin 2.4.21 | https://kotlinlang.org/docs/releases.html | Bản ổn định mới nhất | Kotlin 2.3.x: cũ hơn |
 | UI | Jetpack Compose, Compose BOM 2026.09.00 (ui 1.12.1, material3 1.4.0) | https://developer.android.com/compose | Google khuyến nghị cho app mới, viết UI ít code hơn | XML View: cũ hơn, nhiều code hơn |
 | Điều hướng | Navigation Compose 2.10.2 | https://developer.android.com/guide/navigation | Hướng dẫn chính thức vẫn khuyên dùng cho app thuần Compose, nhiều tài liệu | Navigation 3 (1.2.0): mới ổn định, ít tài liệu, cần `compileSdk` 37 |
-| Kiến trúc | MVVM: ViewModel + StateFlow, Lifecycle 2.11.0 | https://developer.android.com/topic/architecture | Đúng hướng dẫn chính thức, dễ hiểu | MVI: thêm khái niệm, khó hơn cho người học |
+| Kiến trúc | MVVM: ViewModel + StateFlow, Lifecycle 2.11.0, kèm tầng domain (tuỳ chọn theo hướng dẫn chính thức) | https://developer.android.com/topic/architecture · https://developer.android.com/topic/architecture/domain-layer | Đúng hướng dẫn chính thức, dễ hiểu. Tầng domain gom các quy tắc BR-xx về một chỗ, dễ unit test (10.7), và dùng chung nghiệp vụ "bắt đầu/kết thúc chạy" giữa nhiều màn hình | MVI: thêm khái niệm, khó hơn cho người học. Không có domain: quy tắc nằm rải rác trong ViewModel và Repository, khó test |
 | Bất đồng bộ | Kotlin Coroutines + Flow | https://kotlinlang.org/docs/coroutines-overview.html | Room, Retrofit và ViewModel đều hỗ trợ sẵn | RxJava: nặng, ít dùng cho app mới |
 | Lưu trữ | Room 3.0.3, sinh code bằng KSP 2.3.12 | https://developer.android.com/training/data-storage/room | Kiểm tra SQL lúc biên dịch, trả về Flow. Tài liệu chính thức mặc định dùng Room 3, thiết kế ưu tiên coroutine | Room 2.8.5: tài liệu chính thức đã gọi là legacy. SQLDelight: viết SQL tay |
 | Gọi mạng | Retrofit 3.0.0 + `converter-kotlinx-serialization` | https://square.github.io/retrofit/ | Phổ biến, nhiều tài liệu | Ktor Client: cấu hình nhiều hơn cho Android |
@@ -611,6 +611,8 @@ Tài liệu: https://developer.android.com/develop/background-work/services/fgs/
 ```mermaid
 flowchart LR
     UI[Màn hình Compose] <--> VM[ViewModel]
+    VM --> DM[Domain<br/>quy tắc BR-xx, use case]
+    DM --> RP
     VM --> RP[Repository]
     VM -- Bắt đầu / Tạm dừng / Tiếp tục / Kết thúc --> SVC
     SVC[RunTrackingService<br/>Foreground Service] --> RP
@@ -618,6 +620,17 @@ flowchart LR
     RP --> API[Retrofit<br/>Open-Meteo]
     SVC --> LOC[Fused Location]
 ```
+
+**Thư mục code** (gói `com.nhacongdong.runmate`):
+
+| Thư mục | Chứa gì |
+|---|---|
+| `ui/` | Màn hình Compose, ViewModel, điều hướng, theme |
+| `domain/` | **Hàm quy tắc thuần** (BR-xx: cảnh báo thời tiết, lọc điểm GPS, tính quãng đường và pace, chuyển trạng thái, ân hạn, khoảng gợi ý) và **use case** cho nghiệp vụ dùng nhiều Repository hoặc nhiều màn hình (bắt đầu chạy, kết thúc chạy, khôi phục buổi chạy, xoá buổi chạy của kế hoạch) |
+| `data/` | Repository, Room, Retrofit |
+| `service/` | `RunTrackingService` (Service của Android, ghi GPS chạy nền) |
+
+**Quy ước:** tính toán thuần thì vào `domain/`, đụng database hay mạng thì vào `data/`. Việc đơn giản (ví dụ đọc danh sách kế hoạch) thì ViewModel gọi thẳng Repository, không cần use case.
 
 - ViewModel của S4, S5 và S6 **ra lệnh** cho Service: Bắt đầu, Tạm dừng, Tiếp tục, Kết thúc. Service **không gửi số liệu ngược lên** ViewModel, mà ghi vào Room như gạch dưới.
 - Service ghi điểm GPS và số liệu vào Room. Màn hình đang chạy đọc lại từ Room qua Flow, nên tắt rồi mở lại app vẫn thấy đúng số liệu.
@@ -756,7 +769,7 @@ Phần này không thêm tính năng mới, mà nói app phải chạy **như th
 
 - Dữ liệu chỉ nằm trên máy (mục 2). App không có quảng cáo, không có thư viện thống kê hay báo lỗi gửi dữ liệu ra ngoài.
 - Chỉ gửi ra ngoài: toạ độ địa điểm đã chọn (tới Open-Meteo Forecast) và chữ người dùng gõ để tìm địa điểm. Chữ tìm kiếm đi tới **dịch vụ Geocoder của máy** (máy có Google Play thường là Google), hoặc tới Open-Meteo Geocoding khi dùng dự phòng (mục 8.2). **Không gửi** điểm GPS lúc chạy.
-- Tắt sao lưu tự động của Android (`android:allowBackup="false"` trong `AndroidManifest.xml`), để khớp mục 2: dữ liệu, kể cả quỹ đạo chạy, không rời khỏi máy. Đổi lại, gỡ app hoặc đổi máy thì mất lịch sử.
+- Tắt sao lưu và chuyển dữ liệu sang máy khác: `android:allowBackup="false"` (Android 11 trở xuống) và `android:dataExtractionRules` trỏ tới `res/xml/data_extraction_rules.xml`, loại trừ mọi dữ liệu khỏi `cloud-backup` và `device-transfer` (Android 12 trở lên). Cần cả hai vì trên máy của một số hãng, `allowBackup="false"` không chặn việc chuyển sang máy mới ([tài liệu](https://developer.android.com/identity/data/autobackup)). Mục đích là khớp mục 2: dữ liệu, kể cả quỹ đạo chạy, không rời khỏi máy. Đổi lại, gỡ app hoặc đổi máy thì mất lịch sử.
 
 ### 10.5 Giao diện và tương thích
 
