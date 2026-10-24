@@ -1,3 +1,35 @@
 <resources>
     <string name="app_name">RunMate</string>
+
+    <!-- Thanh dưới (SPEC 9.3) -->
+    <string name="tab_plans">Kế hoạch</string>
+    <string name="tab_run">Chạy</string>
+    <string name="tab_history">Lịch sử</string>
+
+    <!-- Tiêu đề màn hình (SPEC 9.1) -->
+    <string name="screen_plan_list">S1 · Kế hoạch</string>
+    <string name="screen_plan_edit">S2 · Tạo / Sửa kế hoạch</string>
+    <string name="screen_location_picker">S3 · Chọn vị trí</string>
+    <string name="screen_plan_detail">S4 · Chi tiết kế hoạch</string>
+    <string name="screen_free_run_setup">S5 · Chuẩn bị chạy tự do</string>
+    <string name="screen_running">S6 · Đang chạy</string>
+    <string name="screen_session_detail">S7 · Chi tiết buổi chạy</string>
+    <string name="screen_history">S8 · Lịch sử</string>
+
+    <!-- Nút tạm của khung code (bước 3.4) -->
+    <string name="action_create_plan">Tạo kế hoạch</string>
+    <string name="action_open_plan">Mở một kế hoạch</string>
+    <string name="action_running_banner">Băng: Đang có buổi chạy</string>
+    <string name="action_pick_location">Chọn vị trí</string>
+    <string name="action_save">Lưu</string>
+    <string name="action_select_location">Chọn vị trí này</string>
+    <string name="action_edit">Sửa</string>
+    <string name="action_start_run">Bắt đầu chạy</string>
+    <string name="action_view_session">Xem buổi chạy</string>
+    <string name="action_delete">Xoá</string>
+    <string name="action_change_location">Đổi vị trí</string>
+    <string name="action_run_with_plan">Chạy theo kế hoạch</string>
+    <string name="action_finish_saved">Kết thúc (đã lưu)</string>
+    <string name="action_finish_too_short">Kết thúc (quá ngắn, không lưu)</string>
+    <string name="action_open_session">Mở một buổi chạy</string>
 </resources>
