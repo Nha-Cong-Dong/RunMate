@@ -40,6 +40,7 @@ Phần này dùng để tôi đưa vào `README.md` (mục Công nghệ) và `do
 1. **README.md**: điền giới thiệu, tính năng, công nghệ
 2. **docs/SPEC.md**: vấn đề, người dùng, tính năng MVP, user stories, luồng màn hình, mô hình dữ liệu, kiến trúc
 3. **Khung code ban đầu**: tạo project Android tối thiểu theo SPEC đã chốt. Kế hoạch chi tiết và tiến độ: xem `docs/PLAN.md`
+4. **Xây dựng MVP**: theo giai đoạn A–G trong `docs/PLAN.md`
 
 Chỉ chuyển sang bước tiếp theo khi tôi xác nhận bước trước đã xong.
 
