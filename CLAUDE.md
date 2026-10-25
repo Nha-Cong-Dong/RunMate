@@ -48,3 +48,6 @@ Chỉ chuyển sang bước tiếp theo khi tôi xác nhận bước trước đ
 
 - Commit message theo dạng: `feat: ...`, `fix: ...`, `docs: ...`
 - Không commit file bí mật: `google-services.json`, `local.properties`, API key (đã có trong `.gitignore`)
+
+## Skill có sẵn
+- /explain — giải thích đoạn code vừa viết và hỏi lại mình vài câu để kiểm tra hiểu
