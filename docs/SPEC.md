@@ -528,7 +528,7 @@ Cảnh báo và gợi ý vật dụng **không lưu**. Mỗi lần hiển thị,
 | `PlanStatus` | `PLANNED`, `IN_PROGRESS`, `COMPLETED`, `MISSED`, `CANCELLED` |
 | `SessionStatus` | `RECORDING`, `PAUSED`, `FINISHED` |
 
-Enum lưu dạng chuỗi qua `TypeConverter`, để có đổi thứ tự trong code thì dữ liệu cũ cũng không sai.
+Enum lưu dạng chuỗi (tên enum, ví dụ `"PLANNED"`) bằng converter có sẵn của Room, không cần tự viết `TypeConverter` ([Room 2.3.0: Built-in Enum Support](https://developer.android.com/jetpack/androidx/releases/room)). Nhờ lưu bằng tên nên đổi thứ tự trong code thì dữ liệu cũ cũng không sai. Ngược lại, **đổi tên** một giá trị thì phải viết `Migration`.
 
 ### 7.7 Quy tắc lưu và xoá
 
