@@ -44,4 +44,6 @@ dependencies {
     ksp(libs.androidx.room3.compiler)
     implementation(libs.androidx.sqlite.bundled)
     testImplementation(libs.junit)
+    testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.androidx.sqlite.bundled.jvm)
 }
