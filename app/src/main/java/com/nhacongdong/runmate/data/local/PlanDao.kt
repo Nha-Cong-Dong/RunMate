@@ -5,6 +5,7 @@ import androidx.room3.Delete
 import androidx.room3.Insert
 import androidx.room3.Query
 import androidx.room3.Update
+import com.nhacongdong.runmate.domain.model.PlanStatus
 import kotlinx.coroutines.flow.Flow
 
 // Truy vấn bảng run_plan. Room 3 bắt buộc hàm DAO là suspend hoặc trả về Flow.
@@ -22,4 +23,7 @@ interface PlanDao {
 
     @Query("SELECT * FROM run_plan WHERE id = :id")
     suspend fun getById(id: Long): RunPlan?
+
+    @Query("UPDATE run_plan SET status = :status WHERE id = :id")
+    suspend fun updateStatus(id: Long, status: PlanStatus)
 }
