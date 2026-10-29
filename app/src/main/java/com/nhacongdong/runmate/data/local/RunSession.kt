@@ -13,7 +13,7 @@ import com.nhacongdong.runmate.data.model.SessionStatus
     tableName = "run_session",
     foreignKeys = [ForeignKey(
         entity = RunPlan::class, parentColumns = ["id"], childColumns = ["planId"],
-        onDelete = ForeignKey.CASCADE                     // BR-52
+        onDelete = ForeignKey.SET_NULL                    // BR-52: xoá kế hoạch thì thành chạy tự do
     )],
     indices = [Index(value = ["planId"], unique = true)]  // mỗi kế hoạch tối đa 1 buổi
 )

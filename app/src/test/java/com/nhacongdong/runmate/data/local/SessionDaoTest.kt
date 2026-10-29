@@ -6,10 +6,12 @@ import com.nhacongdong.runmate.data.plan
 import com.nhacongdong.runmate.data.point
 import com.nhacongdong.runmate.data.session
 import com.nhacongdong.runmate.data.testDatabase
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
+import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -46,7 +48,7 @@ class SessionDaoTest {
     }
 
     @Test
-    fun deletePlan_cascadesToSessionAndTrackPoints() = runTest {
+    fun deletePlan_keepsSessionAsFreeRun() = runTest {
         val planId = db.planDao().insert(plan())
         val sessionId = db.sessionDao().insert(session(planId))
         db.trackPointDao().insert(point(sessionId, timestamp = 1))
@@ -54,8 +56,11 @@ class SessionDaoTest {
 
         db.planDao().delete(db.planDao().getById(planId)!!)
 
-        assertNull(db.sessionDao().getByPlanId(planId))
-        assertEquals(0, db.trackPointDao().getBySession(sessionId).size)
+        // BR-52: buổi chạy còn, thành chạy tự do, điểm GPS giữ nguyên
+        val kept = db.sessionDao().observeById(sessionId).first()
+        assertNotNull(kept)
+        assertNull(kept?.planId)
+        assertEquals(2, db.trackPointDao().getBySession(sessionId).size)
     }
 
     @Test
