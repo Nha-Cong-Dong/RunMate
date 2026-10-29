@@ -6,7 +6,9 @@ Hướng dẫn cho Claude khi làm việc trong dự án này.
 
 - **RunMate**: ứng dụng Android đồng hành cho người chạy bộ (ghi lộ trình GPS, quãng đường, pace, lịch sử).
 - Ngôn ngữ: Kotlin · Build: Gradle · JDK 17
-- Tài liệu: `README.md` (giới thiệu), `docs/SPEC.md` (đặc tả sản phẩm)
+- Tài liệu: `README.md` (giới thiệu), `docs/SPEC.md` (đặc tả sản phẩm: app làm gì),
+  `docs/DESIGN.md` (thiết kế giao diện: app trông thế nào), `docs/PLAN.md` (kế hoạch và tiến độ)
+- SPEC và DESIGN mâu thuẫn thì **SPEC thắng** (DESIGN đã ghi ở đầu file)
 - Trả lời bằng **tiếng Việt**.
 
 ## Quy tắc 1: Hỏi trước khi sửa
@@ -35,10 +37,19 @@ Phần này dùng để tôi đưa vào `README.md` (mục Công nghệ) và `do
 
 - Ưu tiên tài liệu **chính thức**; nếu không chắc về phiên bản hay API, nói rõ là chưa chắc, không tự bịa.
 
+## Quy tắc 3: Giao diện theo DESIGN.md
+
+- Trước khi viết hoặc sửa màn hình, thành phần Compose, màu, chữ: đọc phần liên quan trong `docs/DESIGN.md`
+  (mục 4 Màu, 5 Chữ, 6 Khoảng cách, 8 Thành phần dùng chung, 9 Từng màn hình, 13 Cách làm trong Compose).
+- Dùng đúng tên thành phần như DESIGN (ví dụ `WeekCalendar`, `PlanCard`, `ResultCard`, `RunRing`).
+- Không tự thêm màu, cỡ chữ, khoảng cách hay hiệu ứng ngoài DESIGN. Nếu cần, đề xuất sửa DESIGN trước, chờ đồng ý rồi mới viết code.
+- Khi đề xuất một màn hình, ghi rõ đang làm theo mục nào của DESIGN.
+
 ## Thứ tự công việc
 
 1. **README.md**: điền giới thiệu, tính năng, công nghệ
-2. **docs/SPEC.md**: vấn đề, người dùng, tính năng MVP, user stories, luồng màn hình, mô hình dữ liệu, kiến trúc
+2. **docs/SPEC.md**: vấn đề, người dùng, tính năng MVP, user stories, luồng màn hình, mô hình dữ liệu, kiến trúc.
+   **docs/DESIGN.md**: màu, chữ, thành phần, bố cục từng màn hình
 3. **Khung code ban đầu**: tạo project Android tối thiểu theo SPEC đã chốt. Kế hoạch chi tiết và tiến độ: xem `docs/PLAN.md`
 4. **Xây dựng MVP**: theo giai đoạn A–G trong `docs/PLAN.md`
 
