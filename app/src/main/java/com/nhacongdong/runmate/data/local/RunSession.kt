@@ -5,8 +5,8 @@ import androidx.room3.Entity
 import androidx.room3.ForeignKey
 import androidx.room3.Index
 import androidx.room3.PrimaryKey
-import com.nhacongdong.runmate.domain.model.GoalType
-import com.nhacongdong.runmate.domain.model.SessionStatus
+import com.nhacongdong.runmate.data.model.GoalType
+import com.nhacongdong.runmate.data.model.SessionStatus
 
 // Bảng run_session: buổi chạy (SPEC 7.3, 7.7).
 @Entity(

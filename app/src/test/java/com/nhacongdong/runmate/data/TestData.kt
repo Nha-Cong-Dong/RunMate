@@ -7,9 +7,9 @@ import com.nhacongdong.runmate.data.local.RunPlan
 import com.nhacongdong.runmate.data.local.RunSession
 import com.nhacongdong.runmate.data.local.TrackPoint
 import com.nhacongdong.runmate.data.local.WeatherSnapshot
-import com.nhacongdong.runmate.domain.model.GoalType
-import com.nhacongdong.runmate.domain.model.PlanStatus
-import com.nhacongdong.runmate.domain.model.SessionStatus
+import com.nhacongdong.runmate.data.model.GoalType
+import com.nhacongdong.runmate.data.model.PlanStatus
+import com.nhacongdong.runmate.data.model.SessionStatus
 
 // Dữ liệu mẫu dùng chung cho test. Mỗi test chỉ ghi trường mà nó quan tâm.
 

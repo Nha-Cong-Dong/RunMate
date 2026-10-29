@@ -1,11 +1,11 @@
 package com.nhacongdong.runmate.data.local
 
 import androidx.sqlite.SQLiteException
+import com.nhacongdong.runmate.data.model.SessionStatus
 import com.nhacongdong.runmate.data.plan
 import com.nhacongdong.runmate.data.point
 import com.nhacongdong.runmate.data.session
 import com.nhacongdong.runmate.data.testDatabase
-import com.nhacongdong.runmate.domain.model.SessionStatus
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Assert.assertEquals

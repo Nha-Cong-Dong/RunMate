@@ -631,6 +631,8 @@ flowchart LR
 | `data/` | Repository, Room, Retrofit |
 | `service/` | `RunTrackingService` (Service của Android, ghi GPS chạy nền) |
 
+**Phụ thuộc một chiều:** `ui` → `domain` → `data`. `data/` không import `domain/`. Enum dùng chung (`GoalType`, `PlanStatus`, `SessionStatus`) đặt ở `data/model/`.
+
 **Quy ước:** tính toán thuần thì vào `domain/`, đụng database hay mạng thì vào `data/`. Việc đơn giản (ví dụ đọc danh sách kế hoạch) thì ViewModel gọi thẳng Repository, không cần use case.
 
 - ViewModel của S4, S5 và S6 **ra lệnh** cho Service: Bắt đầu, Tạm dừng, Tiếp tục, Kết thúc. Service **không gửi số liệu ngược lên** ViewModel, mà ghi vào Room như gạch dưới.

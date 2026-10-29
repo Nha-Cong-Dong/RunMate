@@ -2,7 +2,7 @@ package com.nhacongdong.runmate.data
 
 import com.nhacongdong.runmate.data.local.PlanDao
 import com.nhacongdong.runmate.data.local.RunPlan
-import com.nhacongdong.runmate.domain.model.PlanStatus
+import com.nhacongdong.runmate.data.model.PlanStatus
 import kotlinx.coroutines.flow.Flow
 
 // Cửa ngõ đọc và ghi kế hoạch. Không kiểm tra quy tắc BR-xx, việc đó thuộc domain/.

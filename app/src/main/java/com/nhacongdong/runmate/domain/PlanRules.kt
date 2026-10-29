@@ -1,8 +1,8 @@
 package com.nhacongdong.runmate.domain
 
-import com.nhacongdong.runmate.domain.model.GoalType
+import com.nhacongdong.runmate.data.model.GoalType
+import com.nhacongdong.runmate.data.model.PlanStatus
 import com.nhacongdong.runmate.domain.model.PlanError
-import com.nhacongdong.runmate.domain.model.PlanStatus
 
 // Quy tắc kế hoạch (SPEC 5.1, 6.3, 6.4). Hàm thuần: giờ hiện tại luôn truyền vào qua `now` (SPEC 10.7).
 object PlanRules {

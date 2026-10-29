@@ -1,8 +1,8 @@
 package com.nhacongdong.runmate.domain
 
-import com.nhacongdong.runmate.domain.model.GoalType
+import com.nhacongdong.runmate.data.model.GoalType
+import com.nhacongdong.runmate.data.model.PlanStatus
 import com.nhacongdong.runmate.domain.model.PlanError
-import com.nhacongdong.runmate.domain.model.PlanStatus
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue

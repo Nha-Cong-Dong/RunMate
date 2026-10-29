@@ -1,7 +1,7 @@
 package com.nhacongdong.runmate.data
 
 import com.nhacongdong.runmate.data.local.RunMateDatabase
-import com.nhacongdong.runmate.domain.model.PlanStatus
+import com.nhacongdong.runmate.data.model.PlanStatus
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.After
