@@ -275,7 +275,8 @@ Theo SPEC 10.5: dấu phẩy thập phân, đơn vị km, phút/km, °C, km/h.
 | Thời gian | `m:ss` dưới 1 giờ, `h:mm:ss` từ 1 giờ | `26:55` · `1:04:10` |
 | Tổng thời gian (S8) | `h giờ mm phút` | `4 giờ 05 phút` |
 | Pace | `m:ss` + "/km", chưa đủ 100 m thì `--` (BR-35) | `5:08 /km` |
-| Tỷ lệ | Số nguyên + `%`, có thể trên 100; không có dữ liệu thì `--` (BR-55) | `112%` |
+| Tỷ lệ | Số nguyên + `%`, **làm tròn xuống** để "100%" luôn nghĩa là đạt mục tiêu (BR-37), có thể trên 100; không có dữ liệu thì `--` (BR-55) | `112%` · 99,6% hiện `99%` |
+| Mục tiêu | Km bỏ ",0"; thời gian theo giờ và phút | `5 km` · `5,5 km` · `45 phút` · `1 giờ 30 phút` · `2 giờ` |
 | Ngày | "Thứ Năm, 29/10" | |
 | Giờ | 24 giờ | `06:00` |
 | Kỳ thống kê | Tuần: "26/10 – 01/11". Tháng: "Tháng 10, 2026" | |
@@ -408,7 +409,7 @@ Thẻ đặc biệt nhất ở S1, dùng cho **kế hoạch `COMPLETED`** và **
 ```
 ┌──────────────────────────────────────────┐
 │ (◎✓)  06:00 · Hồ Tây          [Hoàn thành]│
-│       5,24 km · 105% mục tiêu ✓          │
+│       5,24 km · 104% mục tiêu ✓          │
 │                          Xem kết quả  ›  │
 └──────────────────────────────────────────┘
 ```
@@ -416,7 +417,7 @@ Thẻ đặc biệt nhất ở S1, dùng cho **kế hoạch `COMPLETED`** và **
 | Phần | Kế hoạch `COMPLETED` | Chạy tự do |
 |---|---|---|
 | Trái | `RunRing` cỡ M | `RunRing` cỡ M |
-| Dòng 1 | Giờ kế hoạch · tên địa điểm | Giờ bắt đầu · "Chạy tự do" |
+| Dòng 1 | **Giờ bắt đầu chạy** · tên địa điểm (dữ liệu chạy quan trọng hơn giờ dự kiến) | Giờ bắt đầu chạy · "Chạy tự do" |
 | Dòng 2 | Quãng đường · tỷ lệ mục tiêu (BR-37) | Quãng đường · thời gian chạy |
 | Chip | "Hoàn thành" | Không có chip (SPEC 6: chạy tự do không có trạng thái) |
 | Nút "Xem kết quả" | Mở S7 | Mở S7 |
@@ -597,7 +598,7 @@ Thứ Năm, 29/10             2 buổi · 15,4 km
 
 - **Thanh trên:** `arrow_back`; menu `more_vert` gồm **Sửa**, **Huỷ kế hoạch**, **Xoá** (chữ `error`). Mục bị tắt theo SPEC 6.4 vẫn hiện, làm mờ, kèm dòng phụ giải thích.
 - **Phần đầu:** `StatusChip`, rồi "Thứ Năm, 29/10" (`titleMedium`), giờ "06:00" (`displayMedium`), tên địa điểm, mục tiêu.
-- **Kế hoạch `COMPLETED`:** ngay dưới phần đầu có một hàng kết quả thu gọn: `RunRing` cỡ M + "5,24 km · 105% mục tiêu ✓" + "Xem buổi chạy ›" (mở S7).
+- **Kế hoạch `COMPLETED`:** ngay dưới phần đầu có một hàng kết quả thu gọn: `RunRing` cỡ M + "5,24 km · 104% mục tiêu ✓" + "Xem buổi chạy ›" (mở S7).
 - `WeatherBlock` → `WarningList` → `GearChips`.
 - Khối cảnh báo tiết kiệm pin (BR-61) nếu cần, kiểu giống `WarningList` với biểu tượng `battery_saver`.
 - **Đáy cố định:**
@@ -660,7 +661,7 @@ Màn hình quan trọng nhất. Mục tiêu: **liếc 1 giây là đọc đượ
 - **Thanh trên:** `arrow_back`; menu `more_vert` có **Xoá buổi chạy** (chữ `error`). S7 là nơi duy nhất xoá buổi chạy (SPEC UC6).
 - **Phần đầu:** "Thứ Năm, 29/10 · 06:02" (`labelMedium`), tên địa điểm (`titleMedium`), nhãn "Theo kế hoạch" hoặc "Chạy tự do".
 - `TrackCanvas` vuông, rộng hết lề.
-- Hàng kết quả: quãng đường lớn (`displayMedium`) bên trái; `GoalRing` 96 dp bên phải, trong vòng ghi tỷ lệ "105%". Đạt mục tiêu thì dưới vòng có "Đạt mục tiêu" màu `success` + ✓.
+- Hàng kết quả: quãng đường lớn (`displayMedium`) bên trái; `GoalRing` 96 dp bên phải, trong vòng ghi tỷ lệ "104%". Đạt mục tiêu thì dưới vòng có "Đạt mục tiêu" màu `success` + ✓.
 - Lưới `StatTile` 3 cột: Thời gian chạy · Pace trung bình · Mục tiêu.
 - `WeatherBlock` chỉ đọc, tiêu đề "Thời tiết lúc bắt đầu".
 - Mở từ S6: chạy hoạt ảnh mục 3.4 bước 1. Mở từ S1 hoặc S4: hiện thẳng, không hoạt ảnh.

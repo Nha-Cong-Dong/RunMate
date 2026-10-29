@@ -330,7 +330,7 @@ Tất cả user story đều là của **người chạy** (tác nhân duy nhấ
 
 | Mã | Quy tắc |
 |---|---|
-| BR-50 | Trên lịch tuần, kế hoạch và buổi chạy của cùng một ngày sắp theo giờ **tăng dần**. Ngày được tính theo múi giờ của máy |
+| BR-50 | Trên lịch tuần, kế hoạch và buổi chạy của cùng một ngày sắp theo giờ **tăng dần**. Ngày được tính theo múi giờ của máy. Buổi chạy nằm ở **ngày bắt đầu chạy**; kế hoạch `COMPLETED` đi theo buổi chạy của nó (chạy muộn sang ngày sau thì cả hai hiện ở ngày chạy) |
 | BR-51 | Không tự xoá dữ liệu cũ. Chỉ xoá khi người dùng xoá |
 | BR-52 | Xoá kế hoạch thì buổi chạy gắn với nó (nếu có) **được giữ lại thành chạy tự do** (`planId` = null), điểm GPS giữ nguyên. Có thông báo trước |
 | BR-53 | Xoá riêng buổi chạy của một kế hoạch thì kế hoạch về `PLANNED` hoặc `MISSED`, có cảnh báo |
