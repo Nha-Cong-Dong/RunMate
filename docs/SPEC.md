@@ -251,7 +251,7 @@ Tất cả user story đều là của **người chạy** (tác nhân duy nhấ
 
 | Mã | Quy tắc | Giá trị |
 |---|---|---|
-| BR-01 | Thời điểm bắt đầu của kế hoạch phải **không nằm trong quá khứ** | ≥ thời điểm hiện tại |
+| BR-01 | Thời điểm bắt đầu của kế hoạch phải **không nằm trong quá khứ** | ≥ thời điểm hiện tại, so theo phút (bỏ giây lẻ): chọn 06:00 rồi bấm Lưu lúc 06:00:20 vẫn hợp lệ |
 | BR-02 | Chỉ đặt kế hoạch trong vòng tối đa kể từ hiện tại | **16 ngày** (theo giới hạn dự báo theo giờ của Open-Meteo trong README) |
 | BR-03 | Mỗi kế hoạch có đúng **một** mục tiêu, bắt buộc | Loại `DISTANCE` (km) hoặc `DURATION` (phút) |
 | BR-04 | Mục tiêu quãng đường | **0,5 km đến 100 km**, bước nhập 0,1 km |
