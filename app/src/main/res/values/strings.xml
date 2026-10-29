@@ -33,6 +33,26 @@
     <string name="cd_goal_reached">Đạt mục tiêu</string>
     <string name="cd_runs_count">%1$d buổi chạy</string>
 
+    <!-- Lịch tuần (DESIGN 8.3) -->
+    <string name="today">Hôm nay</string>
+    <string name="cd_prev_week">Tuần trước</string>
+    <string name="cd_next_week">Tuần sau</string>
+    <string name="plan_limit">Chỉ lên kế hoạch được trong 16 ngày tới</string>
+    <string name="day_cd_running">%1$s, đang chạy</string>
+    <string name="day_cd_ran">%1$s, đã chạy %2$d buổi</string>
+    <string name="day_cd_ran_reached">%1$s, đã chạy %2$d buổi, đạt mục tiêu</string>
+    <string name="day_cd_plans">%1$s, %2$d kế hoạch</string>
+    <string name="day_cd_missed">%1$s, bỏ lỡ %2$d kế hoạch</string>
+    <string name="day_cd_empty">%1$s, không có lịch</string>
+
+    <!-- Danh sách của ngày đang chọn (DESIGN 8.7) -->
+    <string name="day_empty_today">Hôm nay chưa có lịch</string>
+    <string name="day_empty_future">Chưa có lịch</string>
+    <string name="day_empty_past">Không có buổi chạy nào</string>
+    <string name="action_plan">Lên kế hoạch</string>
+    <string name="action_plan_this_day">Lên kế hoạch cho ngày này</string>
+    <string name="action_run_now">Chạy ngay</string>
+
     <!-- Nút tạm của khung code (bước 3.4) -->
     <string name="action_create_plan">Tạo kế hoạch</string>
     <string name="action_open_plan">Mở một kế hoạch</string>

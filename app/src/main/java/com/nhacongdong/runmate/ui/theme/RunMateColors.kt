@@ -56,6 +56,13 @@ fun nhipLinear(size: Size) = Brush.linearGradient(
     end = Offset(size.width, 0f),
 )
 
+// Chéo dưới-trái lên trên-phải, tự co theo kích thước vật được tô (dùng cho viền nút)
+val NhipDiagonal = Brush.linearGradient(
+    *NhipStops,
+    start = Offset(0f, Float.POSITIVE_INFINITY),
+    end = Offset(Float.POSITIVE_INFINITY, 0f),
+)
+
 // Màu tại vị trí t (0..1), dùng tô quỹ đạo theo pace (DESIGN 2.4)
 fun nhipColorAt(t: Float): Color {
     val x = t.coerceIn(0f, 1f)

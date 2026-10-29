@@ -80,6 +80,10 @@ object RunFormat {
         }
     }
 
+    // Tóm tắt ở tiêu đề DayList: "2 buổi · 15,4 km" (DESIGN 8.7)
+    fun formatDaySummary(runCount: Int, meters: Double): String =
+        "$runCount buổi · ${formatDistanceKm(meters)} km"
+
     // value / scale với đúng `digits` chữ số thập phân, dấu phẩy
     private fun decimal(value: Long, scale: Int, digits: Int): String =
         "%d,%0${digits}d".format(Locale.ROOT, value / scale, value % scale)

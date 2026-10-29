@@ -437,7 +437,8 @@ Thẻ đặc biệt nhất ở S1, dùng cho **kế hoạch `COMPLETED`** và **
 |---|---|
 | Trống, ngày trong khoảng đặt được (hôm nay → +16 ngày) | "Chưa có lịch" + nút viền "Lên kế hoạch cho ngày này" (mở S2 điền sẵn ngày) |
 | Trống, ngày đã qua | "Không có buổi chạy nào" |
-| Trống, hôm nay | "Hôm nay chưa có lịch" + hai nút: "Lên kế hoạch" và "Chạy ngay" (viền gradient) |
+| Trống, hôm nay | "Hôm nay chưa có lịch" + hai nút: "Lên kế hoạch" và "Chạy ngay" (viền gradient 2 dp) |
+| Trống, sau mốc 16 ngày (trong tuần giới hạn, BR-02) | "Chưa có lịch" + dòng phụ "Chỉ lên kế hoạch được trong 16 ngày tới", không có nút |
 
 ### 8.8 `StatusChip`: nhãn trạng thái kế hoạch
 

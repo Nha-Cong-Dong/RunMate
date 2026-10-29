@@ -55,6 +55,9 @@ class RunFormatTest {
     }
 
     @Test
+    fun daySummary() = assertEquals("2 buổi · 15,4 km", RunFormat.formatDaySummary(2, 15_400.0))
+
+    @Test
     fun goal_distanceAndDuration() {
         assertEquals("5 km", RunFormat.formatGoal(GoalType.DISTANCE, 5_000))
         assertEquals("5,5 km", RunFormat.formatGoal(GoalType.DISTANCE, 5_500))
