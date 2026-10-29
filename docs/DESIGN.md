@@ -141,9 +141,9 @@ Một tuần chạy đều sẽ trông như một hàng stories đầy màu. M�
 | Một buổi chạy đã lưu | **Gradient đầy** | Quỹ đạo | ✓ nếu đạt mục tiêu |
 | Nhiều buổi chạy | **Gradient chia đoạn**, mỗi buổi một đoạn, khe 6° giữa các đoạn, tối đa 4 đoạn (giống Insta khi có nhiều story) | Quỹ đạo dài nhất | Số buổi ("2") ở góc trên phải; ✓ ở góc dưới phải nếu **mọi** buổi đều đạt mục tiêu |
 | Buổi chạy đang diễn ra | Gradient **xoay chậm** | Chấm gradient nhấp nháy | |
-| Chỉ có kế hoạch `PLANNED` (chưa chạy) | **Nét đứt** 1,5 dp, màu `textSecondary` | Số ngày, `textPrimary` | |
-| Chỉ có kế hoạch `MISSED` | Nét liền 1,5 dp, màu `outlineStrong` | Số ngày, `textSecondary` | `!` nền `error` |
-| Không có gì, hoặc chỉ có `CANCELLED` | Không có vòng | Số ngày, `textSecondary` | |
+| Chỉ có kế hoạch `PLANNED` (chưa chạy) | **Nét đứt** 1,5 dp, màu `textSecondary` | Trống (số ngày hiện ở dưới vòng, DESIGN 8.3) | |
+| Chỉ có kế hoạch `MISSED` | Nét liền 1,5 dp, màu `outlineStrong` | Trống | `!` nền `error` |
+| Không có gì, hoặc chỉ có `CANCELLED` | Không có vòng | Trống | |
 
 **Thứ tự ưu tiên** khi một ngày có nhiều thứ: đang chạy > đã chạy > `PLANNED` > `MISSED`. Ví dụ ngày có một buổi đã chạy và một kế hoạch `PLANNED` buổi chiều thì hiện vòng gradient (thành tích được ưu tiên). Kế hoạch còn lại vẫn thấy trong danh sách ngày bên dưới.
 
@@ -396,7 +396,7 @@ Cho `PLANNED`, `IN_PROGRESS`, `MISSED`, `CANCELLED`. Bấm cả thẻ mở S4.
 ```
 
 - Nền `surfaceContainer`, bo `radiusL`, đệm 16 dp, chiều cao tối thiểu 72 dp.
-- Cột trái rộng 56 dp: giờ (`headlineSmall`, `tnum`).
+- Cột trái rộng **tối thiểu** 56 dp: giờ (`headlineSmall`, `tnum`), luôn một dòng. Cột tự nới ra nếu chữ rộng hơn (cỡ chữ hệ thống lớn).
 - Giữa: tên địa điểm (`titleMedium`, cắt "…"), mục tiêu (`bodyMedium`, `textSecondary`).
 - Phải: `StatusChip` (mục 8.8).
 - **Không hiện thời tiết** trên thẻ (SPEC 9.1). Thời tiết xem ở S4.
@@ -878,6 +878,7 @@ Vòng nét đứt (`Planned`): `Stroke(width, pathEffect = PathEffect.dashPathEf
 | Nút bị tắt luôn kèm giải thích | Ẩn nút mà không nói vì sao |
 | Cảnh báo dùng màu `warning` + biểu tượng + chữ | Cảnh báo bằng màu cam của gradient |
 | Thêm `@Preview` cho mọi trạng thái | Chỉ xem trước trạng thái "đẹp" |
+| **Một nội dung một dòng:** giờ, con số, đơn vị, nhãn, chip, chữ trên nút không bao giờ ngắt dòng. Chữ dài do người dùng nhập (tên địa điểm) thì cắt "…". Chỉ nội dung **khác** mới xuống dòng | Ngắt "06:00" hay "Đã lên kế hoạch" thành hai dòng |
 
 ---
 

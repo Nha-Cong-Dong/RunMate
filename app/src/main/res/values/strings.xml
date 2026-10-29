@@ -16,6 +16,23 @@
     <string name="screen_session_detail">S7 · Chi tiết buổi chạy</string>
     <string name="screen_history">S8 · Lịch sử</string>
 
+    <!-- Nhãn trạng thái kế hoạch (SPEC 6.1, DESIGN 8.8) -->
+    <string name="status_planned">Đã lên kế hoạch</string>
+    <string name="status_in_progress">Đang chạy</string>
+    <string name="status_completed">Hoàn thành</string>
+    <string name="status_missed">Bỏ lỡ</string>
+    <string name="status_cancelled">Đã huỷ</string>
+
+    <!-- Thẻ ở S1 (DESIGN 8.5, 8.6) -->
+    <string name="plan_goal">Mục tiêu %1$s</string>
+    <string name="time_and_place">%1$s · %2$s</string>
+    <string name="free_run">Chạy tự do</string>
+    <string name="distance_km">%1$s km</string>
+    <string name="goal_percent">%1$s mục tiêu</string>
+    <string name="view_result">Xem kết quả</string>
+    <string name="cd_goal_reached">Đạt mục tiêu</string>
+    <string name="cd_runs_count">%1$d buổi chạy</string>
+
     <!-- Nút tạm của khung code (bước 3.4) -->
     <string name="action_create_plan">Tạo kế hoạch</string>
     <string name="action_open_plan">Mở một kế hoạch</string>

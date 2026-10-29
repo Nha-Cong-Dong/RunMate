@@ -31,4 +31,17 @@ data class RunRingSize(
 object RunRingSizes {
     val S = RunRingSize(outer = 44.dp, ring = 2.5.dp, gap = 2.dp, core = 35.dp, track = 1.75.dp, badge = 16.dp)
     val M = RunRingSize(outer = 52.dp, ring = 3.dp, gap = 2.5.dp, core = 41.dp, track = 2.dp, badge = 18.dp)
+
+    // Hình minh hoạ của EmptyState (DESIGN 8.19 chỉ quy định 72 dp, nét đứt). Các số còn lại giữ như cỡ M
+    val L = RunRingSize(outer = 72.dp, ring = 3.dp, gap = 2.5.dp, core = 61.dp, track = 2.dp, badge = 18.dp)
+}
+
+// Nét của vòng PLANNED, MISSED và nét đứt (DESIGN 3.2, 13.4)
+object RunRingStroke {
+    val outline = 1.5.dp
+    val dashOn = 4.dp
+    val dashOff = 3.dp
+    val badgeBorder = 2.dp       // viền huy hiệu, màu background (DESIGN 3.2)
+    const val SEGMENT_GAP_DEG = 6f
+    const val MAX_SEGMENTS = 4
 }
