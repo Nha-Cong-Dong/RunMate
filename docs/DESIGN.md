@@ -244,7 +244,7 @@ Gradient, `ringTrack`, `warning`, `success` không có vai trò sẵn trong Mate
 
 - **Inter**, giấy phép SIL OFL, có đủ dấu tiếng Việt.
 - **Đóng gói trong `res/font/`**, không dùng Downloadable Fonts. Lý do: app phải chạy không mạng (SPEC 10.3) và không gửi gì ra ngoài ngoài những thứ SPEC 10.4 cho phép.
-- Chỉ cần 4 độ đậm: 400, 500, 600, 800.
+- Cần 5 độ đậm: 400, 500, 600, 700, 800 (700 dùng cho `headlineMedium`, `headlineSmall` và "Hôm nay" trên lịch tuần). Inter 4.1, file tĩnh trong `res/font/`, giấy phép ở `licenses/Inter-OFL.txt`.
 - **Mọi con số** (quãng đường, thời gian, pace, %, giờ, ngày trên lịch) bật `fontFeatureSettings = "tnum"` để chữ số rộng bằng nhau, số không bị nhảy khi cập nhật.
 
 ### 5.2 Thang chữ
