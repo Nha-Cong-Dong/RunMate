@@ -62,7 +62,7 @@
 | F2 | Đánh giá thời tiết | Dự báo nhiệt độ, khả năng mưa, gió, UV tại thời điểm và vị trí đã chọn, áp dụng cho cả kế hoạch lẫn chạy tự do. Cảnh báo khi thời tiết xấu. Gợi ý vật dụng nên mang |
 | F3 | Ghi một buổi chạy | GPS, quãng đường, thời gian, pace |
 | F4 | Xem lại quỹ đạo | Vẽ đường đã chạy bằng Compose Canvas, chưa có bản đồ nền |
-| F5 | Lưu lịch sử | Lưu mọi buổi chạy, xem lại và xoá |
+| F5 | Lịch sử và thống kê | Lưu mọi buổi chạy, xem lại trên lịch tuần cùng kế hoạch, xoá. Thống kê theo tuần hoặc tháng |
 
 ### Ngoài MVP (làm sau)
 
@@ -77,7 +77,7 @@
 - Tài khoản, đăng nhập, đồng bộ đám mây
 - Chia sẻ lên mạng xã hội, bạn bè, bảng xếp hạng
 - Kết nối đồng hồ thông minh hay cảm biến nhịp tim
-- Huấn luyện, giáo án chạy, thống kê nâng cao
+- Huấn luyện, giáo án chạy, thống kê nâng cao (biểu đồ, so sánh nhiều kỳ). MVP chỉ có thống kê cơ bản ở F5
 
 ## 4. Use case và sơ đồ flow
 
@@ -89,10 +89,10 @@
 |---|---|---|---|
 | UC1 | Tạo kế hoạch chạy | F1 | Người chạy chọn ngày, giờ, vị trí và mục tiêu (km hoặc thời gian) rồi lưu kế hoạch |
 | UC2 | Xem thời tiết và cảnh báo | F2 | App lấy dự báo cho kế hoạch, hiện cảnh báo và gợi ý vật dụng |
-| UC3 | Sửa hoặc xoá kế hoạch | F1 | Chỉ làm được khi kế hoạch ở trạng thái cho phép (xem mục 6). Xoá kế hoạch `COMPLETED` sẽ xoá luôn buổi chạy gắn với nó, có cảnh báo trước |
+| UC3 | Sửa hoặc xoá kế hoạch | F1 | Chỉ làm được khi kế hoạch ở trạng thái cho phép (xem mục 6). Xoá kế hoạch `COMPLETED` thì buổi chạy gắn với nó được giữ lại thành chạy tự do, có thông báo trước (BR-52) |
 | UC4 | Ghi buổi chạy | F3 | Bắt đầu **từ một kế hoạch hoặc chạy tự do**. Chạy tự do vẫn phải chọn vị trí và mục tiêu, và vẫn xem được thời tiết. Sau đó tạm dừng, tiếp tục và kết thúc. GPS ghi cả khi tắt màn hình |
 | UC5 | Xem quỹ đạo | F4 | Xem đường đã chạy và số liệu tổng kết của buổi chạy |
-| UC6 | Xem và xoá lịch sử | F5 | Xem danh sách buổi chạy, mở chi tiết, xoá. Buổi chạy tự do xoá trực tiếp được. Xoá riêng buổi chạy của một kế hoạch thì kế hoạch quay về `PLANNED` hoặc `MISSED`, có cảnh báo |
+| UC6 | Xem và xoá lịch sử, xem thống kê | F5 | Xem buổi chạy trên lịch tuần ở S1 (cùng kế hoạch), mở S7 để xem chi tiết hoặc xoá. Xoá buổi chạy của một kế hoạch thì kế hoạch về `PLANNED` hoặc `MISSED`, có cảnh báo. Xem thống kê tuần/tháng ở S8 |
 
 ### 4.2 Sơ đồ use case tổng quát
 
@@ -106,7 +106,7 @@ flowchart LR
     U --- UC3[UC3 Sửa/xoá kế hoạch]
     U --- UC4[UC4 Ghi buổi chạy]
     U --- UC5[UC5 Xem quỹ đạo]
-    U --- UC6[UC6 Xem/xoá lịch sử]
+    U --- UC6[UC6 Lịch sử và thống kê]
 
     UC1 -. bao gồm .-> UC2[UC2 Xem thời tiết và cảnh báo]
     UC2 --- W
@@ -198,24 +198,25 @@ flowchart TD
 
 ```mermaid
 flowchart TD
-    A[Mở màn hình Lịch sử] --> B{Có buổi chạy nào?}
-    B -- Không --> C[Hiện trạng thái trống]
-    B -- Có --> D[Danh sách, mới nhất trước]
-    D --> E{Chọn gì?}
-    E -- Mở --> F[UC5 Xem quỹ đạo]
+    A[Chọn một ngày trên lịch tuần S1] --> B{Ngày đó có buổi chạy?}
+    B -- Không --> C[Hiện kế hoạch của ngày, hoặc Chưa có lịch]
+    B -- Có --> D[Thẻ buổi chạy: kế hoạch Hoàn thành hoặc chạy tự do]
+    D -- Xem kết quả --> S7[S7 Chi tiết buổi chạy]
+    S7 --> E{Chọn gì?}
+    E -- Xem --> F[UC5 Xem quỹ đạo]
     E -- Xoá --> P{Buổi chạy thuộc một kế hoạch?}
     P -- Không --> G[Hỏi xác nhận]
     P -- Có --> W[Cảnh báo: kế hoạch gắn với buổi chạy này sẽ quay về<br/>PLANNED, hoặc MISSED nếu đã quá giờ bắt đầu]
     W --> G
     G -- Đồng ý --> H[Xoá buổi chạy và các điểm GPS]
     H --> R{Buổi chạy thuộc một kế hoạch?}
-    R -- Không --> D
+    R -- Không --> A
     R -- Có --> T{Đã quá giờ bắt đầu của kế hoạch?}
     T -- Chưa --> T1[Kế hoạch chuyển COMPLETED thành PLANNED]
     T -- Rồi --> T2[Kế hoạch chuyển COMPLETED thành MISSED]
-    T1 --> D
-    T2 --> D
-    G -- Huỷ --> D
+    T1 --> A
+    T2 --> A
+    G -- Huỷ --> S7
 ```
 
 ### 4.4 Lưu ý
@@ -241,7 +242,8 @@ Tất cả user story đều là của **người chạy** (tác nhân duy nhấ
 | US9 | Tôi muốn **tạm dừng** khi dừng đèn đỏ hay nghỉ, để số liệu không bị tính sai | Lúc tạm dừng không tính thời gian (BR-34) và không cộng quãng đường (BR-33). Quỹ đạo đứt tại chỗ dừng (`segmentIndex`) | UC4 |
 | US10 | Tôi muốn **không mất buổi chạy** nếu app bị tắt giữa chừng | Mở lại app thì có hộp thoại Tiếp tục hoặc Kết thúc (10.1). Quá 1 giờ thì chỉ còn Kết thúc (BR-60) | Mục 10.1 |
 | US11 | Sau khi chạy, tôi muốn **xem quỹ đạo và tổng kết**, để biết mình chạy so với mục tiêu ra sao | Có quãng đường, thời gian, pace trung bình, tỷ lệ đạt mục tiêu (có thể trên 100%). Quá ít điểm thì báo thiếu dữ liệu | UC5 |
-| US12 | Tôi muốn **xem và xoá lịch sử** các buổi chạy | Mới nhất trước (BR-50). Xoá thì hỏi xác nhận (BR-54). Xoá buổi thuộc kế hoạch thì kế hoạch về `PLANNED` hoặc `MISSED` (BR-53) | UC6 |
+| US12 | Tôi muốn **xem lại các buổi đã chạy ngay trên lịch** và xoá khi cần | Buổi chạy hiện trên lịch tuần đúng ngày, cả chạy tự do. Kế hoạch Hoàn thành có nút "Xem kết quả". Xoá ở S7, hỏi xác nhận (BR-54). Xoá buổi thuộc kế hoạch thì kế hoạch về `PLANNED` hoặc `MISSED` (BR-53) | UC6 |
+| US13 | Tôi muốn **xem thống kê theo tuần hoặc tháng**, để biết mình chạy đều đến đâu | Số buổi, tổng quãng đường, tổng thời gian, pace trung bình, tỷ lệ giữ lịch (BR-55, BR-56). Chuyển tuần/tháng và lùi tới kỳ trước | UC6 |
 
 ## 5. Quy tắc nghiệp vụ
 
@@ -324,15 +326,17 @@ Tất cả user story đều là của **người chạy** (tác nhân duy nhấ
 | BR-43 | Không tạo kế hoạch và không có trạng thái kế hoạch. Buổi chạy lưu thẳng vào lịch sử |
 | BR-44 | **Gợi ý chạy theo kế hoạch:** khi mở S5, nếu có kế hoạch `PLANNED` mà giờ hiện tại nằm trong **khoảng gợi ý** (từ giờ bắt đầu − **30 phút** (đề xuất) đến giờ bắt đầu + ân hạn BR-09), app hiện gợi ý "Bạn có kế hoạch lúc 06:00 · 5 km. Chạy theo kế hoạch này?". **Chạy theo kế hoạch** thì chuyển sang S4 của kế hoạch đó. **Bỏ qua** thì ở lại S5 và chạy tự do. Có nhiều kế hoạch khớp thì chỉ gợi ý kế hoạch có giờ bắt đầu gần bây giờ nhất. Quá ân hạn thì kế hoạch là `MISSED`, app không gợi ý, và buổi chạy là chạy tự do |
 
-### 5.5 Lịch sử và xoá dữ liệu
+### 5.5 Lịch sử, thống kê và xoá dữ liệu
 
 | Mã | Quy tắc |
 |---|---|
-| BR-50 | Lịch sử sắp xếp **mới nhất trước** |
+| BR-50 | Trên lịch tuần, kế hoạch và buổi chạy của cùng một ngày sắp theo giờ **tăng dần**. Ngày được tính theo múi giờ của máy |
 | BR-51 | Không tự xoá dữ liệu cũ. Chỉ xoá khi người dùng xoá |
-| BR-52 | Xoá kế hoạch `COMPLETED` thì xoá luôn buổi chạy và các điểm GPS, có cảnh báo |
+| BR-52 | Xoá kế hoạch thì buổi chạy gắn với nó (nếu có) **được giữ lại thành chạy tự do** (`planId` = null), điểm GPS giữ nguyên. Có thông báo trước |
 | BR-53 | Xoá riêng buổi chạy của một kế hoạch thì kế hoạch về `PLANNED` hoặc `MISSED`, có cảnh báo |
 | BR-54 | Mọi thao tác xoá đều **hỏi xác nhận** và không khôi phục được |
+| BR-55 | **Tỷ lệ giữ lịch** = số kế hoạch `COMPLETED` ÷ (`COMPLETED` + `MISSED`) trong kỳ, tính theo giờ bắt đầu của kế hoạch. Không tính `PLANNED`, `IN_PROGRESS`, `CANCELLED`. Kỳ không có kế hoạch nào thì hiện "--" |
+| BR-56 | **Kỳ thống kê:** tuần từ Thứ Hai đến Chủ nhật, tháng theo dương lịch. Buổi chạy (cả theo kế hoạch lẫn tự do) tính vào kỳ chứa `startedAt`. Pace trung bình = tổng thời gian chạy ÷ tổng quãng đường |
 
 ## 6. Trạng thái kế hoạch
 
@@ -395,7 +399,7 @@ stateDiagram-v2
 |---|---|---|---|
 | `PLANNED` | Được | Được | Hỏi xác nhận khi xoá |
 | `IN_PROGRESS` | **Không** | **Không** | Phải kết thúc buổi chạy trước. Nút bị vô hiệu hoá, kèm giải thích |
-| `COMPLETED` | **Không** | Được, **xoá luôn buổi chạy** | Cảnh báo "không khôi phục được" |
+| `COMPLETED` | **Không** | Được, buổi chạy **chuyển thành chạy tự do** | Báo trước "buổi chạy sẽ được giữ lại dưới dạng chạy tự do" |
 | `MISSED` | Được | Được | Sửa sang giờ ở tương lai thì về `PLANNED` |
 | `CANCELLED` | Được | Được | Sửa sang giờ ở tương lai thì về `PLANNED` |
 
@@ -534,7 +538,7 @@ Enum lưu dạng chuỗi (tên enum, ví dụ `"PLANNED"`) bằng converter có 
 
 | Quy tắc | Cách làm trong Room |
 |---|---|
-| Xoá kế hoạch thì xoá luôn buổi chạy (BR-52) | `run_session.planId` → `run_plan.id`, `onDelete = CASCADE` |
+| Xoá kế hoạch thì buổi chạy thành chạy tự do (BR-52) | `run_session.planId` → `run_plan.id`, `onDelete = SET_NULL` |
 | Xoá buổi chạy thì xoá luôn điểm GPS | `track_point.sessionId` → `run_session.id`, `onDelete = CASCADE` |
 | Xoá buổi chạy của kế hoạch thì kế hoạch về `PLANNED` hoặc `MISSED` (BR-53) | Một transaction: xoá buổi chạy rồi cập nhật `status` của kế hoạch |
 | Chỉ 1 buổi chạy đang diễn ra (BR-08) | Trước khi bắt đầu, kiểm tra không có `run_session` nào ở `RECORDING` hoặc `PAUSED` |
@@ -645,14 +649,14 @@ flowchart LR
 
 | Mã | Màn hình | Use case | Nội dung chính | Hành động |
 |---|---|---|---|---|
-| S1 | **Kế hoạch** (màn hình chính) | UC1, UC3 | Danh sách kế hoạch, sắp theo giờ bắt đầu, kèm nhãn trạng thái (mục 6.1). Có băng "Đang có buổi chạy" khi tồn tại buổi chạy `RECORDING` hoặc `PAUSED` | Tạo kế hoạch (nút +), mở một kế hoạch, bấm băng để về S6 |
+| S1 | **Kế hoạch** (màn hình chính) | UC1, UC3, UC6 | Lịch tuần: dải 7 ngày (T2–CN), ngày có kế hoạch hoặc buổi chạy có dấu chấm. Chọn một ngày để xem kế hoạch và buổi chạy của ngày đó (BR-50). Thẻ kế hoạch: giờ, vị trí, mục tiêu, nhãn trạng thái (mục 6.1), chưa hiện thời tiết. Kế hoạch Hoàn thành có thêm kết quả (quãng đường, tỷ lệ mục tiêu) và nút "Xem kết quả". Thẻ chạy tự do: giờ, quãng đường, thời gian, nút "Xem kết quả". Mặc định chọn hôm nay. ‹ › chuyển tuần, "Hôm nay" quay về tuần này. Lùi không giới hạn, tiến tối đa tới tuần chứa hôm nay + 16 ngày (BR-02). Có băng "Đang có buổi chạy" khi tồn tại buổi chạy `RECORDING` hoặc `PAUSED` | Tạo kế hoạch (nút +), mở kế hoạch (S4), xem kết quả (S7), bấm băng để về S6 |
 | S2 | **Tạo / Sửa kế hoạch** | UC1, UC2, UC3 | Form gồm ngày, giờ, vị trí, loại và giá trị mục tiêu. Khi đủ thông tin thì hiện thời tiết, cảnh báo và gợi ý vật dụng | Chọn vị trí (sang S3), Lưu |
 | S3 | **Chọn vị trí** | UC1, UC4 | Nút "Dùng vị trí hiện tại", ô tìm theo tên và danh sách kết quả (mục 8.2) | Chọn một vị trí rồi quay lại màn hình trước |
 | S4 | **Chi tiết kế hoạch** | UC2, UC3, UC4 | Thông tin kế hoạch, trạng thái, thời tiết, cảnh báo, gợi ý vật dụng. Áp dụng quy tắc 3 giờ và nhãn "cập nhật lúc …" (mục 5.2) | Bắt đầu chạy, Sửa, Huỷ, Xoá (bật hoặc tắt theo mục 6.4). Kế hoạch `COMPLETED` có thêm "Xem buổi chạy" |
 | S5 | **Chuẩn bị chạy tự do** | UC2, UC4 | Vị trí (mặc định là vị trí hiện tại), mục tiêu, thời tiết, cảnh báo, gợi ý vật dụng (mục 5.4). Gợi ý kế hoạch đang trong khoảng gợi ý (BR-44) | Đổi vị trí (sang S3), Chạy theo kế hoạch (sang S4), Bắt đầu chạy |
 | S6 | **Đang chạy** | UC4 | Quãng đường, thời gian chạy, pace, tiến độ so với mục tiêu, trạng thái ghi hoặc tạm dừng | Tạm dừng, Tiếp tục, Kết thúc |
 | S7 | **Chi tiết buổi chạy** | UC5, UC6 | Quỹ đạo vẽ bằng Canvas, chia theo `segmentIndex`. Quãng đường, thời gian, pace trung bình, tỷ lệ đạt mục tiêu, thời tiết đã lưu | Xoá buổi chạy |
-| S8 | **Lịch sử** | UC6 | Danh sách buổi chạy, mới nhất trước (BR-50). Trạng thái trống khi chưa có buổi nào | Mở một buổi chạy (sang S7), Xoá |
+| S8 | **Thống kê** | UC6 | Chọn Tuần hoặc Tháng, ‹ › chuyển kỳ. Số buổi chạy, tổng quãng đường, tổng thời gian, pace trung bình (BR-56), số kế hoạch Hoàn thành / Bỏ lỡ và tỷ lệ giữ lịch (BR-55). Chưa có biểu đồ | Chuyển kỳ |
 
 S2 dùng chung cho cả tạo và sửa. Khi sửa, form được điền sẵn dữ liệu cũ (UC3). S5 là màn hình riêng vì chạy tự do không có ngày giờ và không lưu kế hoạch, nhưng dùng lại các thành phần giao diện của S2 (vị trí, mục tiêu, khối thời tiết).
 
@@ -662,9 +666,9 @@ S2 dùng chung cho cả tạo và sửa. Khi sửa, form được điền sẵn 
 
 | Hộp thoại | Xuất hiện ở | Khi nào |
 |---|---|---|
-| Xác nhận xoá | S4, S7, S8 | Mọi thao tác xoá (BR-54) |
-| Cảnh báo xoá kèm dữ liệu | S4 | Xoá kế hoạch `COMPLETED` thì xoá luôn buổi chạy (BR-52) |
-| Cảnh báo kế hoạch đổi trạng thái | S7, S8 | Xoá buổi chạy thuộc một kế hoạch (BR-53) |
+| Xác nhận xoá | S4, S7 | Mọi thao tác xoá (BR-54) |
+| Thông báo giữ buổi chạy | S4 | Xoá kế hoạch `COMPLETED`: buổi chạy được giữ lại thành chạy tự do (BR-52) |
+| Cảnh báo kế hoạch đổi trạng thái | S7 | Xoá buổi chạy thuộc một kế hoạch (BR-53) |
 | Giải thích quyền | S4, S5 | Người dùng từ chối quyền vị trí hoặc thông báo (UC4) |
 | Xác nhận kết thúc | S6 | Bấm Kết thúc, để tránh bấm nhầm |
 | Buổi chạy quá ngắn | S6 | Kết thúc mà chưa đạt ngưỡng lưu (BR-36) |
@@ -674,9 +678,9 @@ S2 dùng chung cho cả tạo và sửa. Khi sửa, form được điền sẵn 
 
 ### 9.3 Điều hướng
 
-Thanh điều hướng dưới cùng có **3 mục**: **Kế hoạch** (S1), **Chạy** (ở giữa, nổi bật) và **Lịch sử** (S8).
+Thanh điều hướng dưới cùng có **3 mục**: **Kế hoạch** (S1), **Chạy** (ở giữa, nổi bật) và **Thống kê** (S8).
 
-- Kế hoạch và Lịch sử là 2 tab. Bấm thì chuyển qua lại, thanh dưới vẫn hiện.
+- Kế hoạch và Thống kê là 2 tab. Bấm thì chuyển qua lại, thanh dưới vẫn hiện.
 - **Chạy** là nút hành động, giống nút Tạo bài (+) của Instagram. Bấm vào thì mở S5 chồng lên trên. Nếu đang có buổi chạy dở (`RECORDING` hoặc `PAUSED`), nút này mở thẳng S6, vì mỗi lúc chỉ có một buổi chạy (BR-08).
 - Các màn hình khác (S2 đến S7) mở chồng lên trên và không hiện thanh dưới.
 
@@ -685,7 +689,8 @@ flowchart TD
     S1[S1 Kế hoạch] -- Tạo kế hoạch --> S2[S2 Tạo / Sửa kế hoạch]
     S1 -- Mở kế hoạch --> S4[S4 Chi tiết kế hoạch]
     S1 -- Băng đang chạy --> S6[S6 Đang chạy]
-    S1 <-- Tab --> S8[S8 Lịch sử]
+    S1 -- Xem kết quả --> S7[S7 Chi tiết buổi chạy]
+    S1 <-- Tab --> S8[S8 Thống kê]
 
     NAV((Nút Chạy<br/>thanh dưới)) -- Không có buổi chạy dở --> S5[S5 Chuẩn bị chạy tự do]
     NAV -- Đang có buổi chạy dở --> S6
@@ -697,12 +702,11 @@ flowchart TD
 
     S4 -- Sửa --> S2
     S4 -- Bắt đầu chạy --> S6
-    S4 -- Xem buổi chạy --> S7[S7 Chi tiết buổi chạy]
+    S4 -- Xem buổi chạy --> S7
     S5 -- Chạy theo kế hoạch --> S4
     S5 -- Bắt đầu chạy --> S6
 
     S6 -- Kết thúc, đã lưu --> S7
-    S8 -- Mở buổi chạy --> S7
 ```
 
 **Quy tắc điều hướng:**
