@@ -51,7 +51,7 @@ class PlanListViewModel(
 
     private val navigation = MutableStateFlow(today().let { Navigation(it, WeekRules.weekStartOf(it), it) })
 
-    // Giai đoạn E: thêm buổi đang RECORDING/PAUSED để vòng "đang chạy" hiện được
+    // Giai đoạn D (D7): thêm buổi đang RECORDING/PAUSED để vòng "đang chạy" hiện được
     val uiState: StateFlow<PlanListUiState> = combine(
         navigation, planRepository.observePlans(), sessionRepository.observeFinishedSessions(),
     ) { nav, plans, sessions ->

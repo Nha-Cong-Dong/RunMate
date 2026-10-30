@@ -50,7 +50,7 @@ fun RunMateApp() {
                 BottomBar(
                     selected = tab,
                     onSelect = { navController.navigateToTab(if (it == BottomTab.Calendar) PlanList else Stats) },
-                    // Nút hành động, không phải tab (SPEC 9.3). Giai đoạn E: có buổi chạy dở thì mở thẳng S6 (BR-08)
+                    // Nút hành động, không phải tab (SPEC 9.3). Giai đoạn D (D7): có buổi chạy dở thì mở thẳng S6 (BR-08)
                     onRun = { navController.navigate(FreeRunSetup) },
                 )
             }

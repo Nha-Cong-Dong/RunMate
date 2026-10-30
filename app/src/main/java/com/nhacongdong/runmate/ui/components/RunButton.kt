@@ -28,7 +28,7 @@ private val RingGap = 3.dp
 
 // Nút Chạy ở giữa thanh dưới (DESIGN 8.1): vòng gradient 3 dp, khe 3 dp màu surface, lõi inverse.
 // Cùng cấu tạo với vòng chạy: "bấm vào đây sẽ tạo ra vòng màu".
-// Giai đoạn E: trạng thái đang có buổi chạy dở (vòng xoay, chấm tròn, mở thẳng S6)
+// Giai đoạn D (D7): trạng thái đang có buổi chạy dở (vòng xoay, chấm tròn, mở thẳng S6)
 @Composable
 fun RunButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
     val colors = MaterialTheme.colorScheme
