@@ -2,24 +2,108 @@
     <string name="app_name">RunMate</string>
 
     <!-- Thanh dưới (SPEC 9.3) -->
-    <string name="tab_plans">Kế hoạch</string>
+    <string name="tab_calendar">Lịch</string>
     <string name="tab_run">Chạy</string>
-    <string name="tab_history">Lịch sử</string>
+    <string name="tab_stats">Thống kê</string>
 
     <!-- Tiêu đề màn hình (SPEC 9.1) -->
-    <string name="screen_plan_list">S1 · Kế hoạch</string>
     <string name="screen_plan_edit">S2 · Tạo / Sửa kế hoạch</string>
     <string name="screen_location_picker">S3 · Chọn vị trí</string>
     <string name="screen_plan_detail">S4 · Chi tiết kế hoạch</string>
     <string name="screen_free_run_setup">S5 · Chuẩn bị chạy tự do</string>
     <string name="screen_running">S6 · Đang chạy</string>
     <string name="screen_session_detail">S7 · Chi tiết buổi chạy</string>
-    <string name="screen_history">S8 · Lịch sử</string>
+    <string name="screen_stats">S8 · Thống kê</string>
+
+    <!-- Nhãn trạng thái kế hoạch (SPEC 6.1, DESIGN 8.8) -->
+    <string name="status_planned">Đã lên kế hoạch</string>
+    <string name="status_in_progress">Đang chạy</string>
+    <string name="status_completed">Hoàn thành</string>
+    <string name="status_missed">Bỏ lỡ</string>
+    <string name="status_cancelled">Đã huỷ</string>
+
+    <!-- S1 (DESIGN 9 S1, 8.19) -->
+    <string name="action_create_plan">Tạo kế hoạch</string>
+    <string name="first_use_title">Tuần của bạn đang trống</string>
+    <string name="first_use_message">Mỗi buổi chạy sẽ tô màu một vòng trên lịch.</string>
+    <string name="action_plan_first">Lên kế hoạch đầu tiên</string>
+
+    <!-- Thẻ ở S1 (DESIGN 8.5, 8.6) -->
+    <string name="plan_goal">Mục tiêu %1$s</string>
+    <string name="time_and_place">%1$s · %2$s</string>
+    <string name="free_run">Chạy tự do</string>
+    <string name="distance_and_duration">%1$s km · %2$s</string>
+    <string name="goal_percent">%1$s mục tiêu</string>
+    <string name="view_result">Xem kết quả</string>
+    <string name="cd_goal_reached">Đạt mục tiêu</string>
+    <string name="cd_runs_count">%1$d buổi chạy</string>
+
+    <!-- Lịch tuần (DESIGN 8.3) -->
+    <string name="today">Hôm nay</string>
+    <string name="cd_prev_week">Tuần trước</string>
+    <string name="cd_next_week">Tuần sau</string>
+    <string name="plan_limit">Chỉ lên kế hoạch được trong 16 ngày tới</string>
+    <string name="day_cd_running">%1$s, đang chạy</string>
+    <string name="day_cd_ran">%1$s, đã chạy %2$d buổi</string>
+    <string name="day_cd_ran_reached">%1$s, đã chạy %2$d buổi, đạt mục tiêu</string>
+    <string name="day_cd_plans">%1$s, %2$d kế hoạch</string>
+    <string name="day_cd_missed">%1$s, bỏ lỡ %2$d kế hoạch</string>
+    <string name="day_cd_empty">%1$s, không có lịch</string>
+
+    <!-- Danh sách của ngày đang chọn (DESIGN 8.7) -->
+    <string name="day_empty_today">Hôm nay chưa có lịch</string>
+    <string name="day_empty_future">Chưa có lịch</string>
+    <string name="day_empty_past">Không có buổi chạy nào</string>
+    <string name="action_plan">Lên kế hoạch</string>
+    <string name="action_plan_this_day">Lên kế hoạch cho ngày này</string>
+    <string name="action_run_now">Chạy ngay</string>
+
+    <!-- S3 Chọn vị trí (DESIGN 9 S3, SPEC 10.3) -->
+    <string name="cd_back">Quay lại</string>
+    <string name="place_search_hint">Tìm địa điểm</string>
+    <string name="place_use_current">Dùng vị trí hiện tại</string>
+    <string name="place_not_found">Không tìm thấy “%1$s”. Thử tên quận hoặc thành phố.</string>
+    <string name="place_network_error">Cần mạng để tìm theo tên. Bạn vẫn có thể dùng vị trí hiện tại.</string>
+    <string name="place_permission_denied">Cần quyền vị trí để dùng vị trí hiện tại.</string>
+    <string name="place_locate_failed">Chưa lấy được vị trí hiện tại. Thử lại ở chỗ thoáng hơn.</string>
+
+    <!-- S2 Tạo / Sửa kế hoạch (DESIGN 9 S2, 8.13, 8.14) -->
+    <string name="plan_new_title">Kế hoạch mới</string>
+    <string name="plan_edit_title">Sửa kế hoạch</string>
+    <string name="cd_close">Đóng</string>
+    <string name="label_date">Ngày</string>
+    <string name="label_time">Giờ</string>
+    <string name="error_start_past">Giờ bắt đầu đã qua</string>
+    <string name="error_start_too_far">Chỉ đặt được trong 16 ngày tới</string>
+    <string name="location_empty">Chọn vị trí</string>
+    <string name="goal_title">Mục tiêu</string>
+    <string name="goal_distance">Quãng đường</string>
+    <string name="goal_duration">Thời gian</string>
+    <string name="goal_range_distance">Từ 0,5 đến 100 km</string>
+    <string name="goal_range_duration">Từ 5 phút đến 12 giờ</string>
+    <string name="unit_km">km</string>
+    <string name="unit_hours">giờ</string>
+    <string name="unit_minutes">phút</string>
+    <string name="action_save_plan">Lưu kế hoạch</string>
+    <string name="action_select">Chọn</string>
+    <string name="action_cancel">Huỷ</string>
+
+    <!-- S4 Chi tiết kế hoạch (DESIGN 9 S4, 10) -->
+    <string name="cd_more">Thêm</string>
+    <string name="action_cancel_plan">Huỷ kế hoạch</string>
+    <string name="action_start_late">Chạy muộn</string>
+    <string name="action_back_to_run">Về buổi chạy</string>
+    <string name="hint_reschedule">Sửa sang giờ ở tương lai để lên lịch lại</string>
+    <string name="delete_plan_title">Xoá kế hoạch?</string>
+    <string name="delete_plan_message">Không khôi phục được.</string>
+    <string name="blocked_edit_running">Kết thúc buổi chạy trước khi sửa.</string>
+    <string name="blocked_edit_completed">Buổi đã hoàn thành nên không sửa được kế hoạch.</string>
+    <string name="blocked_cancel_running">Kết thúc buổi chạy trước khi huỷ.</string>
+    <string name="blocked_cancel_completed">Kế hoạch đã hoàn thành nên không huỷ được.</string>
+    <string name="blocked_cancel_done">Kế hoạch đã được huỷ.</string>
+    <string name="blocked_delete_running">Kết thúc buổi chạy trước khi xoá.</string>
 
     <!-- Nút tạm của khung code (bước 3.4) -->
-    <string name="action_create_plan">Tạo kế hoạch</string>
-    <string name="action_open_plan">Mở một kế hoạch</string>
-    <string name="action_running_banner">Băng: Đang có buổi chạy</string>
     <string name="action_pick_location">Chọn vị trí</string>
     <string name="action_save">Lưu</string>
     <string name="action_select_location">Chọn vị trí này</string>

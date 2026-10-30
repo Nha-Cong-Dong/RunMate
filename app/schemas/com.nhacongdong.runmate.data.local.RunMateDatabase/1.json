@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "2abaafc806021d3b9d8da5c1bc613d8a",
+    "identityHash": "28f1ab1f8dddd4b4880a5c704c75cb35",
     "entities": [
       {
         "tableName": "run_plan",
@@ -97,7 +97,7 @@
       },
       {
         "tableName": "run_session",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `planId` INTEGER, `status` TEXT NOT NULL, `startedAt` INTEGER NOT NULL, `endedAt` INTEGER, `locationName` TEXT NOT NULL, `latitude` REAL NOT NULL, `longitude` REAL NOT NULL, `goalType` TEXT NOT NULL, `goalValue` INTEGER NOT NULL, `distanceMeters` REAL NOT NULL, `activeDurationSec` INTEGER NOT NULL, `goalReachedAt` INTEGER, `weatherFetchedAt` INTEGER, `temperatureC` REAL, `precipitationProb` INTEGER, `windSpeedKmh` REAL, `uvIndex` REAL, FOREIGN KEY(`planId`) REFERENCES `run_plan`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `planId` INTEGER, `status` TEXT NOT NULL, `startedAt` INTEGER NOT NULL, `endedAt` INTEGER, `locationName` TEXT NOT NULL, `latitude` REAL NOT NULL, `longitude` REAL NOT NULL, `goalType` TEXT NOT NULL, `goalValue` INTEGER NOT NULL, `distanceMeters` REAL NOT NULL, `activeDurationSec` INTEGER NOT NULL, `goalReachedAt` INTEGER, `weatherFetchedAt` INTEGER, `temperatureC` REAL, `precipitationProb` INTEGER, `windSpeedKmh` REAL, `uvIndex` REAL, FOREIGN KEY(`planId`) REFERENCES `run_plan`(`id`) ON UPDATE NO ACTION ON DELETE SET NULL )",
         "fields": [
           {
             "fieldPath": "id",
@@ -220,7 +220,7 @@
         "foreignKeys": [
           {
             "table": "run_plan",
-            "onDelete": "CASCADE",
+            "onDelete": "SET NULL",
             "onUpdate": "NO ACTION",
             "columns": [
               "planId"
@@ -312,7 +312,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '2abaafc806021d3b9d8da5c1bc613d8a')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '28f1ab1f8dddd4b4880a5c704c75cb35')"
     ]
   }
 }

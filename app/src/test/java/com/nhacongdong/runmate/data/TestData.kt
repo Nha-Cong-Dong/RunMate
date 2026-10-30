@@ -7,9 +7,9 @@ import com.nhacongdong.runmate.data.local.RunPlan
 import com.nhacongdong.runmate.data.local.RunSession
 import com.nhacongdong.runmate.data.local.TrackPoint
 import com.nhacongdong.runmate.data.local.WeatherSnapshot
-import com.nhacongdong.runmate.domain.model.GoalType
-import com.nhacongdong.runmate.domain.model.PlanStatus
-import com.nhacongdong.runmate.domain.model.SessionStatus
+import com.nhacongdong.runmate.data.model.GoalType
+import com.nhacongdong.runmate.data.model.PlanStatus
+import com.nhacongdong.runmate.data.model.SessionStatus
 
 // Dữ liệu mẫu dùng chung cho test. Mỗi test chỉ ghi trường mà nó quan tâm.
 
@@ -19,14 +19,26 @@ fun testDatabase(): RunMateDatabase =
         .setDriver(BundledSQLiteDriver())
         .build()
 
-fun plan(status: PlanStatus = PlanStatus.PLANNED, weather: WeatherSnapshot? = null) = RunPlan(
-    startTime = 1_000, locationName = "Hồ Tây", latitude = 21.05, longitude = 105.82,
+fun plan(
+    status: PlanStatus = PlanStatus.PLANNED,
+    weather: WeatherSnapshot? = null,
+    startTime: Long = 1_000,
+    id: Long = 0,
+) = RunPlan(
+    id = id, startTime = startTime, locationName = "Hồ Tây", latitude = 21.05, longitude = 105.82,
     goalType = GoalType.DISTANCE, goalValue = 5_000, status = status, createdAt = 0, weather = weather
 )
 
-fun session(planId: Long?, status: SessionStatus = SessionStatus.FINISHED) = RunSession(
-    planId = planId, status = status, startedAt = 1_000, locationName = "Hồ Tây",
-    latitude = 21.05, longitude = 105.82, goalType = GoalType.DISTANCE, goalValue = 5_000, weather = null
+fun session(
+    planId: Long?,
+    status: SessionStatus = SessionStatus.FINISHED,
+    startedAt: Long = 1_000,
+    distanceMeters: Double = 0.0,
+    id: Long = 0,
+) = RunSession(
+    id = id, planId = planId, status = status, startedAt = startedAt, locationName = "Hồ Tây",
+    latitude = 21.05, longitude = 105.82, goalType = GoalType.DISTANCE, goalValue = 5_000,
+    distanceMeters = distanceMeters, weather = null
 )
 
 fun point(sessionId: Long, timestamp: Long = 0) = TrackPoint(

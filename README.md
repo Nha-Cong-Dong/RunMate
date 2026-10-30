@@ -37,7 +37,7 @@ Mục tiêu chính: học qua vibe code. Hiểu được thứ AI viết ra quan
   - Gợi ý vật dụng nên mang (áo mưa, mũ, kem chống nắng, nước…)
 - [ ] **Ghi một buổi chạy:** theo kế hoạch hoặc chạy tự do. GPS, quãng đường, thời gian, pace, tiến độ so với mục tiêu
 - [ ] **Xem lại quỹ đạo** sau khi chạy (vẽ đường chạy, chưa có bản đồ nền)
-- [ ] **Lưu lịch sử** các buổi chạy
+- [ ] **Lịch sử và thống kê:** xem các buổi đã chạy trên lịch tuần cùng kế hoạch, thống kê theo tuần hoặc tháng
 
 ### Sau MVP
 - [ ] Thông báo trước giờ chạy 30 phút, kèm dự báo lại thời tiết
@@ -114,7 +114,7 @@ Hiện mới có `ui/`. Các thư mục `domain/`, `data/`, `service/` sẽ có 
 
 ## Lộ trình
 
-- [ ] **MVP:** lên kế hoạch kèm đánh giá thời tiết, ghi buổi chạy, xem quỹ đạo, lưu lịch sử
+- [ ] **MVP:** lên kế hoạch kèm đánh giá thời tiết, ghi buổi chạy, xem quỹ đạo, lịch sử trên lịch tuần và thống kê
 - [ ] **v1.1:** thông báo trước giờ chạy 30 phút và dự báo lại thời tiết
 - [ ] **v1.2:** bản đồ nền và vẽ đường theo thời gian thực
 

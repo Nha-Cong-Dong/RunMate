@@ -5,15 +5,15 @@ import androidx.room3.Entity
 import androidx.room3.ForeignKey
 import androidx.room3.Index
 import androidx.room3.PrimaryKey
-import com.nhacongdong.runmate.domain.model.GoalType
-import com.nhacongdong.runmate.domain.model.SessionStatus
+import com.nhacongdong.runmate.data.model.GoalType
+import com.nhacongdong.runmate.data.model.SessionStatus
 
 // Bảng run_session: buổi chạy (SPEC 7.3, 7.7).
 @Entity(
     tableName = "run_session",
     foreignKeys = [ForeignKey(
         entity = RunPlan::class, parentColumns = ["id"], childColumns = ["planId"],
-        onDelete = ForeignKey.CASCADE                     // BR-52
+        onDelete = ForeignKey.SET_NULL                    // BR-52: xoá kế hoạch thì thành chạy tự do
     )],
     indices = [Index(value = ["planId"], unique = true)]  // mỗi kế hoạch tối đa 1 buổi
 )

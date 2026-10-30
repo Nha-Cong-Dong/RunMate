@@ -3,8 +3,8 @@ package com.nhacongdong.runmate.data.local
 import androidx.room3.Embedded
 import androidx.room3.Entity
 import androidx.room3.PrimaryKey
-import com.nhacongdong.runmate.domain.model.GoalType
-import com.nhacongdong.runmate.domain.model.PlanStatus
+import com.nhacongdong.runmate.data.model.GoalType
+import com.nhacongdong.runmate.data.model.PlanStatus
 
 // Bảng run_plan: kế hoạch chạy (SPEC 7.2).
 @Entity(tableName = "run_plan")

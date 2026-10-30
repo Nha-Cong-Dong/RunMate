@@ -7,8 +7,8 @@ import com.nhacongdong.runmate.data.local.RunSession
 import com.nhacongdong.runmate.data.local.SessionDao
 import com.nhacongdong.runmate.data.local.TrackPoint
 import com.nhacongdong.runmate.data.local.TrackPointDao
-import com.nhacongdong.runmate.domain.model.PlanStatus
-import com.nhacongdong.runmate.domain.model.SessionStatus
+import com.nhacongdong.runmate.data.model.PlanStatus
+import com.nhacongdong.runmate.data.model.SessionStatus
 import kotlinx.coroutines.flow.Flow
 
 // Cửa ngõ đọc và ghi buổi chạy, điểm GPS. Giữ kế hoạch và buổi chạy khớp nhau khi xoá.

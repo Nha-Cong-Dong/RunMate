@@ -1,9 +1,9 @@
 package com.nhacongdong.runmate.data.local
 
+import com.nhacongdong.runmate.data.model.GoalType
+import com.nhacongdong.runmate.data.model.PlanStatus
 import com.nhacongdong.runmate.data.plan
 import com.nhacongdong.runmate.data.testDatabase
-import com.nhacongdong.runmate.domain.model.GoalType
-import com.nhacongdong.runmate.domain.model.PlanStatus
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
