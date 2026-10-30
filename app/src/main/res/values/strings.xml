@@ -7,7 +7,6 @@
     <string name="tab_history">Lịch sử</string>
 
     <!-- Tiêu đề màn hình (SPEC 9.1) -->
-    <string name="screen_plan_list">S1 · Kế hoạch</string>
     <string name="screen_plan_edit">S2 · Tạo / Sửa kế hoạch</string>
     <string name="screen_location_picker">S3 · Chọn vị trí</string>
     <string name="screen_plan_detail">S4 · Chi tiết kế hoạch</string>
@@ -22,6 +21,12 @@
     <string name="status_completed">Hoàn thành</string>
     <string name="status_missed">Bỏ lỡ</string>
     <string name="status_cancelled">Đã huỷ</string>
+
+    <!-- S1 (DESIGN 9 S1, 8.19) -->
+    <string name="action_create_plan">Tạo kế hoạch</string>
+    <string name="first_use_title">Tuần của bạn đang trống</string>
+    <string name="first_use_message">Mỗi buổi chạy sẽ tô màu một vòng trên lịch.</string>
+    <string name="action_plan_first">Lên kế hoạch đầu tiên</string>
 
     <!-- Thẻ ở S1 (DESIGN 8.5, 8.6) -->
     <string name="plan_goal">Mục tiêu %1$s</string>
@@ -54,9 +59,6 @@
     <string name="action_run_now">Chạy ngay</string>
 
     <!-- Nút tạm của khung code (bước 3.4) -->
-    <string name="action_create_plan">Tạo kế hoạch</string>
-    <string name="action_open_plan">Mở một kế hoạch</string>
-    <string name="action_running_banner">Băng: Đang có buổi chạy</string>
     <string name="action_pick_location">Chọn vị trí</string>
     <string name="action_save">Lưu</string>
     <string name="action_select_location">Chọn vị trí này</string>

@@ -29,6 +29,7 @@ import com.nhacongdong.runmate.ui.navigation.PlanEdit
 import com.nhacongdong.runmate.ui.navigation.PlanList
 import com.nhacongdong.runmate.ui.navigation.Running
 import com.nhacongdong.runmate.ui.navigation.SessionDetail
+import com.nhacongdong.runmate.ui.plan.PlanListRoute
 import com.nhacongdong.runmate.ui.screens.PlaceholderAction
 import com.nhacongdong.runmate.ui.screens.PlaceholderScreen
 import com.nhacongdong.runmate.ui.theme.RunMateTheme
@@ -54,11 +55,14 @@ fun RunMateApp() {
             modifier = Modifier.padding(innerPadding),
         ) {
             composable<PlanList> {
-                PlaceholderScreen(R.string.screen_plan_list, listOf(
-                    PlaceholderAction(R.string.action_create_plan) { navController.navigate(PlanEdit()) },
-                    PlaceholderAction(R.string.action_open_plan) { navController.navigate(PlanDetail(SAMPLE_ID)) },
-                    PlaceholderAction(R.string.action_running_banner) { navController.navigate(Running) },
-                ))
+                PlanListRoute(
+                    onCreatePlan = { navController.navigate(PlanEdit()) },
+                    // B4: điền sẵn ngày đang chọn vào S2
+                    onPlanDay = { navController.navigate(PlanEdit()) },
+                    onOpenPlan = { navController.navigate(PlanDetail(it)) },
+                    onViewResult = { navController.navigate(SessionDetail(it)) },
+                    onRunNow = { navController.navigate(FreeRunSetup) },
+                )
             }
             composable<PlanEdit> {
                 // Lưu khi tạo thì về S1, khi sửa thì về S4: cả hai đều là quay lại màn hình trước
