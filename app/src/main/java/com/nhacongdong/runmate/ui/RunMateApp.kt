@@ -1,18 +1,11 @@
 package com.nhacongdong.runmate.ui
 
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Icon
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
@@ -21,14 +14,16 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.nhacongdong.runmate.R
+import com.nhacongdong.runmate.ui.components.BottomBar
+import com.nhacongdong.runmate.ui.components.BottomTab
 import com.nhacongdong.runmate.ui.navigation.FreeRunSetup
-import com.nhacongdong.runmate.ui.navigation.History
 import com.nhacongdong.runmate.ui.navigation.LocationPicker
 import com.nhacongdong.runmate.ui.navigation.PlanDetail
 import com.nhacongdong.runmate.ui.navigation.PlanEdit
 import com.nhacongdong.runmate.ui.navigation.PlanList
 import com.nhacongdong.runmate.ui.navigation.Running
 import com.nhacongdong.runmate.ui.navigation.SessionDetail
+import com.nhacongdong.runmate.ui.navigation.Stats
 import com.nhacongdong.runmate.ui.plan.PlanListRoute
 import com.nhacongdong.runmate.ui.screens.PlaceholderAction
 import com.nhacongdong.runmate.ui.screens.PlaceholderScreen
@@ -42,12 +37,24 @@ fun RunMateApp() {
     val navController = rememberNavController()
     val backStackEntry by navController.currentBackStackEntryAsState()
     val destination = backStackEntry?.destination
-    // Thanh dưới chỉ hiện ở 2 tab (SPEC 9.3)
-    val showBottomBar = destination?.hasRoute<PlanList>() == true ||
-        destination?.hasRoute<History>() == true
+    // Thanh dưới chỉ hiện ở 2 tab (SPEC 9.3, DESIGN 8.2)
+    val tab = when {
+        destination?.hasRoute<PlanList>() == true -> BottomTab.Calendar
+        destination?.hasRoute<Stats>() == true -> BottomTab.Stats
+        else -> null
+    }
 
     Scaffold(
-        bottomBar = { if (showBottomBar) RunMateBottomBar(navController, destination) },
+        bottomBar = {
+            if (tab != null) {
+                BottomBar(
+                    selected = tab,
+                    onSelect = { navController.navigateToTab(if (it == BottomTab.Calendar) PlanList else Stats) },
+                    // Nút hành động, không phải tab (SPEC 9.3). Giai đoạn E: có buổi chạy dở thì mở thẳng S6 (BR-08)
+                    onRun = { navController.navigate(FreeRunSetup) },
+                )
+            }
+        },
     ) { innerPadding ->
         NavHost(
             navController = navController,
@@ -114,38 +121,12 @@ fun RunMateApp() {
                     PlaceholderAction(R.string.action_delete) { navController.popBackStack() },
                 ))
             }
-            composable<History> {
-                PlaceholderScreen(R.string.screen_history, listOf(
+            composable<Stats> {
+                PlaceholderScreen(R.string.screen_stats, listOf(
                     PlaceholderAction(R.string.action_open_session) { navController.navigate(SessionDetail(SAMPLE_ID)) },
                 ))
             }
         }
-    }
-}
-
-@Composable
-private fun RunMateBottomBar(navController: NavHostController, destination: NavDestination?) {
-    NavigationBar {
-        NavigationBarItem(
-            selected = destination?.hasRoute<PlanList>() == true,
-            onClick = { navController.navigateToTab(PlanList) },
-            icon = { Icon(painterResource(R.drawable.ic_plan_list), contentDescription = null) },
-            label = { Text(stringResource(R.string.tab_plans)) },
-        )
-        // Nút hành động, không phải tab (SPEC 9.3).
-        // Giai đoạn D: nếu đang có buổi chạy dở thì mở thẳng S6 (BR-08).
-        NavigationBarItem(
-            selected = false,
-            onClick = { navController.navigate(FreeRunSetup) },
-            icon = { Icon(painterResource(R.drawable.ic_run), contentDescription = null) },
-            label = { Text(stringResource(R.string.tab_run)) },
-        )
-        NavigationBarItem(
-            selected = destination?.hasRoute<History>() == true,
-            onClick = { navController.navigateToTab(History) },
-            icon = { Icon(painterResource(R.drawable.ic_history), contentDescription = null) },
-            label = { Text(stringResource(R.string.tab_history)) },
-        )
     }
 }
 

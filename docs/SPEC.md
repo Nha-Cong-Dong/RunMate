@@ -649,7 +649,7 @@ flowchart LR
 
 | Mã | Màn hình | Use case | Nội dung chính | Hành động |
 |---|---|---|---|---|
-| S1 | **Kế hoạch** (màn hình chính) | UC1, UC3, UC6 | Lịch tuần: dải 7 ngày (T2–CN), ngày có kế hoạch hoặc buổi chạy có vòng chỉ trạng thái của ngày (xem DESIGN 3.2). Chọn một ngày để xem kế hoạch và buổi chạy của ngày đó (BR-50). Thẻ kế hoạch: giờ, vị trí, mục tiêu, nhãn trạng thái (mục 6.1), chưa hiện thời tiết. Kế hoạch Hoàn thành có thêm kết quả (quãng đường, tỷ lệ mục tiêu) và nút "Xem kết quả". Thẻ chạy tự do: giờ, quãng đường, thời gian, nút "Xem kết quả". Mặc định chọn hôm nay. ‹ › chuyển tuần, "Hôm nay" quay về tuần này. Lùi không giới hạn, tiến tối đa tới tuần chứa hôm nay + 16 ngày (BR-02). Có băng "Đang có buổi chạy" khi tồn tại buổi chạy RECORDING hoặc PAUSED | Tạo kế hoạch (nút +), mở kế hoạch (S4), xem kết quả (S7), bấm băng để về S6 |
+| S1 | **Lịch** (màn hình chính) | UC1, UC3, UC6 | Lịch tuần: dải 7 ngày (T2–CN), ngày có kế hoạch hoặc buổi chạy có vòng chỉ trạng thái của ngày (xem DESIGN 3.2). Chọn một ngày để xem kế hoạch và buổi chạy của ngày đó (BR-50). Thẻ kế hoạch: giờ, vị trí, mục tiêu, nhãn trạng thái (mục 6.1), chưa hiện thời tiết. Kế hoạch Hoàn thành có thêm kết quả (quãng đường, tỷ lệ mục tiêu) và nút "Xem kết quả". Thẻ chạy tự do: giờ, quãng đường, thời gian, nút "Xem kết quả". Mặc định chọn hôm nay. ‹ › chuyển tuần, "Hôm nay" quay về tuần này. Lùi không giới hạn, tiến tối đa tới tuần chứa hôm nay + 16 ngày (BR-02). Có băng "Đang có buổi chạy" khi tồn tại buổi chạy RECORDING hoặc PAUSED | Tạo kế hoạch (nút +), mở kế hoạch (S4), xem kết quả (S7), bấm băng để về S6 |
 | S2 | **Tạo / Sửa kế hoạch** | UC1, UC2, UC3 | Form gồm ngày, giờ, vị trí, loại và giá trị mục tiêu. Khi đủ thông tin thì hiện thời tiết, cảnh báo và gợi ý vật dụng | Chọn vị trí (sang S3), Lưu |
 | S3 | **Chọn vị trí** | UC1, UC4 | Nút "Dùng vị trí hiện tại", ô tìm theo tên và danh sách kết quả (mục 8.2) | Chọn một vị trí rồi quay lại màn hình trước |
 | S4 | **Chi tiết kế hoạch** | UC2, UC3, UC4 | Thông tin kế hoạch, trạng thái, thời tiết, cảnh báo, gợi ý vật dụng. Áp dụng quy tắc 3 giờ và nhãn "cập nhật lúc …" (mục 5.2) | Bắt đầu chạy, Sửa, Huỷ, Xoá (bật hoặc tắt theo mục 6.4). Kế hoạch `COMPLETED` có thêm "Xem buổi chạy" |
@@ -678,7 +678,7 @@ S2 dùng chung cho cả tạo và sửa. Khi sửa, form được điền sẵn 
 
 ### 9.3 Điều hướng
 
-Thanh điều hướng dưới cùng có **3 mục**: **Kế hoạch** (S1), **Chạy** (ở giữa, nổi bật) và **Thống kê** (S8).
+Thanh điều hướng dưới cùng có **3 mục**: **Lịch** (S1), **Chạy** (ở giữa, nổi bật) và **Thống kê** (S8).
 
 - Kế hoạch và Thống kê là 2 tab. Bấm thì chuyển qua lại, thanh dưới vẫn hiện.
 - **Chạy** là nút hành động, giống nút Tạo bài (+) của Instagram. Bấm vào thì mở S5 chồng lên trên. Nếu đang có buổi chạy dở (`RECORDING` hoặc `PAUSED`), nút này mở thẳng S6, vì mỗi lúc chỉ có một buổi chạy (BR-08).
@@ -686,7 +686,7 @@ Thanh điều hướng dưới cùng có **3 mục**: **Kế hoạch** (S1), **C
 
 ```mermaid
 flowchart TD
-    S1[S1 Kế hoạch] -- Tạo kế hoạch --> S2[S2 Tạo / Sửa kế hoạch]
+    S1[S1 Lịch] -- Tạo kế hoạch --> S2[S2 Tạo / Sửa kế hoạch]
     S1 -- Mở kế hoạch --> S4[S4 Chi tiết kế hoạch]
     S1 -- Băng đang chạy --> S6[S6 Đang chạy]
     S1 -- Xem kết quả --> S7[S7 Chi tiết buổi chạy]

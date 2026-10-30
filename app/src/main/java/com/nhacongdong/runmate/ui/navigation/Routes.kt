@@ -11,4 +11,4 @@ import kotlinx.serialization.Serializable
 @Serializable data object FreeRunSetup                           // S5
 @Serializable data object Running                                // S6: tối đa 1 buổi chạy (BR-08)
 @Serializable data class SessionDetail(val sessionId: Long)      // S7
-@Serializable data object History                                // S8 (tab)
+@Serializable data object Stats                                  // S8 Thống kê (tab)

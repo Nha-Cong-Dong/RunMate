@@ -2,9 +2,9 @@
     <string name="app_name">RunMate</string>
 
     <!-- Thanh dưới (SPEC 9.3) -->
-    <string name="tab_plans">Kế hoạch</string>
+    <string name="tab_calendar">Lịch</string>
     <string name="tab_run">Chạy</string>
-    <string name="tab_history">Lịch sử</string>
+    <string name="tab_stats">Thống kê</string>
 
     <!-- Tiêu đề màn hình (SPEC 9.1) -->
     <string name="screen_plan_edit">S2 · Tạo / Sửa kế hoạch</string>
@@ -13,7 +13,7 @@
     <string name="screen_free_run_setup">S5 · Chuẩn bị chạy tự do</string>
     <string name="screen_running">S6 · Đang chạy</string>
     <string name="screen_session_detail">S7 · Chi tiết buổi chạy</string>
-    <string name="screen_history">S8 · Lịch sử</string>
+    <string name="screen_stats">S8 · Thống kê</string>
 
     <!-- Nhãn trạng thái kế hoạch (SPEC 6.1, DESIGN 8.8) -->
     <string name="status_planned">Đã lên kế hoạch</string>

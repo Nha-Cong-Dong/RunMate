@@ -323,7 +323,7 @@ Theo SPEC 10.5: dấu phẩy thập phân, đơn vị km, phút/km, °C, km/h.
 
 | Ý nghĩa | Biểu tượng |
 |---|---|
-| Kế hoạch | `calendar_month` |
+| Lịch (tab S1) | `calendar_month` |
 | Thống kê | `insights` |
 | Chạy | `play_arrow` (trong nút gradient) |
 | Thêm kế hoạch | `add` |
@@ -354,7 +354,7 @@ Mỗi thành phần ghi rõ các trạng thái. Đặt trong `ui/components/`.
 ### 8.2 `BottomBar`: thanh dưới
 
 - Cao 64 dp + inset của thanh điều hướng hệ thống. Nền `surface`, kẻ trên 1 dp `outline`.
-- 3 mục: **Kế hoạch** · `RunButton` · **Thống kê** (SPEC 9.3). Hai tab hiện biểu tượng **và** chữ `labelMedium`.
+- 3 mục: **Lịch** · `RunButton` · **Thống kê** (SPEC 9.3). Hai tab hiện biểu tượng **và** chữ `labelMedium`.
 - Chỉ hiện ở S1 và S8.
 
 ### 8.3 `WeekCalendar`: lịch tuần
@@ -547,7 +547,7 @@ Dùng ở S2, S4, S5, S7. Nền `surfaceContainer`, bo `radiusL`, đệm 16 dp.
 
 Chiều rộng tham chiếu: 360–412 dp. Chỉ màn hình dọc (SPEC 10.5).
 
-### S1 · Kế hoạch (màn hình chính)
+### S1 · Lịch (màn hình chính)
 
 ```
 RunMate                               [+]
@@ -563,7 +563,7 @@ Thứ Năm, 29/10             2 buổi · 15,4 km
 [ResultCard  17:30 · Chạy tự do          ]
 [PlanCard    19:00 · Công viên Thống Nhất]
 ──────────────────────────────────────────
-   Kế hoạch        (RUN)        Thống kê
+   Lịch            (RUN)        Thống kê
 ```
 
 - **Thanh trên:** chữ "RunMate" (`titleLarge`, đậm 800) bên trái; nút `add` 48 dp bên phải ("Tạo kế hoạch"). Nếu đang chọn một ngày trong khoảng đặt được, S2 mở với ngày đó điền sẵn.
@@ -688,7 +688,7 @@ Tổng quãng đường
 Giữ lịch
  (  80%  )    4 hoàn thành · 1 bỏ lỡ        ← GoalRing 96 dp
 ──────────────────────────────────────────
-   Kế hoạch        (RUN)        Thống kê
+   Lịch            (RUN)        Thống kê
 ```
 
 - **Thanh trên:** "Thống kê" (`titleLarge`).

@@ -73,7 +73,7 @@ fun PlanListRoute(
     )
 }
 
-// S1 · Kế hoạch (DESIGN 9 S1): thanh trên → WeekCalendar cố định → DayList cuộn
+// S1 · Lịch (DESIGN 9 S1): thanh trên → WeekCalendar cố định → DayList cuộn
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PlanListScreen(
