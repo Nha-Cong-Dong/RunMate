@@ -5,7 +5,8 @@ import kotlinx.serialization.Serializable
 // Mỗi màn hình trong SPEC mục 9 là một route
 
 @Serializable data object PlanList                               // S1 (tab)
-@Serializable data class PlanEdit(val planId: Long? = null)      // S2: planId null là tạo mới
+// S2: planId null là tạo mới. initialDay là ngày đang chọn trên S1, lưu dạng epoch day
+@Serializable data class PlanEdit(val planId: Long? = null, val initialDay: Long? = null)
 @Serializable data object LocationPicker                         // S3
 @Serializable data class PlanDetail(val planId: Long)            // S4
 @Serializable data object FreeRunSetup                           // S5

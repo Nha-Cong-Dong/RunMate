@@ -49,7 +49,7 @@ import java.time.ZoneId
 // S1 nối với ViewModel: đọc trạng thái, cập nhật MISSED mỗi lần màn hình hiện lại (SPEC 6.3)
 @Composable
 fun PlanListRoute(
-    onCreatePlan: () -> Unit,
+    onCreatePlan: (LocalDate) -> Unit,
     onPlanDay: (LocalDate) -> Unit,
     onOpenPlan: (Long) -> Unit,
     onViewResult: (Long) -> Unit,
@@ -70,6 +70,7 @@ fun PlanListRoute(
         onOpenPlan = onOpenPlan,
         onViewResult = onViewResult,
         onRunNow = onRunNow,
+        onSwipeDay = viewModel::swipeDay,
     )
 }
 
@@ -78,7 +79,7 @@ fun PlanListRoute(
 @Composable
 fun PlanListScreen(
     state: PlanListUiState,
-    onCreatePlan: () -> Unit,
+    onCreatePlan: (LocalDate) -> Unit,
     onSelectDate: (LocalDate) -> Unit,
     onPrevWeek: () -> Unit,
     onNextWeek: () -> Unit,
@@ -87,6 +88,7 @@ fun PlanListScreen(
     onOpenPlan: (Long) -> Unit,
     onViewResult: (Long) -> Unit,
     onRunNow: () -> Unit,
+    onSwipeDay: (Long) -> Unit,
     zone: ZoneId = ZoneId.systemDefault(),
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
@@ -98,7 +100,7 @@ fun PlanListScreen(
             TopAppBar(
                 title = { Text(stringResource(R.string.app_name), style = MaterialTheme.typography.titleLarge) },
                 actions = {
-                    IconButton(onClick = onCreatePlan) {
+                    IconButton(onClick = { onCreatePlan(state.selected) }) {
                         Icon(painterResource(R.drawable.ic_add), stringResource(R.string.action_create_plan))
                     }
                 },
@@ -132,23 +134,29 @@ fun PlanListScreen(
                     title = stringResource(R.string.first_use_title),
                     message = stringResource(R.string.first_use_message),
                     actionLabel = stringResource(R.string.action_plan_first),
-                    onAction = onCreatePlan,
+                    onAction = { onCreatePlan(state.selected) },
                     modifier = Modifier.padding(horizontal = Dimens.space4),
                 )
-                else -> DayList(
-                    date = state.selected,
-                    today = state.today,
-                    entries = state.entries,
-                    onOpenPlan = onOpenPlan,
-                    onViewResult = onViewResult,
-                    onPlanDay = onPlanDay,
-                    onRunNow = onRunNow,
+                else -> SwipeDayContainer(
+                    selected = state.selected,
+                    onSwipeDay = onSwipeDay,
                     modifier = Modifier.weight(1f),
-                    contentPadding = PaddingValues(
-                        start = Dimens.space4, end = Dimens.space4, top = Dimens.space5, bottom = Dimens.space4,
-                    ),
-                    zone = zone,
-                )
+                ) { date ->
+                    DayList(
+                        date = date,
+                        today = state.today,
+                        entries = state.entriesByDay[date].orEmpty(),
+                        onOpenPlan = onOpenPlan,
+                        onViewResult = onViewResult,
+                        onPlanDay = onPlanDay,
+                        onRunNow = onRunNow,
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(
+                            start = Dimens.space4, end = Dimens.space4, top = Dimens.space5, bottom = Dimens.space4,
+                        ),
+                        zone = zone,
+                    )
+                }
             }
         }
     }
@@ -181,7 +189,7 @@ private fun previewState(isFirstUse: Boolean): PlanListUiState {
 
 @Composable
 private fun PreviewScreen(isFirstUse: Boolean) = RunMateTheme {
-    PlanListScreen(previewState(isFirstUse), {}, {}, {}, {}, {}, {}, {}, {}, {}, zone = PreviewZone)
+    PlanListScreen(previewState(isFirstUse), {}, {}, {}, {}, {}, {}, {}, {}, {}, onSwipeDay = {}, zone = PreviewZone)
 }
 
 @Preview(name = "Sáng", widthDp = 360, heightDp = 720, showBackground = true)

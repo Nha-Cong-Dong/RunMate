@@ -3,6 +3,10 @@ package com.nhacongdong.runmate.domain
 import com.nhacongdong.runmate.data.model.GoalType
 import com.nhacongdong.runmate.data.model.PlanStatus
 import com.nhacongdong.runmate.domain.model.PlanError
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.LocalTime
+import java.time.temporal.ChronoUnit
 
 // Quy tắc kế hoạch (SPEC 5.1, 6.3, 6.4). Hàm thuần: giờ hiện tại luôn truyền vào qua `now` (SPEC 10.7).
 object PlanRules {
@@ -35,6 +39,12 @@ object PlanRules {
         return errors
     }
 
+    // Bánh xe mục tiêu ở S2 (DESIGN 8.13): giá trị ngoài BR-04, BR-05 được kéo về biên gần nhất
+    fun clampGoal(goalType: GoalType, goalValue: Int): Int = when (goalType) {
+        GoalType.DISTANCE -> goalValue.coerceIn(DISTANCE_RANGE_M.first, DISTANCE_RANGE_M.last)
+        GoalType.DURATION -> goalValue.coerceIn(DURATION_RANGE_S.first, DURATION_RANGE_S.last)
+    }
+
     // BR-09: quá giờ khi now > startTime + 30 phút. Đúng mốc 30 phút thì chưa quá giờ
     fun isOverdue(startTime: Long, now: Long): Boolean = now > startTime + GRACE_PERIOD_MS
 
@@ -58,4 +68,19 @@ object PlanRules {
     // BR-08 (chỉ một buổi chạy cùng lúc) cần database nên kiểm tra riêng ở use case D4
     fun canStart(status: PlanStatus): Boolean =
         status == PlanStatus.PLANNED || status == PlanStatus.MISSED
+
+    // SPEC 6.4: MISSED hoặc CANCELLED sửa sang giờ tương lai thì về PLANNED.
+    // Chỉ gọi sau khi validate đã qua, nên giờ mới chắc chắn không ở quá khứ (BR-01)
+    fun statusAfterEdit(status: PlanStatus): PlanStatus =
+        if (status == PlanStatus.MISSED || status == PlanStatus.CANCELLED) PlanStatus.PLANNED else status
+
+    // Giá trị mặc định của S2 khi tạo mới (PLAN B4, không phải quy tắc SPEC).
+    // Hôm nay thì lấy giờ tròn kế tiếp, ngày khác thì 06:00. Ngày đã qua thì dùng hôm nay
+    private val EARLY_MORNING = LocalTime.of(6, 0)
+
+    fun defaultStart(selectedDay: LocalDate?, now: LocalDateTime): LocalDateTime {
+        val today = now.toLocalDate()
+        val day = if (selectedDay == null || selectedDay.isBefore(today)) today else selectedDay
+        return if (day == today) now.truncatedTo(ChronoUnit.HOURS).plusHours(1) else day.atTime(EARLY_MORNING)
+    }
 }

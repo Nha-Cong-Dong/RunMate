@@ -32,7 +32,7 @@ import com.nhacongdong.runmate.ui.theme.tabular
 import java.time.ZoneId
 
 // Thẻ buổi đã chạy: kế hoạch COMPLETED hoặc chạy tự do (DESIGN 8.6).
-// onOpen: bấm cả thẻ (kế hoạch thì mở S4, chạy tự do thì mở S7). onViewResult: nút "Xem kết quả" mở S7
+// onOpen: bấm cả thẻ, mở S7 cho cả kế hoạch đã hoàn thành và chạy tự do. onViewResult: nút "Xem kết quả" mở S7
 @Composable
 fun ResultCard(
     entry: DayEntry.ResultEntry,

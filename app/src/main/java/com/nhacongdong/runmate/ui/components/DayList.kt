@@ -57,7 +57,7 @@ fun DayList(
                     is DayEntry.ResultEntry -> ResultCard(
                         entry,
                         // Bấm cả thẻ: kế hoạch mở S4, chạy tự do mở S7 (DESIGN 8.6)
-                        onOpen = { entry.plan?.let { onOpenPlan(it.id) } ?: onViewResult(entry.session.id) },
+                        onOpen = { onViewResult(entry.session.id) },
                         onViewResult = { onViewResult(entry.session.id) },
                         zone = zone,
                     )

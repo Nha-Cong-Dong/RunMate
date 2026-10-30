@@ -11,6 +11,7 @@ import com.nhacongdong.runmate.data.SessionRepository
 import com.nhacongdong.runmate.domain.DayAgenda
 import com.nhacongdong.runmate.domain.DayData
 import com.nhacongdong.runmate.domain.DayEntry
+import com.nhacongdong.runmate.domain.PlanRules
 import com.nhacongdong.runmate.domain.RefreshMissedPlans
 import com.nhacongdong.runmate.domain.WeekRules
 import com.nhacongdong.runmate.domain.dayRingState
@@ -36,6 +37,7 @@ data class PlanListUiState(
     val selected: LocalDate,
     val days: List<CalendarDay> = emptyList(),     // 7 ngày của tuần đang xem
     val entries: List<DayEntry> = emptyList(),     // thẻ của ngày đang chọn
+    val entriesByDay: Map<LocalDate, List<DayEntry>> = emptyMap(), // thẻ của mọi ngày, để ngày cũ còn đúng lúc trượt đi
     val canGoNext: Boolean = true,                 // BR-02
     val isFirstUse: Boolean = false,               // chưa có kế hoạch hay buổi chạy nào (DESIGN 8.19)
     val isLoading: Boolean = true,
@@ -65,6 +67,7 @@ class PlanListViewModel(
                 CalendarDay(date, dayRingState(day), day.plans.size)
             },
             entries = DayAgenda.dayEntries(byDay[nav.selected] ?: DayData()),
+            entriesByDay = byDay.mapValues { DayAgenda.dayEntries(it.value) },
             canGoNext = nav.weekStart < WeekRules.lastAllowedWeekStart(nav.today),
             isFirstUse = plans.isEmpty() && sessions.isEmpty(),
             isLoading = false,
@@ -76,6 +79,15 @@ class PlanListViewModel(
     )
 
     fun selectDate(date: LocalDate) = navigation.update { it.copy(selected = date) }
+
+    // Vuốt ngang trên danh sách (DESIGN 9 S1): đổi ngày, qua tuần thì lịch tuần đi theo.
+    // Không vượt 16 ngày kể từ hôm nay (BR-02)
+    fun swipeDay(days: Long) {
+        val nav = navigation.value
+        val target = nav.selected.plusDays(days)
+        if (target.isAfter(nav.today.plusDays(PlanRules.MAX_DAYS_AHEAD.toLong()))) return
+        navigation.update { it.copy(selected = target, weekStart = WeekRules.weekStartOf(target)) }
+    }
 
     fun prevWeek() = moveWeek(-1)
 

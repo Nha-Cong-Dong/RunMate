@@ -7,6 +7,8 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import java.time.LocalDate
+import java.time.LocalDateTime
 
 // Test quy tắc kế hoạch, tập trung vào giá trị biên (SPEC 5.1, 6.3, 6.4).
 class PlanRulesTest {
@@ -134,4 +136,61 @@ class PlanRulesTest {
             assertEquals(expected, PlanRules.canStart(status))
         }
     }
+
+    // SPEC 6.4: sửa sang giờ tương lai
+    @Test
+    fun statusAfterEdit_missedAndCancelledBecomePlanned() {
+        assertEquals(PlanStatus.PLANNED, PlanRules.statusAfterEdit(PlanStatus.MISSED))
+        assertEquals(PlanStatus.PLANNED, PlanRules.statusAfterEdit(PlanStatus.CANCELLED))
+    }
+
+    @Test
+    fun statusAfterEdit_plannedStaysPlanned() =
+        assertEquals(PlanStatus.PLANNED, PlanRules.statusAfterEdit(PlanStatus.PLANNED))
+
+    // S2, PLAN B4. 29/10/2026 là Thứ Năm
+    private val editNow = LocalDateTime.of(2026, 10, 29, 8, 20)
+
+    @Test
+    fun defaultStart_noSelectedDay_usesNextFullHourToday() =
+        assertEquals(LocalDateTime.of(2026, 10, 29, 9, 0), PlanRules.defaultStart(null, editNow))
+
+    @Test
+    fun defaultStart_selectedToday_usesNextFullHour() =
+        assertEquals(LocalDateTime.of(2026, 10, 29, 9, 0), PlanRules.defaultStart(LocalDate.of(2026, 10, 29), editNow))
+
+    @Test
+    fun defaultStart_selectedPastDay_fallsBackToToday() =
+        assertEquals(LocalDateTime.of(2026, 10, 29, 9, 0), PlanRules.defaultStart(LocalDate.of(2026, 10, 27), editNow))
+
+    @Test
+    fun defaultStart_selectedFutureDay_usesEarlyMorning() =
+        assertEquals(LocalDateTime.of(2026, 11, 2, 6, 0), PlanRules.defaultStart(LocalDate.of(2026, 11, 2), editNow))
+
+    @Test
+    fun defaultStart_lateEvening_rollsOverToNextDay() =
+        assertEquals(
+            LocalDateTime.of(2026, 10, 30, 0, 0),
+            PlanRules.defaultStart(null, LocalDateTime.of(2026, 10, 29, 23, 30)),
+        )
+
+    // DESIGN 8.13: bánh xe tự chỉnh về khoảng hợp lệ
+    @Test
+    fun clampGoal_inRangeUnchanged() {
+        assertEquals(5_000, PlanRules.clampGoal(GoalType.DISTANCE, 5_000))
+        assertEquals(1_800, PlanRules.clampGoal(GoalType.DURATION, 1_800))
+    }
+
+    @Test
+    fun clampGoal_distanceBelowMinimum_becomesHalfKm() = assertEquals(500, PlanRules.clampGoal(GoalType.DISTANCE, 300))
+
+    @Test
+    fun clampGoal_distanceAboveMaximum_becomes100Km() =
+        assertEquals(100_000, PlanRules.clampGoal(GoalType.DISTANCE, 100_500))
+
+    @Test
+    fun clampGoal_durationBelowMinimum_becomes5Minutes() = assertEquals(300, PlanRules.clampGoal(GoalType.DURATION, 180))
+
+    @Test
+    fun clampGoal_durationAboveMaximum_becomes12Hours() = assertEquals(43_200, PlanRules.clampGoal(GoalType.DURATION, 43_800))
 }
