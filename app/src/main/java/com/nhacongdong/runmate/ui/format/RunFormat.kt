@@ -68,21 +68,27 @@ object RunFormat {
             val tenths = goalValue % 1000 / 100
             if (tenths == 0) "$km km" else "$km,$tenths km"
         }
-        GoalType.DURATION -> {
-            val minutes = goalValue / 60
-            val h = minutes / 60
-            val m = minutes % 60
-            when {
-                h == 0 -> "$m phút"
-                m == 0 -> "$h giờ"
-                else -> "$h giờ $m phút"
-            }
-        }
+        GoalType.DURATION -> hoursMinutes(goalValue / 60)
     }
+
+    // Thời lượng trên ResultCard, bỏ giây: "26 phút", "1 giờ 4 phút", "2 giờ" (DESIGN 5.3)
+    fun formatDurationWords(seconds: Long): String =
+        if (seconds < 60) "Dưới 1 phút" else hoursMinutes((seconds / 60).toInt())
 
     // Tóm tắt ở tiêu đề DayList: "2 buổi · 15,4 km" (DESIGN 8.7)
     fun formatDaySummary(runCount: Int, meters: Double): String =
         "$runCount buổi · ${formatDistanceKm(meters)} km"
+
+    // "45 phút", "1 giờ 30 phút", "2 giờ"
+    private fun hoursMinutes(minutes: Int): String {
+        val h = minutes / 60
+        val m = minutes % 60
+        return when {
+            h == 0 -> "$m phút"
+            m == 0 -> "$h giờ"
+            else -> "$h giờ $m phút"
+        }
+    }
 
     // value / scale với đúng `digits` chữ số thập phân, dấu phẩy
     private fun decimal(value: Long, scale: Int, digits: Int): String =

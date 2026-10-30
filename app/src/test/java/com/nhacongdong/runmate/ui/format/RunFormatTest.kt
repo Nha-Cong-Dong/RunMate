@@ -25,6 +25,15 @@ class RunFormatTest {
     }
 
     @Test
+    fun durationWords_dropsSeconds() {
+        assertEquals("26 phút", RunFormat.formatDurationWords(1_615))
+        assertEquals("1 giờ 4 phút", RunFormat.formatDurationWords(3_850))
+        assertEquals("2 giờ", RunFormat.formatDurationWords(7_259))
+        assertEquals("1 phút", RunFormat.formatDurationWords(60))
+        assertEquals("Dưới 1 phút", RunFormat.formatDurationWords(59))
+    }
+
+    @Test
     fun percent_roundsDown() {
         assertEquals("104%", RunFormat.formatPercent(1.048))
         assertEquals("99%", RunFormat.formatPercent(0.996))

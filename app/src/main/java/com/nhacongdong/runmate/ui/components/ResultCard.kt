@@ -66,43 +66,48 @@ fun ResultCard(
                         style = type.titleMedium.tabular(), color = colors.onSurface,
                         maxLines = 1, overflow = TextOverflow.Ellipsis,
                     )
-                    // Dòng 2: kế hoạch thì quãng đường · tỷ lệ, chạy tự do thì quãng đường · thời gian
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        val distance = stringResource(R.string.distance_km, RunFormat.formatDistanceKm(session.distanceMeters))
-                        if (entry.plan != null) {
-                            Text("$distance · ", style = type.bodyMedium.tabular(), color = colors.onSurfaceVariant, maxLines = 1, softWrap = false)
-                            Text(
-                                stringResource(R.string.goal_percent, RunFormat.formatPercent(SessionResult.goalRatio(session))),
-                                style = type.bodyMedium.tabular(),
-                                color = if (reached) RunMateTheme.colors.success else colors.onSurfaceVariant,
-                                maxLines = 1, softWrap = false,
-                            )
-                            if (reached) {
-                                Icon(
-                                    painterResource(R.drawable.ic_check),
-                                    contentDescription = stringResource(R.string.cd_goal_reached),
-                                    tint = RunMateTheme.colors.success,
-                                    modifier = Modifier.padding(start = Dimens.space1).size(16.dp),
-                                )
-                            }
-                        } else {
-                            Text(
-                                "$distance · ${RunFormat.formatDuration(session.activeDurationSec)}",
-                                style = type.bodyMedium.tabular(), color = colors.onSurfaceVariant,
-                                maxLines = 1, softWrap = false,
-                            )
-                        }
-                    }
+                    // Dòng 2: quãng đường · thời lượng bằng chữ, giống nhau ở cả hai loại thẻ
+                    Text(
+                        stringResource(
+                            R.string.distance_and_duration,
+                            RunFormat.formatDistanceKm(session.distanceMeters),
+                            RunFormat.formatDurationWords(session.activeDurationSec),
+                        ),
+                        style = type.bodyMedium.tabular(), color = colors.onSurfaceVariant,
+                        maxLines = 1, softWrap = false,
+                    )
                 }
                 // Chạy tự do không có chip (SPEC 6)
                 if (entry.plan != null) StatusChip(PlanStatus.COMPLETED)
             }
-            TextButton(
-                onClick = onViewResult,
-                modifier = Modifier.align(Alignment.End).heightIn(min = 48.dp),
-            ) {
-                Text(stringResource(R.string.view_result), style = type.labelLarge, maxLines = 1, softWrap = false)
-                Icon(painterResource(R.drawable.ic_chevron_right), contentDescription = null, modifier = Modifier.size(20.dp))
+            // Hàng dưới: tỷ lệ mục tiêu bên trái (thẳng cột với chữ ở trên), "Xem kết quả" bên phải.
+            // Không thêm dòng nên hai loại thẻ luôn cao bằng nhau
+            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                Row(
+                    Modifier.weight(1f).padding(start = RunRingSizes.M.outer + Dimens.space3),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    if (entry.plan != null) {
+                        Text(
+                            stringResource(R.string.goal_percent, RunFormat.formatPercent(SessionResult.goalRatio(session))),
+                            style = type.bodyMedium.tabular(),
+                            color = if (reached) RunMateTheme.colors.success else colors.onSurfaceVariant,
+                            maxLines = 1, softWrap = false,
+                        )
+                        if (reached) {
+                            Icon(
+                                painterResource(R.drawable.ic_check),
+                                contentDescription = stringResource(R.string.cd_goal_reached),
+                                tint = RunMateTheme.colors.success,
+                                modifier = Modifier.padding(start = Dimens.space1).size(16.dp),
+                            )
+                        }
+                    }
+                }
+                TextButton(onClick = onViewResult, modifier = Modifier.heightIn(min = 48.dp)) {
+                    Text(stringResource(R.string.view_result), style = type.labelLarge, maxLines = 1, softWrap = false)
+                    Icon(painterResource(R.drawable.ic_chevron_right), contentDescription = null, modifier = Modifier.size(20.dp))
+                }
             }
         }
     }

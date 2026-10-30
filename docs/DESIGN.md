@@ -274,6 +274,7 @@ Theo SPEC 10.5: dấu phẩy thập phân, đơn vị km, phút/km, °C, km/h.
 | Quãng đường | 2 chữ số thập phân dưới 10 km, 1 chữ số từ 10 km | `5,24` · `12,4` |
 | Thời gian | `m:ss` dưới 1 giờ, `h:mm:ss` từ 1 giờ | `26:55` · `1:04:10` |
 | Tổng thời gian (S8) | `h giờ mm phút` | `4 giờ 05 phút` |
+| Thời lượng trên `ResultCard` (S1) | Bằng chữ, **bỏ giây** (làm tròn xuống). Từ 1 giờ: giờ và phút, viết như mục tiêu. Dưới 1 phút: "Dưới 1 phút" | `26 phút` · `1 giờ 4 phút` · `2 giờ` |
 | Pace | `m:ss` + "/km", chưa đủ 100 m thì `--` (BR-35) | `5:08 /km` |
 | Tỷ lệ | Số nguyên + `%`, **làm tròn xuống** để "100%" luôn nghĩa là đạt mục tiêu (BR-37), có thể trên 100; không có dữ liệu thì `--` (BR-55) | `112%` · 99,6% hiện `99%` |
 | Mục tiêu | Km bỏ ",0"; thời gian theo giờ và phút | `5 km` · `5,5 km` · `45 phút` · `1 giờ 30 phút` · `2 giờ` |
@@ -409,8 +410,8 @@ Thẻ đặc biệt nhất ở S1, dùng cho **kế hoạch `COMPLETED`** và **
 ```
 ┌──────────────────────────────────────────┐
 │ (◎✓)  06:00 · Hồ Tây          [Hoàn thành]│
-│       5,24 km · 104% mục tiêu ✓          │
-│                          Xem kết quả  ›  │
+│       5,24 km · 26 phút                  │
+│       104% mục tiêu ✓     Xem kết quả  › │
 └──────────────────────────────────────────┘
 ```
 
@@ -418,13 +419,15 @@ Thẻ đặc biệt nhất ở S1, dùng cho **kế hoạch `COMPLETED`** và **
 |---|---|---|
 | Trái | `RunRing` cỡ M | `RunRing` cỡ M |
 | Dòng 1 | **Giờ bắt đầu chạy** · tên địa điểm (dữ liệu chạy quan trọng hơn giờ dự kiến) | Giờ bắt đầu chạy · "Chạy tự do" |
-| Dòng 2 | Quãng đường · tỷ lệ mục tiêu (BR-37) | Quãng đường · thời gian chạy |
+| Dòng 2 | Quãng đường · thời lượng bằng chữ (mục 5.3) | Quãng đường · thời lượng bằng chữ (mục 5.3) |
+| Hàng dưới, bên trái | Tỷ lệ mục tiêu (BR-37), thẳng cột với chữ ở trên | Trống |
 | Chip | "Hoàn thành" | Không có chip (SPEC 6: chạy tự do không có trạng thái) |
 | Nút "Xem kết quả" | Mở S7 | Mở S7 |
 | Bấm cả thẻ | Mở S4 | Mở S7 |
 
 - Tỷ lệ ≥ 100%: số % màu `success` + biểu tượng `check` 16 dp. Dưới 100%: màu `textSecondary`, không có biểu tượng.
 - "Xem kết quả" là nút chữ (`labelLarge`) cao 48 dp ở góc dưới phải.
+- Hai loại thẻ luôn cao bằng nhau: tỷ lệ mục tiêu nằm chung hàng với nút, không thêm dòng.
 - Nền thẻ **vẫn là `surfaceContainer`** như mọi thẻ khác. Sự đặc biệt nằm ở vòng chạy, không ở nền thẻ.
 
 ### 8.7 `DayList`: danh sách của ngày đang chọn
