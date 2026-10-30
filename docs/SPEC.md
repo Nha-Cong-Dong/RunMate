@@ -655,7 +655,7 @@ flowchart LR
 | S4 | **Chi tiết kế hoạch** | UC2, UC3, UC4 | Thông tin kế hoạch, trạng thái, thời tiết, cảnh báo, gợi ý vật dụng. Áp dụng quy tắc 3 giờ và nhãn "cập nhật lúc …" (mục 5.2) | Bắt đầu chạy, Sửa, Huỷ, Xoá (bật hoặc tắt theo mục 6.4). Kế hoạch `COMPLETED` có thêm "Xem buổi chạy" |
 | S5 | **Chuẩn bị chạy tự do** | UC2, UC4 | Vị trí (mặc định là vị trí hiện tại), mục tiêu, thời tiết, cảnh báo, gợi ý vật dụng (mục 5.4). Gợi ý kế hoạch đang trong khoảng gợi ý (BR-44) | Đổi vị trí (sang S3), Chạy theo kế hoạch (sang S4), Bắt đầu chạy |
 | S6 | **Đang chạy** | UC4 | Quãng đường, thời gian chạy, pace, tiến độ so với mục tiêu, trạng thái ghi hoặc tạm dừng | Tạm dừng, Tiếp tục, Kết thúc |
-| S7 | **Chi tiết buổi chạy** | UC5, UC6 | Quỹ đạo vẽ bằng Canvas, chia theo `segmentIndex`. Quãng đường, thời gian, pace trung bình, tỷ lệ đạt mục tiêu, thời tiết đã lưu | Xoá buổi chạy |
+| S7 | **Chi tiết buổi chạy** | UC5, UC6 | Quỹ đạo vẽ bằng Canvas, chia theo `segmentIndex`. Quãng đường, thời gian, pace trung bình, tỷ lệ đạt mục tiêu | Xoá buổi chạy. Nếu buổi chạy thuộc kế hoạch `COMPLETED` thì thêm Xoá kế hoạch |
 | S8 | **Thống kê** | UC6 | Chọn Tuần hoặc Tháng, ‹ › chuyển kỳ. Số buổi chạy, tổng quãng đường, tổng thời gian, pace trung bình (BR-56), số kế hoạch Hoàn thành / Bỏ lỡ và tỷ lệ giữ lịch (BR-55). Chưa có biểu đồ | Chuyển kỳ |
 
 S2 dùng chung cho cả tạo và sửa. Khi sửa, form được điền sẵn dữ liệu cũ (UC3). S5 là màn hình riêng vì chạy tự do không có ngày giờ và không lưu kế hoạch, nhưng dùng lại các thành phần giao diện của S2 (vị trí, mục tiêu, khối thời tiết).
@@ -714,7 +714,7 @@ flowchart TD
 - Kết thúc buổi chạy thì sang S7 và **bỏ S6 khỏi lịch sử điều hướng**, để bấm Back không quay lại màn hình đang chạy.
 - Đang ở S6 mà bấm Back hoặc thoát app thì **buổi chạy vẫn tiếp tục** (Service vẫn ghi). Có 2 cách quay lại S6: bấm băng "Đang có buổi chạy" ở S1, hoặc bấm vào thông báo của Service.
 - Buổi chạy quá ngắn thì không có S7. App báo rồi quay về màn hình đã mở S6.
-- Xoá kế hoạch ở S4 thì về S1. Xoá buổi chạy ở S7 thì về màn hình trước đó.
+- Xoá kế hoạch ở S4, hoặc xoá kế hoạch `COMPLETED` ở S7, thì về S1. Xoá buổi chạy ở S7 thì về màn hình trước đó.
 
 ## 10. Yêu cầu phi chức năng
 

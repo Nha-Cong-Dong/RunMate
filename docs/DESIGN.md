@@ -329,6 +329,7 @@ Theo SPEC 10.5: dấu phẩy thập phân, đơn vị km, phút/km, °C, km/h.
 | Thêm kế hoạch | `add` |
 | Tuần trước / sau | `chevron_left` / `chevron_right` |
 | Vị trí / vị trí hiện tại | `location_on` / `my_location` |
+| Giờ bắt đầu / mục tiêu (S4) | `schedule` / `flag` |
 | Nhiệt độ / mưa / gió / UV | `thermostat` / `rainy` / `air` / `wb_sunny` |
 | Cảnh báo | `warning` |
 | Tạm dừng / tiếp tục / kết thúc | `pause` / `play_arrow` / `stop` |
@@ -423,7 +424,7 @@ Thẻ đặc biệt nhất ở S1, dùng cho **kế hoạch `COMPLETED`** và **
 | Hàng dưới, bên trái | Tỷ lệ mục tiêu (BR-37), thẳng cột với chữ ở trên | Trống |
 | Chip | "Hoàn thành" | Không có chip (SPEC 6: chạy tự do không có trạng thái) |
 | Nút "Xem kết quả" | Mở S7 | Mở S7 |
-| Bấm cả thẻ | Mở S4 | Mở S7 |
+| Bấm cả thẻ | Mở S7 | Mở S7 |
 
 - Tỷ lệ ≥ 100%: số % màu `success` + biểu tượng `check` 16 dp. Dưới 100%: màu `textSecondary`, không có biểu tượng.
 - "Xem kết quả" là nút chữ (`labelLarge`) cao 48 dp ở góc dưới phải.
@@ -496,11 +497,16 @@ Dùng ở S2, S4, S5, S7. Nền `surfaceContainer`, bo `radiusL`, đệm 16 dp.
 
 ### 8.13 `GoalPicker`: chọn mục tiêu
 
+- Tiêu đề **Mục tiêu** (`titleMedium`, `textPrimary`) nằm trên thanh chọn, cách `space2`.
 - Nút chọn 2 phần (segmented): **Quãng đường** | **Thời gian**. Phần được chọn nền `inverse`.
-- Bên dưới: số lớn `headlineMedium` ở giữa, hai nút tròn `−` và `+` 48 dp hai bên. Bấm số để gõ trực tiếp.
-- Bước tăng: 0,1 km hoặc 1 phút (BR-04, BR-05). Giữ nút để tăng nhanh: 1 km hoặc 5 phút.
-- Dòng gợi ý dưới (`labelMedium`): "Từ 0,5 đến 100 km" hoặc "Từ 5 phút đến 12 giờ". Vượt giới hạn thì dòng này đổi màu `error`.
-- Hàng chip chọn nhanh: 3 km · 5 km · 10 km · 21,1 km (hoặc 20 · 30 · 45 · 60 phút).
+- Bên dưới là hai cột cuộn kiểu bánh xe của đồng hồ đếm giờ. Mỗi cột hiện 3 mốc: mốc giữa là giá trị đang chọn, chữ `headlineMedium`, mốc trên và mốc dưới mờ đi (`textSecondary`). Thả tay thì cột tự dừng đúng mốc. Không có nút `−` và `+`, không gõ số trực tiếp.
+  - **Thời gian:** cột **giờ** từ 00 đến 12, cột **phút** từ 00 đến 59, mỗi cột có đơn vị đi kèm "giờ" và "phút", cỡ nhỏ (mục 5.2). Ví dụ `00 giờ 20 phút`. Hai cột **cuộn vòng**: cuộn lên từ 00 thì ra 12, cuộn xuống từ 12 thì ra 00. Phút cũng vòng tương tự (59 về 00 và ngược lại). Mỗi cột vòng riêng, không kéo theo cột kia.
+  - **Quãng đường:** cột **km** từ 0 đến 100, cột **phần thập phân** từ 0 đến 9 (bước 0,1 km, BR-04). Dấu phẩy giữa hai cột, đơn vị "km" đi kèm. Cả hai cột **cuộn vòng**, mỗi cột vòng riêng: cuộn lên từ 0 km thì ra 100 km, phần thập phân 9 về 0 và ngược lại. Giá trị ngoài giới hạn vẫn được tự chỉnh về hợp lệ như trên.
+- Giá trị ngoài giới hạn được tự chỉnh về hợp lệ, không báo lỗi bằng màu. Sau khi thả tay, cột luôn quay về mốc đã lưu, kể cả khi giá trị không đổi (ví dụ đang 12 giờ 00, cuộn phút lên 59 thì phút quay về 00):
+  - Thời gian: dưới 5 phút thì chỉnh lên 5 phút. Chọn 12 giờ thì cột phút khoá ở 00 (BR-05).
+  - Quãng đường: dưới 0,5 km thì chỉnh lên 0,5 km. Chọn 100 km thì cột phần thập phân khoá ở 0 (BR-04).
+- Dòng gợi ý dưới (`labelMedium`, `textSecondary`) luôn hiện: "Từ 0,5 đến 100 km" hoặc "Từ 5 phút đến 12 giờ".
+- Hàng chip chọn nhanh: 3 km · 5 km · 10 km · 21,1 km (hoặc 20 · 30 · 45 · 60 phút). Chọn chip thì các cột cuộn tới giá trị đó.
 
 ### 8.14 `LocationRow`: ô vị trí
 
@@ -569,6 +575,8 @@ Thứ Năm, 29/10             2 buổi · 15,4 km
 - **Thanh trên:** chữ "RunMate" (`titleLarge`, đậm 800) bên trái; nút `add` 48 dp bên phải ("Tạo kế hoạch"). Nếu đang chọn một ngày trong khoảng đặt được, S2 mở với ngày đó điền sẵn.
 - `WeekCalendar` (mục 8.3) → `ActiveRunBanner` nếu có → `DayList` (mục 8.7).
 - Lịch tuần **không cuộn theo** danh sách: giữ cố định ở trên, chỉ danh sách cuộn.
+- **Vuốt ngang để đổi ngày** trên khu vực danh sách (không ảnh hưởng cuộn dọc): vuốt sang trái là ngày sau, sang phải là ngày trước. Khi ngày mới nằm ngoài tuần đang xem thì lịch tuần chuyển sang tuần đó, giống nút `‹` `›`. Không vuốt tới ngày ngoài giới hạn 16 ngày (BR-02): vuốt tới giới hạn thì không đổi ngày.
+- **Hiệu ứng:** danh sách trượt theo chiều vuốt, khoảng 200 ms, kiểu `ease-out` (mục 11). Ngày mới trượt vào từ phía tay vuốt, ngày cũ trượt ra. Vuốt chưa tới ngưỡng thì danh sách trở về vị trí cũ.
 - Hộp thoại khôi phục buổi chạy dở hiện ở đây (mục 10).
 - **Lần đầu dùng app** (chưa có kế hoạch hay buổi chạy nào): lịch tuần vẫn hiện (các ngày không có vòng), `DayList` thay bằng `EmptyState`: "Tuần của bạn đang trống" · "Mỗi buổi chạy sẽ tô màu một vòng trên lịch." · nút **Lên kế hoạch đầu tiên**.
 
@@ -582,6 +590,7 @@ Thứ Năm, 29/10             2 buổi · 15,4 km
   4. `WeatherBlock` → `WarningList` → `GearChips` (hiện khi đủ ngày, giờ, vị trí)
 - **Đáy cố định:** nút chính "Lưu kế hoạch" (nền `inverse`, cao 56 dp, bo `radiusFull`). Không có gradient vì lưu kế hoạch chưa phải là chạy.
 - **Lỗi nhập:** chữ `error` ngay dưới ô sai: "Giờ bắt đầu đã qua" (BR-01), "Chỉ đặt được trong 16 ngày tới" (BR-02).
+- Hộp chọn giờ (`TimePicker`) hiện giờ đang chọn bằng `displayMedium` (56 sp), không dùng `displayLarge` (96 sp, chỉ dành cho số chính ở S6), để giờ như `17:50` không bị cắt. Hộp chọn ngày giữ kiểu mặc định của Material 3.
 - Lưu xong về S1, lịch tuần nhảy tới ngày của kế hoạch và ngày đó hiện vòng nét đứt.
 
 ### S3 · Chọn vị trí
@@ -600,9 +609,9 @@ Thứ Năm, 29/10             2 buổi · 15,4 km
 
 ### S4 · Chi tiết kế hoạch
 
-- **Thanh trên:** `arrow_back`; menu `more_vert` gồm **Sửa**, **Huỷ kế hoạch**, **Xoá** (chữ `error`). Mục bị tắt theo SPEC 6.4 vẫn hiện, làm mờ, kèm dòng phụ giải thích.
-- **Phần đầu:** `StatusChip`, rồi "Thứ Năm, 29/10" (`titleMedium`), giờ "06:00" (`displayMedium`), tên địa điểm, mục tiêu.
-- **Kế hoạch `COMPLETED`:** ngay dưới phần đầu có một hàng kết quả thu gọn: `RunRing` cỡ M + "5,24 km · 104% mục tiêu ✓" + "Xem buổi chạy ›" (mở S7).
+- **Thanh trên:** `arrow_back`, ngay bên phải là `StatusChip`; menu `more_vert` gồm **Sửa**, **Huỷ kế hoạch**, **Xoá** (chữ `error`). Mục bị tắt theo SPEC 6.4 vẫn hiện, làm mờ, kèm dòng phụ giải thích.
+- **Phần đầu:** mỗi dòng có biểu tượng 20 dp, màu `textSecondary`: "Thứ Năm, 29/10" (`titleMedium`, `calendar_month`), giờ "06:00" (`displayMedium`, `schedule`), tên địa điểm (`bodyLarge`, `location_on`), mục tiêu (`bodyLarge`, `flag`).
+- Kế hoạch `COMPLETED` không mở S4 từ S1 (thẻ mở S7, mục 8.6). Kết quả xem ở S7 (mục 9 S7).
 - `WeatherBlock` → `WarningList` → `GearChips`.
 - Khối cảnh báo tiết kiệm pin (BR-61) nếu cần, kiểu giống `WarningList` với biểu tượng `battery_saver`.
 - **Đáy cố định:**
@@ -662,12 +671,11 @@ Màn hình quan trọng nhất. Mục tiêu: **liếc 1 giây là đọc đượ
 
 Đây là nơi diễn ra **khoảnh khắc hoàn thành** (mục 3.4) khi mở từ S6.
 
-- **Thanh trên:** `arrow_back`; menu `more_vert` có **Xoá buổi chạy** (chữ `error`). S7 là nơi duy nhất xoá buổi chạy (SPEC UC6).
+- **Thanh trên:** `arrow_back`; menu `more_vert` có **Xoá buổi chạy** (chữ `error`). S7 là nơi duy nhất xoá buổi chạy (SPEC UC6). Nếu buổi chạy thuộc kế hoạch `COMPLETED` thì menu có thêm **Xoá kế hoạch** (chữ `error`), hỏi xác nhận như ở S4 (mục 10).
 - **Phần đầu:** "Thứ Năm, 29/10 · 06:02" (`labelMedium`), tên địa điểm (`titleMedium`), nhãn "Theo kế hoạch" hoặc "Chạy tự do".
 - `TrackCanvas` vuông, rộng hết lề.
 - Hàng kết quả: quãng đường lớn (`displayMedium`) bên trái; `GoalRing` 96 dp bên phải, trong vòng ghi tỷ lệ "104%". Đạt mục tiêu thì dưới vòng có "Đạt mục tiêu" màu `success` + ✓.
 - Lưới `StatTile` 3 cột: Thời gian chạy · Pace trung bình · Mục tiêu.
-- `WeatherBlock` chỉ đọc, tiêu đề "Thời tiết lúc bắt đầu".
 - Mở từ S6: chạy hoạt ảnh mục 3.4 bước 1. Mở từ S1 hoặc S4: hiện thẳng, không hoạt ảnh.
 
 ### S8 · Thống kê
