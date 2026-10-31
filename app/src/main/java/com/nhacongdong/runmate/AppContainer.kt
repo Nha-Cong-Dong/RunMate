@@ -14,7 +14,12 @@ import com.nhacongdong.runmate.data.place.PlaceRepository
 import com.nhacongdong.runmate.data.WeatherRepository
 import com.nhacongdong.runmate.data.remote.ForecastApi
 import com.nhacongdong.runmate.data.remote.GeocodingApi
+import com.nhacongdong.runmate.domain.FinishRun
+import com.nhacongdong.runmate.domain.PauseRun
 import com.nhacongdong.runmate.domain.RecordTrackPoint
+import com.nhacongdong.runmate.domain.ResumeRun
+import com.nhacongdong.runmate.domain.StartFreeRun
+import com.nhacongdong.runmate.domain.StartPlanRun
 import com.nhacongdong.runmate.domain.RefreshMissedPlans
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
@@ -43,6 +48,13 @@ class AppContainer(private val context: Context) {
 
     // Ghi một điểm GPS của buổi chạy, dùng trong RunTrackingService (SPEC 10.2)
     val recordTrackPoint by lazy { RecordTrackPoint(sessionRepository) }
+
+    // Bắt đầu, tạm dừng, tiếp tục, kết thúc buổi chạy (SPEC 6.3). Màn S4, S5, S6 gọi các use case này
+    val startPlanRun by lazy { StartPlanRun(sessionRepository, planRepository) }
+    val startFreeRun by lazy { StartFreeRun(sessionRepository) }
+    val pauseRun by lazy { PauseRun(sessionRepository) }
+    val resumeRun by lazy { ResumeRun(sessionRepository) }
+    val finishRun by lazy { FinishRun(sessionRepository, planRepository) }
 
     val refreshMissedPlans by lazy { RefreshMissedPlans(planRepository) }
 

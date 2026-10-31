@@ -46,11 +46,17 @@ class RunTrackingService : Service() {
             ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION,
         )
         when (intent?.action) {
+            ACTION_START -> {
+                sessionId = intent.getLongExtra(EXTRA_SESSION_ID, -1L)
+                startLocation(hasPermission)
+            }
             ACTION_PAUSE -> locationSource.stop()
             ACTION_RESUME -> startLocation(hasPermission)
-            else -> {
-                sessionId = intent?.getLongExtra(EXTRA_SESSION_ID, -1L) ?: -1L
-                startLocation(hasPermission)
+            // Kết thúc buổi chạy: ngừng nhận GPS và dừng service (SPEC 6.3)
+            ACTION_STOP -> {
+                locationSource.stop()
+                stopForeground(STOP_FOREGROUND_REMOVE)
+                stopSelf()
             }
         }
         return START_NOT_STICKY
@@ -111,6 +117,8 @@ class RunTrackingService : Service() {
     companion object {
         const val CHANNEL_ID = "run_tracking"
         const val NOTIFICATION_ID = 1
+        const val ACTION_START = "com.nhacongdong.runmate.action.START"
+        const val ACTION_STOP = "com.nhacongdong.runmate.action.STOP"
         const val ACTION_PAUSE = "com.nhacongdong.runmate.action.PAUSE"
         const val ACTION_RESUME = "com.nhacongdong.runmate.action.RESUME"
         const val EXTRA_SESSION_ID = "session_id"
