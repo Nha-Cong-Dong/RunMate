@@ -47,11 +47,16 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.nhacongdong.runmate.R
 import com.nhacongdong.runmate.data.local.RunPlan
+import com.nhacongdong.runmate.data.local.WeatherSnapshot
 import com.nhacongdong.runmate.data.model.PlanStatus
 import com.nhacongdong.runmate.domain.PlanRules
 import com.nhacongdong.runmate.ui.components.PreviewZone
+import com.nhacongdong.runmate.domain.WeatherRules
+import com.nhacongdong.runmate.ui.components.GearChips
 import com.nhacongdong.runmate.ui.components.StartRunButton
 import com.nhacongdong.runmate.ui.components.StatusChip
+import com.nhacongdong.runmate.ui.components.WarningList
+import com.nhacongdong.runmate.ui.components.WeatherBlock
 import com.nhacongdong.runmate.ui.components.previewPlan
 import com.nhacongdong.runmate.ui.format.RunFormat
 import com.nhacongdong.runmate.ui.navigation.PlanDetail
@@ -71,10 +76,18 @@ fun PlanDetailRoute(
     viewModel: PlanDetailViewModel = viewModel(factory = PlanDetailViewModel.factory(args.planId)),
 ) {
     val plan by viewModel.plan.collectAsStateWithLifecycle()
+    val refreshing by viewModel.refreshing.collectAsStateWithLifecycle()
+    val offline by viewModel.offline.collectAsStateWithLifecycle()
+    var showWeatherError by rememberSaveable { mutableStateOf(false) }
     // Mỗi lần S4 hiện lên thì cập nhật MISSED, giống S1 (SPEC 6.3)
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) { viewModel.refreshStatus() }
     LaunchedEffect(viewModel) {
-        viewModel.events.collect { onDeleted() }
+        viewModel.events.collect { event ->
+            when (event) {
+                PlanDetailEvent.Deleted -> onDeleted()
+                PlanDetailEvent.WeatherFailed -> showWeatherError = true
+            }
+        }
     }
 
     PlanDetailScreen(
@@ -85,6 +98,11 @@ fun PlanDetailRoute(
         onDelete = viewModel::deletePlan,
         onOpenRun = onOpenRun,
         onStartRun = onOpenRun,
+        refreshing = refreshing,
+        offline = offline,
+        showWeatherError = showWeatherError,
+        onRefreshWeather = viewModel::refreshWeather,
+        onDismissWeatherError = { showWeatherError = false },
     )
 }
 
@@ -100,6 +118,12 @@ fun PlanDetailScreen(
     onOpenRun: () -> Unit,
     onStartRun: () -> Unit,
     zone: ZoneId = ZoneId.systemDefault(),
+    refreshing: Boolean = false,
+    offline: Boolean = false,
+    showWeatherError: Boolean = false,
+    onRefreshWeather: () -> Unit = {},
+    onDismissWeatherError: () -> Unit = {},
+    now: Long = System.currentTimeMillis(),
 ) {
     var menuOpen by rememberSaveable { mutableStateOf(false) }
     var confirmDelete by rememberSaveable { mutableStateOf(false) }
@@ -198,8 +222,45 @@ fun PlanDetailScreen(
                     text = stringResource(R.string.plan_goal, RunFormat.formatGoal(plan.goalType, plan.goalValue)),
                     style = MaterialTheme.typography.bodyLarge,
                 )
+
+                WeatherBlock(
+                    snapshot = plan.weather,
+                    forecastHour = WeatherRules.forecastHour(plan.startTime, zone),
+                    zone = zone,
+                    isRefreshing = refreshing,
+                    offline = offline,
+                    showRefresh = WeatherRules.canRefresh(plan.status) &&
+                        WeatherRules.showRefreshButton(plan.weather?.weatherFetchedAt, now),
+                    onRefresh = onRefreshWeather,
+                )
+                plan.weather?.let { weather ->
+                    WarningList(
+                        snapshot = weather,
+                        warnings = WeatherRules.warnings(
+                            weather.precipitationProb, weather.temperatureC, weather.windSpeedKmh, weather.uvIndex,
+                        ),
+                    )
+                    GearChips(
+                        gear = WeatherRules.gear(
+                            weather.precipitationProb, weather.temperatureC, weather.windSpeedKmh, weather.uvIndex,
+                            plan.goalType, plan.goalValue,
+                        ),
+                    )
+                }
             }
         }
+    }
+
+    if (showWeatherError) {
+        AlertDialog(
+            onDismissRequest = onDismissWeatherError,
+            title = { Text(stringResource(R.string.weather_error_title), style = MaterialTheme.typography.titleMedium) },
+            text = { Text(stringResource(R.string.weather_error_message), style = MaterialTheme.typography.bodyMedium) },
+            confirmButton = {
+                TextButton(onClick = onDismissWeatherError) { Text(stringResource(R.string.weather_continue_without)) }
+            },
+            tonalElevation = 0.dp,
+        )
     }
 
     if (confirmDelete) {
@@ -309,16 +370,55 @@ private fun cancelBlockedReason(status: PlanStatus): Int? = when (status) {
 private fun deleteBlockedReason(status: PlanStatus): Int? =
     if (status == PlanStatus.IN_PROGRESS) R.string.blocked_delete_running else null
 
-@Preview(name = "Chưa chạy · Sáng", widthDp = 360, heightDp = 720, showBackground = true)
-@Preview(name = "Chưa chạy · Tối", widthDp = 360, heightDp = 720, showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
+// Dữ liệu thời tiết mẫu, lấy cách đây `hoursAgo` giờ để thử các trạng thái lấy lại
+private fun previewWeather(hoursAgo: Long) = WeatherSnapshot(
+    weatherFetchedAt = System.currentTimeMillis() - hoursAgo * 3_600_000L,
+    temperatureC = 36.0, precipitationProb = 70, windSpeedKmh = 32.0, uvIndex = 9.0,
+)
+
 @Composable
-private fun PlanDetailPlannedPreview() = RunMateTheme {
+private fun PlanDetailPreviewScreen(
+    plan: RunPlan,
+    refreshing: Boolean = false,
+    offline: Boolean = false,
+) = RunMateTheme {
     PlanDetailScreen(
-        plan = previewPlan(PlanStatus.PLANNED),
+        plan = plan,
         onBack = {}, onEdit = {}, onCancel = {}, onDelete = {}, onOpenRun = {}, onStartRun = {},
         zone = PreviewZone,
+        refreshing = refreshing,
+        offline = offline,
     )
 }
+
+@Preview(name = "Dữ liệu mới · Sáng", widthDp = 360, heightDp = 720, showBackground = true)
+@Preview(name = "Dữ liệu mới · Tối", widthDp = 360, heightDp = 720, showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+private fun PlanDetailFreshWeatherPreview() =
+    PlanDetailPreviewScreen(previewPlan(PlanStatus.PLANNED).copy(weather = previewWeather(1)))
+
+@Preview(name = "Quá 3 giờ, có nút · Sáng", widthDp = 360, heightDp = 720, showBackground = true)
+@Preview(name = "Quá 3 giờ, có nút · Tối", widthDp = 360, heightDp = 720, showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+private fun PlanDetailStaleWeatherPreview() =
+    PlanDetailPreviewScreen(previewPlan(PlanStatus.PLANNED).copy(weather = previewWeather(4)))
+
+@Preview(name = "Không có mạng · Sáng", widthDp = 360, heightDp = 720, showBackground = true)
+@Preview(name = "Không có mạng · Tối", widthDp = 360, heightDp = 720, showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+private fun PlanDetailOfflinePreview() =
+    PlanDetailPreviewScreen(previewPlan(PlanStatus.PLANNED).copy(weather = previewWeather(4)), offline = true)
+
+@Preview(name = "Chưa có dữ liệu · Sáng", widthDp = 360, heightDp = 720, showBackground = true)
+@Preview(name = "Chưa có dữ liệu · Tối", widthDp = 360, heightDp = 720, showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+private fun PlanDetailNoWeatherPreview() = PlanDetailPreviewScreen(previewPlan(PlanStatus.PLANNED))
+
+@Preview(name = "Đang tải · Sáng", widthDp = 360, heightDp = 720, showBackground = true)
+@Preview(name = "Đang tải · Tối", widthDp = 360, heightDp = 720, showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+private fun PlanDetailLoadingPreview() =
+    PlanDetailPreviewScreen(previewPlan(PlanStatus.PLANNED).copy(weather = previewWeather(4)), refreshing = true)
 
 @Preview(name = "Đã huỷ · Sáng", widthDp = 360, heightDp = 720, showBackground = true)
 @Composable

@@ -477,10 +477,13 @@ Dùng ở S2, S4, S5, S7. Nền `surfaceContainer`, bo `radiusL`, đệm 16 dp.
 |---|---|
 | Đang tải | 4 ô xương (skeleton) màu `surfaceContainerHigh`, nhấp nháy nhẹ |
 | Có dữ liệu | Như trên |
-| Dữ liệu cũ, không có mạng | Như trên + biểu tượng `cloud_off` cạnh dòng "cập nhật lúc …" |
-| Lỗi, chưa từng có dữ liệu | Nền `errorContainer`: "Không lấy được dự báo thời tiết." + nút chữ **Thử lại**. Không chặn việc lưu hay chạy |
+| Dữ liệu quá 3 giờ, hoặc chưa có dữ liệu, có mạng, ở S4 | Như trên, kèm nút viền **Lấy lại thời tiết** dưới khối: viền 1 dp `outlineStrong`, nền trong suốt, chữ `labelLarge` `textPrimary`, bo `radiusFull`, cao 48 dp (vùng chạm tối thiểu, mục 12), rộng hết khối. App không tự lấy lại khi mở. Bấm nút thì lấy dữ liệu mới, ô số đổi theo, dòng "cập nhật lúc …" đổi theo |
+| Bấm **Lấy lại thời tiết** mà không có mạng (mất mạng hoặc quá thời gian chờ) | Số liệu cũ giữ nguyên nếu có, dòng dưới ghi **Không có mạng** kèm biểu tượng `cloud_off`. Nút Lấy lại vẫn còn để thử lại. Nhãn này chỉ hiện sau lần bấm thất bại, không hiện khi mở màn hình |
+| Chưa từng có dữ liệu, mở S4 | Ô hiện "Không có dữ liệu" và nút **Lấy lại thời tiết** |
+| Lỗi khi bấm Lấy lại, hoặc lỗi khi tự lấy ở S2 và S5 | Khối giữ dữ liệu cũ (nếu có), hiện "Không có dữ liệu" khi chưa có dữ liệu. Lỗi báo bằng hộp thoại "Lỗi thời tiết" (mục 10). Không chặn việc lưu hay chạy |
+| Mở kế hoạch đã có ở S2 | Như S4: hiện dữ liệu đã lưu, không tự gọi API. Quá 3 giờ hoặc chưa có dữ liệu thì hiện nút **Lấy lại thời tiết** như S4. Đổi ngày, giờ hoặc vị trí thì tự lấy cho dữ liệu mới, không cần bấm nút |
 | Chưa đủ thông tin | Chữ `textSecondary`: "Chọn ngày, giờ và vị trí để xem thời tiết" |
-| Kế hoạch `COMPLETED` / `CANCELLED`, và S7 | Chỉ hiện dữ liệu đã lưu, không có nút Thử lại (SPEC 5.2) |
+| Kế hoạch `COMPLETED` / `CANCELLED` / `MISSED`, và S7 | Chỉ hiện dữ liệu đã lưu, không có nút Lấy lại (SPEC 5.2) |
 
 ### 8.11 `WarningList`: danh sách cảnh báo
 
@@ -721,7 +724,8 @@ Dùng `AlertDialog` của Material 3: bo `radiusXL`, nền `surface`, không đ�
 | Giải thích quyền | S4, S5 | Cần quyền vị trí | RunMate dùng GPS để đo quãng đường. Điểm GPS chỉ lưu trên máy bạn. | Để sau · **Mở cài đặt** |
 | Xác nhận kết thúc | S6 | Kết thúc buổi chạy? | 5,24 km · 26:55 | Chạy tiếp · **Kết thúc** |
 | Buổi chạy quá ngắn | S6 | Buổi chạy quá ngắn | Dưới 100 m hoặc dưới 1 phút nên không được lưu. | **Đã hiểu** |
-| Lỗi thời tiết | S2, S4, S5 | Không lấy được thời tiết | Kiểm tra kết nối mạng. Bạn vẫn có thể tiếp tục. | Tiếp tục không có thời tiết · **Thử lại** |
+| Lỗi thời tiết | S2, S5 | Không lấy được thời tiết | Kiểm tra kết nối mạng. Bạn vẫn có thể tiếp tục. | Tiếp tục không có thời tiết · **Thử lại** |
+| Lỗi thời tiết | S4 | Không lấy được thời tiết | Kiểm tra kết nối mạng. Bạn vẫn có thể tiếp tục. | Tiếp tục không có thời tiết (không có Thử lại: S4 không sửa được, chỉ S2 lấy lại thời tiết) |
 | Tiết kiệm pin | S4, S5, S6 | Tiết kiệm pin đang bật | GPS có thể bị tắt khi khoá màn hình, quãng đường sẽ không chính xác. Nên tắt khi chạy. | Vẫn chạy · **Mở cài đặt** |
 | Khôi phục buổi chạy dở | S1 | Buổi chạy chưa kết thúc | Buổi chạy lúc 06:02 (3,2 km · 18:40) chưa kết thúc. | Kết thúc · **Tiếp tục** (ẩn nếu quá 1 giờ, BR-60) |
 

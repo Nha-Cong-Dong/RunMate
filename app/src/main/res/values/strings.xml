@@ -103,6 +103,31 @@
     <string name="blocked_cancel_done">Kế hoạch đã được huỷ.</string>
     <string name="blocked_delete_running">Kết thúc buổi chạy trước khi xoá.</string>
 
+    <!-- Thời tiết (DESIGN 8.10 đến 8.12, 10; SPEC 5.2) -->
+    <string name="weather_forecast_for">Dự báo cho %1$s · cập nhật lúc %2$s</string>
+    <string name="weather_offline">Không có mạng</string>
+    <string name="weather_no_data">Không có dữ liệu</string>
+    <string name="weather_refresh">Lấy lại thời tiết</string>
+    <string name="weather_need_inputs">Chọn ngày, giờ và vị trí để xem thời tiết</string>
+    <string name="weather_label_temperature">Nhiệt độ</string>
+    <string name="weather_label_rain">Mưa</string>
+    <string name="weather_label_wind">Gió</string>
+    <string name="weather_label_uv">UV</string>
+    <string name="weather_error_title">Không lấy được thời tiết</string>
+    <string name="weather_error_message">Kiểm tra kết nối mạng. Bạn vẫn có thể tiếp tục.</string>
+    <string name="weather_continue_without">Tiếp tục không có thời tiết</string>
+    <string name="weather_retry">Thử lại</string>
+    <string name="warning_rain">Có thể mưa (%1$d%%)</string>
+    <string name="warning_hot">Quá nóng (%1$d°C)</string>
+    <string name="warning_windy">Gió mạnh (%1$d km/h)</string>
+    <string name="warning_uv">UV cao (%1$d)</string>
+    <string name="gear_title">Nên mang theo</string>
+    <string name="gear_rain_coat">Áo mưa</string>
+    <string name="gear_hat">Mũ</string>
+    <string name="gear_sunscreen">Kem chống nắng</string>
+    <string name="gear_water">Nước uống</string>
+    <string name="gear_windbreaker">Áo khoác chắn gió</string>
+
     <!-- Nút tạm của khung code (bước 3.4) -->
     <string name="action_pick_location">Chọn vị trí</string>
     <string name="action_save">Lưu</string>
