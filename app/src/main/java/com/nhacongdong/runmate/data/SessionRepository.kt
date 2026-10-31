@@ -34,6 +34,22 @@ class SessionRepository(
     suspend fun updateSession(session: RunSession) = sessionDao.update(session)
     suspend fun addTrackPoint(point: TrackPoint) = trackPointDao.insert(point)
 
+    // Tạo buổi chạy và đổi trạng thái kế hoạch trong cùng một transaction (SPEC 6.3)
+    suspend fun startSession(session: RunSession, planId: Long?, planStatus: PlanStatus?): Long =
+        database.withWriteTransaction {
+            if (planId != null && planStatus != null) planDao.updateStatus(planId, planStatus)
+            sessionDao.insert(session)
+        }
+
+    // Lưu buổi chạy đã kết thúc và đổi trạng thái kế hoạch trong cùng một transaction
+    suspend fun completeSession(session: RunSession, planStatus: PlanStatus?) {
+        database.withWriteTransaction {
+            sessionDao.update(session)
+            val planId = session.planId
+            if (planId != null && planStatus != null) planDao.updateStatus(planId, planStatus)
+        }
+    }
+
     // TrackPointStore: dùng cho RecordTrackPoint (BR-31, BR-39)
     override suspend fun lastPoint(sessionId: Long): TrackPoint? = trackPointDao.getLast(sessionId)
 
