@@ -53,6 +53,9 @@ import com.nhacongdong.runmate.domain.PlanRules
 import com.nhacongdong.runmate.ui.components.PreviewZone
 import com.nhacongdong.runmate.domain.WeatherRules
 import com.nhacongdong.runmate.ui.components.GearChips
+import com.nhacongdong.runmate.ui.location.LocationDialog
+import com.nhacongdong.runmate.ui.location.LocationDialogs
+import com.nhacongdong.runmate.ui.location.rememberLocationGate
 import com.nhacongdong.runmate.ui.components.StartRunButton
 import com.nhacongdong.runmate.ui.components.StatusChip
 import com.nhacongdong.runmate.ui.components.WarningList
@@ -78,6 +81,8 @@ fun PlanDetailRoute(
     val plan by viewModel.plan.collectAsStateWithLifecycle()
     val refreshing by viewModel.refreshing.collectAsStateWithLifecycle()
     val offline by viewModel.offline.collectAsStateWithLifecycle()
+    // Bắt đầu chạy phải kiểm tra quyền và GPS trước (DESIGN 10, SPEC 9.2)
+    val gate = rememberLocationGate(onReady = onOpenRun)
     var showWeatherError by rememberSaveable { mutableStateOf(false) }
     // Mỗi lần S4 hiện lên thì cập nhật MISSED, giống S1 (SPEC 6.3)
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) { viewModel.refreshStatus() }
@@ -97,7 +102,9 @@ fun PlanDetailRoute(
         onCancel = viewModel::cancelPlan,
         onDelete = viewModel::deletePlan,
         onOpenRun = onOpenRun,
-        onStartRun = onOpenRun,
+        onStartRun = gate.start,
+        locationDialog = gate.dialog,
+        onDismissLocationDialog = gate.dismiss,
         refreshing = refreshing,
         offline = offline,
         showWeatherError = showWeatherError,
@@ -121,6 +128,8 @@ fun PlanDetailScreen(
     refreshing: Boolean = false,
     offline: Boolean = false,
     showWeatherError: Boolean = false,
+    locationDialog: LocationDialog? = null,
+    onDismissLocationDialog: () -> Unit = {},
     onRefreshWeather: () -> Unit = {},
     onDismissWeatherError: () -> Unit = {},
     now: Long = System.currentTimeMillis(),
@@ -250,6 +259,13 @@ fun PlanDetailScreen(
             }
         }
     }
+
+    LocationDialogs(
+        dialog = locationDialog,
+        permissionMessage = R.string.location_permission_run_message,
+        locationOffMessage = R.string.location_off_run_message,
+        onDismiss = onDismissLocationDialog,
+    )
 
     if (showWeatherError) {
         AlertDialog(

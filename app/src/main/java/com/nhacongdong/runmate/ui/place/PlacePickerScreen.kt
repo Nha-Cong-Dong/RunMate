@@ -65,6 +65,10 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.nhacongdong.runmate.R
 import com.nhacongdong.runmate.domain.model.Place
+import com.nhacongdong.runmate.ui.location.LocationDialog
+import com.nhacongdong.runmate.ui.location.LocationDialogs
+import com.nhacongdong.runmate.ui.location.hasLocationPermission
+import com.nhacongdong.runmate.ui.location.isLocationOn
 import com.nhacongdong.runmate.ui.theme.Dimens
 import com.nhacongdong.runmate.ui.theme.RunMateTheme
 
@@ -120,55 +124,13 @@ fun PlacePickerRoute(
         onBack = onBack,
     )
 
-    when (locationDialog) {
-        LocationDialog.PERMISSION -> AlertDialog(
-            onDismissRequest = { locationDialog = null },
-            title = { Text(stringResource(R.string.location_permission_title), style = MaterialTheme.typography.titleMedium) },
-            text = { Text(stringResource(R.string.place_permission_denied), style = MaterialTheme.typography.bodyMedium) },
-            confirmButton = {
-                TextButton(onClick = {
-                    locationDialog = null
-                    context.startActivity(appSettingsIntent(context))
-                }) { Text(stringResource(R.string.action_open_settings)) }
-            },
-            dismissButton = {
-                TextButton(onClick = { locationDialog = null }) { Text(stringResource(R.string.action_later)) }
-            },
-            tonalElevation = 0.dp,
-        )
-        LocationDialog.LOCATION_OFF -> AlertDialog(
-            onDismissRequest = { locationDialog = null },
-            title = { Text(stringResource(R.string.location_off_title), style = MaterialTheme.typography.titleMedium) },
-            text = { Text(stringResource(R.string.location_off_message), style = MaterialTheme.typography.bodyMedium) },
-            confirmButton = {
-                TextButton(onClick = {
-                    locationDialog = null
-                    context.startActivity(Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS))
-                }) { Text(stringResource(R.string.action_open_settings)) }
-            },
-            dismissButton = {
-                TextButton(onClick = { locationDialog = null }) { Text(stringResource(R.string.action_cancel)) }
-            },
-            tonalElevation = 0.dp,
-        )
-        null -> Unit
-    }
+    LocationDialogs(
+        dialog = locationDialog,
+        permissionMessage = R.string.place_permission_denied,
+        locationOffMessage = R.string.location_off_message,
+        onDismiss = { locationDialog = null },
+    )
 }
-
-private enum class LocationDialog { PERMISSION, LOCATION_OFF }
-
-// Chỉ cần một trong hai quyền (SPEC 8.3)
-private fun Context.hasLocationPermission(): Boolean =
-    listOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION)
-        .any { ContextCompat.checkSelfPermission(this, it) == PackageManager.PERMISSION_GRANTED }
-
-// GPS của máy có đang bật không (minSdk 26 nên dùng LocationManagerCompat)
-private fun Context.isLocationOn(): Boolean =
-    LocationManagerCompat.isLocationEnabled(getSystemService(LocationManager::class.java))
-
-// Trang cài đặt quyền của chính app
-private fun appSettingsIntent(context: Context): Intent =
-    Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.fromParts("package", context.packageName, null))
 
 // S3 · Chọn vị trí (DESIGN 9 S3): thanh trên có ô tìm, dòng cố định, kết quả, các trạng thái
 @OptIn(ExperimentalMaterial3Api::class)
