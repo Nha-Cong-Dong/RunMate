@@ -1,5 +1,7 @@
 package com.nhacongdong.runmate.domain
 
+import com.nhacongdong.runmate.data.local.RunPlan
+import com.nhacongdong.runmate.data.model.GoalType
 import com.nhacongdong.runmate.data.model.PlanStatus
 import com.nhacongdong.runmate.data.model.SessionStatus
 import org.junit.Assert.assertEquals
@@ -73,5 +75,58 @@ class RunRulesTest {
     fun planAfterFinish_notSavedAfterGrace_missed() {
         val now = startTime + 30 * minute + 1
         assertEquals(PlanStatus.MISSED, RunRules.planAfterFinish(saved = false, startTime = startTime, now = now))
+    }
+
+    // BR-44: gợi ý kế hoạch khi giờ hiện tại nằm trong khoảng từ 30 phút trước đến ân hạn 30 phút sau giờ bắt đầu
+    private fun plan(id: Long, start: Long, status: PlanStatus = PlanStatus.PLANNED) = RunPlan(
+        id = id, startTime = start, locationName = "Hồ Tây", latitude = 21.05, longitude = 105.82,
+        goalType = GoalType.DISTANCE, goalValue = 5_000, status = status, createdAt = 0, weather = null,
+    )
+
+    @Test
+    fun suggestedPlan_noPlans_null() = assertNull(RunRules.suggestedPlan(emptyList(), startTime))
+
+    @Test
+    fun suggestedPlan_inWindow_returnsPlan() {
+        val p = plan(1, startTime)
+        assertEquals(p, RunRules.suggestedPlan(listOf(p), startTime))
+    }
+
+    @Test
+    fun suggestedPlan_exactlyThirtyMinutesBefore_included() {
+        val p = plan(1, startTime)
+        assertEquals(p, RunRules.suggestedPlan(listOf(p), startTime - 30 * minute))
+    }
+
+    @Test
+    fun suggestedPlan_justBeforeWindow_null() {
+        val p = plan(1, startTime)
+        assertNull(RunRules.suggestedPlan(listOf(p), startTime - 30 * minute - 1))
+    }
+
+    @Test
+    fun suggestedPlan_exactlyAtGraceEnd_included() {
+        val p = plan(1, startTime)
+        assertEquals(p, RunRules.suggestedPlan(listOf(p), startTime + 30 * minute))
+    }
+
+    @Test
+    fun suggestedPlan_afterGrace_null() {
+        val p = plan(1, startTime)
+        assertNull(RunRules.suggestedPlan(listOf(p), startTime + 30 * minute + 1))
+    }
+
+    @Test
+    fun suggestedPlan_nonPlannedIgnored() {
+        val p = plan(1, startTime, status = PlanStatus.MISSED)
+        assertNull(RunRules.suggestedPlan(listOf(p), startTime))
+    }
+
+    @Test
+    fun suggestedPlan_severalInWindow_nearestStartWins() {
+        val now = startTime
+        val far = plan(1, startTime + 20 * minute)
+        val near = plan(2, startTime - 5 * minute)
+        assertEquals(near, RunRules.suggestedPlan(listOf(far, near), now))
     }
 }
