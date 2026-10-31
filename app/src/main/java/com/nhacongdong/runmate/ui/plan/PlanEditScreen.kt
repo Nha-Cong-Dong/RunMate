@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DatePicker
@@ -48,12 +49,17 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.nhacongdong.runmate.R
+import com.nhacongdong.runmate.data.local.WeatherSnapshot
 import com.nhacongdong.runmate.data.model.GoalType
+import com.nhacongdong.runmate.domain.WeatherRules
 import com.nhacongdong.runmate.domain.WeekRules
 import com.nhacongdong.runmate.domain.model.Place
 import com.nhacongdong.runmate.domain.model.PlanError
+import com.nhacongdong.runmate.ui.components.GearChips
 import com.nhacongdong.runmate.ui.components.GoalPicker
 import com.nhacongdong.runmate.ui.components.LocationRow
+import com.nhacongdong.runmate.ui.components.WarningList
+import com.nhacongdong.runmate.ui.components.WeatherBlock
 import com.nhacongdong.runmate.ui.format.RunFormat
 import com.nhacongdong.runmate.ui.navigation.PlanEdit
 import com.nhacongdong.runmate.ui.theme.Dimens
@@ -62,6 +68,7 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
+import java.time.ZoneId
 import java.time.ZoneOffset
 
 // S2 nối với ViewModel. Chọn vị trí đi qua S3, kết quả quay về qua pickedPlace (SavedStateHandle ở RunMateApp)
@@ -98,6 +105,9 @@ fun PlanEditRoute(
         onGoalValueChange = viewModel::onGoalValueChange,
         onSave = viewModel::save,
         onClose = onDone,
+        onWeatherRetry = viewModel::retryWeather,
+        onWeatherDismiss = viewModel::dismissWeatherError,
+        onWeatherRefresh = viewModel::refreshWeather,
     )
 }
 
@@ -113,9 +123,15 @@ fun PlanEditScreen(
     onGoalValueChange: (Int) -> Unit,
     onSave: () -> Unit,
     onClose: () -> Unit,
+    onWeatherRetry: () -> Unit = {},
+    onWeatherDismiss: () -> Unit = {},
+    onWeatherRefresh: () -> Unit = {},
+    zone: ZoneId = ZoneId.systemDefault(),
+    now: Long = System.currentTimeMillis(),
 ) {
     var showDatePicker by rememberSaveable { mutableStateOf(false) }
     var showTimePicker by rememberSaveable { mutableStateOf(false) }
+    val startMillis = state.start.atZone(zone).toInstant().toEpochMilli()
 
     Scaffold(
         topBar = {
@@ -195,8 +211,58 @@ fun PlanEditScreen(
                     onGoalTypeChange = onGoalTypeChange,
                     onGoalValueChange = onGoalValueChange,
                 )
+
+                // Thời tiết hiện khi đủ ngày, giờ, vị trí (DESIGN 9 S2). Không có nút lấy lại ở S2, lỗi thì dùng hộp thoại
+                if (state.location == null) {
+                    Text(
+                        stringResource(R.string.weather_need_inputs),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                } else {
+                    WeatherBlock(
+                        snapshot = state.weather,
+                        forecastHour = WeatherRules.forecastHour(startMillis, zone),
+                        zone = zone,
+                        isRefreshing = state.weatherLoading,
+                        offline = state.weatherOffline,
+                        // Như S4: nút Lấy lại khi dữ liệu cũ hơn 3 giờ hoặc chưa có (SPEC 5.2)
+                        showRefresh = state.refreshAllowed &&
+                            WeatherRules.showRefreshButton(state.weather?.weatherFetchedAt, now),
+                        onRefresh = onWeatherRefresh,
+                    )
+                }
+                state.weather?.let { weather ->
+                    WarningList(
+                        snapshot = weather,
+                        warnings = WeatherRules.warnings(
+                            weather.precipitationProb, weather.temperatureC, weather.windSpeedKmh, weather.uvIndex,
+                        ),
+                    )
+                    GearChips(
+                        gear = WeatherRules.gear(
+                            weather.precipitationProb, weather.temperatureC, weather.windSpeedKmh, weather.uvIndex,
+                            state.goalType, state.goalValue,
+                        ),
+                    )
+                }
             }
         }
+    }
+
+    if (state.weatherFailed) {
+        AlertDialog(
+            onDismissRequest = onWeatherDismiss,
+            title = { Text(stringResource(R.string.weather_error_title), style = MaterialTheme.typography.titleMedium) },
+            text = { Text(stringResource(R.string.weather_error_message), style = MaterialTheme.typography.bodyMedium) },
+            confirmButton = {
+                TextButton(onClick = onWeatherRetry) { Text(stringResource(R.string.weather_retry)) }
+            },
+            dismissButton = {
+                TextButton(onClick = onWeatherDismiss) { Text(stringResource(R.string.weather_continue_without)) }
+            },
+            tonalElevation = 0.dp,
+        )
     }
 
     if (showDatePicker) {
@@ -309,6 +375,7 @@ private fun PlanEditNewPreview() = PreviewScreen(
 )
 
 @Preview(name = "Giờ đã qua · Sáng", widthDp = 360, heightDp = 720, showBackground = true)
+@Preview(name = "Giờ đã qua · Tối", widthDp = 360, heightDp = 720, showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun PlanEditErrorPreview() = PreviewScreen(
     PlanEditUiState(
@@ -321,4 +388,57 @@ private fun PlanEditErrorPreview() = PreviewScreen(
         goalValue = 1_800,
         errors = listOf(PlanError.START_IN_PAST),
     ),
+)
+
+// Dữ liệu thời tiết mẫu, lấy cách đây `hoursAgo` giờ để thử các trạng thái lấy lại
+private fun previewWeather(hoursAgo: Long) = WeatherSnapshot(
+    weatherFetchedAt = System.currentTimeMillis() - hoursAgo * 3_600_000L,
+    temperatureC = 36.0, precipitationProb = 70, windSpeedKmh = 32.0, uvIndex = 9.0,
+)
+
+private fun previewWeatherState(
+    weather: WeatherSnapshot?,
+    loading: Boolean = false,
+    offline: Boolean = false,
+) = PlanEditUiState(
+    isEditing = true,
+    isLoading = false,
+    today = PreviewToday,
+    start = LocalDateTime.of(2026, 10, 29, 9, 0),
+    location = Place("Hồ Hoàn Kiếm", "Hoàn Kiếm, Hà Nội", 21.028, 105.852),
+    weather = weather,
+    weatherLoading = loading,
+    weatherOffline = offline,
+)
+
+@Preview(name = "Dữ liệu mới · Sáng", widthDp = 360, heightDp = 720, showBackground = true)
+@Preview(name = "Dữ liệu mới · Tối", widthDp = 360, heightDp = 720, showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+private fun PlanEditFreshWeatherPreview() = PreviewScreen(previewWeatherState(previewWeather(1)))
+
+@Preview(name = "Quá 3 giờ, có nút · Sáng", widthDp = 360, heightDp = 720, showBackground = true)
+@Preview(name = "Quá 3 giờ, có nút · Tối", widthDp = 360, heightDp = 720, showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+private fun PlanEditStaleWeatherPreview() = PreviewScreen(previewWeatherState(previewWeather(4)))
+
+@Preview(name = "Không có mạng · Sáng", widthDp = 360, heightDp = 720, showBackground = true)
+@Preview(name = "Không có mạng · Tối", widthDp = 360, heightDp = 720, showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+private fun PlanEditOfflinePreview() = PreviewScreen(previewWeatherState(previewWeather(4), offline = true))
+
+@Preview(name = "Chưa có dữ liệu · Sáng", widthDp = 360, heightDp = 720, showBackground = true)
+@Preview(name = "Chưa có dữ liệu · Tối", widthDp = 360, heightDp = 720, showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+private fun PlanEditNoWeatherPreview() = PreviewScreen(previewWeatherState(null))
+
+@Preview(name = "Đang tải · Sáng", widthDp = 360, heightDp = 720, showBackground = true)
+@Preview(name = "Đang tải · Tối", widthDp = 360, heightDp = 720, showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+private fun PlanEditLoadingPreview() = PreviewScreen(previewWeatherState(null, loading = true))
+
+@Preview(name = "Chưa chọn vị trí · Sáng", widthDp = 360, heightDp = 720, showBackground = true)
+@Preview(name = "Chưa chọn vị trí · Tối", widthDp = 360, heightDp = 720, showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+private fun PlanEditNoLocationPreview() = PreviewScreen(
+    PlanEditUiState(isLoading = false, today = PreviewToday, start = LocalDateTime.of(2026, 10, 29, 9, 0)),
 )
