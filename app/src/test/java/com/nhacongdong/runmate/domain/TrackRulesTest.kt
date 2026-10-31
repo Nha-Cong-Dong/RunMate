@@ -67,6 +67,60 @@ class TrackRulesTest {
         assertEquals(listOf(points[0], points[3]), valid)
     }
 
+    // BR-39: khoảng trống GPS trên 30 giây mở đoạn mới
+    @Test
+    fun segmentFor_firstPoint_isSegmentZero() =
+        assertEquals(0, TrackRules.segmentFor(null, point(0.0, 0.0, 0)))
+
+    @Test
+    fun segmentFor_gapOfExactlyThirtySeconds_sameSegment() {
+        val last = point(0.0, 0.0, 0)
+        assertEquals(0, TrackRules.segmentFor(last, point(0.0, 0.0, 30_000)))
+    }
+
+    @Test
+    fun segmentFor_gapJustOverThirtySeconds_newSegment() {
+        val last = point(0.0, 0.0, 0, segment = 2)
+        assertEquals(3, TrackRules.segmentFor(last, point(0.0, 0.0, 30_001, segment = 2)))
+    }
+
+    @Test
+    fun shouldKeep_firstPoint_kept() =
+        assertTrue(TrackRules.shouldKeep(null, point(0.0, 0.0, 0)))
+
+    @Test
+    fun shouldKeep_inaccuratePointAfterGap_dropped() {
+        val last = point(0.0, 0.0, 0)
+        assertFalse(TrackRules.shouldKeep(last, point(0.0, 0.0, 40_000, accuracy = 50f)))
+    }
+
+    @Test
+    fun shouldKeep_jumpWithinGap_dropped() {
+        // 500 m trong 10 giây là 50 m/s, khoảng trống 10 giây nên vẫn kiểm tra tốc độ
+        val last = point(0.0, 0.0, 0)
+        assertFalse(TrackRules.shouldKeep(last, point(lat100m * 5, 0.0, 10_000)))
+    }
+
+    @Test
+    fun shouldKeep_fastButAfterLongGap_kept() {
+        // 500 m trong 40 giây là 12,5 m/s. Khoảng trống trên 30 giây thì không kiểm tra tốc độ, mở đoạn mới
+        val last = point(0.0, 0.0, 0)
+        assertTrue(TrackRules.shouldKeep(last, point(lat100m * 5, 0.0, 40_000)))
+    }
+
+    @Test
+    fun filterValid_afterLongGap_startsNewSegmentAndSkipsGapDistance() {
+        val points = listOf(
+            point(0.0, 0.0, 0),
+            point(lat100m, 0.0, 10_000),                  // đoạn 0, cộng khoảng 100 m
+            point(lat100m * 6, 0.0, 60_000),              // sau 50 giây: đoạn 1, không cộng khoảng nối
+            point(lat100m * 7, 0.0, 70_000),              // đoạn 1, cộng khoảng 100 m
+        )
+        val valid = TrackRules.filterValid(points)
+        assertEquals(listOf(0, 0, 1, 1), valid.map { it.segmentIndex })
+        assertEquals(200.0, TrackRules.totalDistanceM(valid), 2.0)
+    }
+
     // BR-33: quãng đường không tính đoạn nối qua lúc tạm dừng
     @Test
     fun distance_excludesGapBetweenSegments() {

@@ -24,6 +24,12 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- Ghi GPS khi chạy, chạy nền bằng foreground service loại location (SPEC 10.2) -->
+        <service
+            android:name=".service.RunTrackingService"
+            android:exported="false"
+            android:foregroundServiceType="location" />
     </application>
 
 </manifest>

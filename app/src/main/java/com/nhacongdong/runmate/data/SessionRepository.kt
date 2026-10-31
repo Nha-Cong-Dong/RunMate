@@ -9,6 +9,7 @@ import com.nhacongdong.runmate.data.local.TrackPoint
 import com.nhacongdong.runmate.data.local.TrackPointDao
 import com.nhacongdong.runmate.data.model.PlanStatus
 import com.nhacongdong.runmate.data.model.SessionStatus
+import com.nhacongdong.runmate.domain.TrackPointStore
 import kotlinx.coroutines.flow.Flow
 
 // Cửa ngõ đọc và ghi buổi chạy, điểm GPS. Giữ kế hoạch và buổi chạy khớp nhau khi xoá.
@@ -17,7 +18,7 @@ class SessionRepository(
     private val sessionDao: SessionDao,
     private val trackPointDao: TrackPointDao,
     private val planDao: PlanDao
-) {
+) : TrackPointStore {
     // S8: lịch sử, mới nhất trước (BR-50)
     fun observeFinishedSessions(): Flow<List<RunSession>> =
         sessionDao.observeByStatus(SessionStatus.FINISHED)
@@ -32,6 +33,11 @@ class SessionRepository(
     suspend fun addSession(session: RunSession): Long = sessionDao.insert(session)
     suspend fun updateSession(session: RunSession) = sessionDao.update(session)
     suspend fun addTrackPoint(point: TrackPoint) = trackPointDao.insert(point)
+
+    // TrackPointStore: dùng cho RecordTrackPoint (BR-31, BR-39)
+    override suspend fun lastPoint(sessionId: Long): TrackPoint? = trackPointDao.getLast(sessionId)
+
+    override suspend fun addPoint(point: TrackPoint) = trackPointDao.insert(point)
     suspend fun getTrackPoints(sessionId: Long): List<TrackPoint> = trackPointDao.getBySession(sessionId)
 
     // Xoá buổi chạy (điểm GPS xoá theo CASCADE). Nếu thuộc kế hoạch thì đổi trạng thái

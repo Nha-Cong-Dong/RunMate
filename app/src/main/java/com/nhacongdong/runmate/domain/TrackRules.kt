@@ -15,6 +15,7 @@ object TrackRules {
     const val MAX_SPEED_MPS = 12.0          // BR-31: khoảng 43 km/h
     const val MIN_DISTANCE_M = 100.0        // BR-35, BR-36
     const val MIN_DURATION_MS = 60_000L     // BR-36
+    const val MAX_GAP_MS = 30_000L          // BR-39: khoảng trống GPS trên 30 giây thì mở đoạn mới
     private const val EARTH_RADIUS_M = 6_371_000.0
 
     // BR-30: bỏ điểm có sai số lớn hơn 30 m
@@ -28,13 +29,31 @@ object TrackRules {
         return speed <= MAX_SPEED_MPS
     }
 
-    // Giữ điểm đủ chính xác, và bỏ điểm nhảy so với điểm hợp lệ gần nhất trước đó
+    // BR-39: khoảng cách thời gian giữa hai điểm vượt 30 giây thì mở đoạn mới
+    fun isNewSegment(last: TrackPoint, point: TrackPoint): Boolean =
+        point.timestamp - last.timestamp > MAX_GAP_MS
+
+    // Số đoạn của điểm mới: điểm đầu tiên là đoạn 0, khoảng trống lớn thì tăng số đoạn
+    fun segmentFor(last: TrackPoint?, point: TrackPoint): Int = when {
+        last == null -> 0
+        isNewSegment(last, point) -> last.segmentIndex + 1
+        else -> last.segmentIndex
+    }
+
+    // Giữ điểm đủ chính xác (BR-30). Sau khoảng trống lớn thì mở đoạn mới và không kiểm tra tốc độ (BR-39).
+    // Trong các trường hợp còn lại thì phải đạt BR-31 so với điểm trước
+    fun shouldKeep(last: TrackPoint?, point: TrackPoint): Boolean {
+        if (!isAccurate(point.accuracyM)) return false
+        if (last == null || isNewSegment(last, point)) return true
+        return isPlausibleStep(last, point)
+    }
+
+    // Giữ điểm hợp lệ theo shouldKeep, so với điểm được giữ gần nhất
     fun filterValid(points: List<TrackPoint>): List<TrackPoint> {
         val valid = mutableListOf<TrackPoint>()
         for (point in points) {
-            if (!isAccurate(point.accuracyM)) continue
             val last = valid.lastOrNull()
-            if (last == null || isPlausibleStep(last, point)) valid += point
+            if (shouldKeep(last, point)) valid += point.copy(segmentIndex = segmentFor(last, point))
         }
         return valid
     }

@@ -14,6 +14,7 @@ import com.nhacongdong.runmate.data.place.PlaceRepository
 import com.nhacongdong.runmate.data.WeatherRepository
 import com.nhacongdong.runmate.data.remote.ForecastApi
 import com.nhacongdong.runmate.data.remote.GeocodingApi
+import com.nhacongdong.runmate.domain.RecordTrackPoint
 import com.nhacongdong.runmate.domain.RefreshMissedPlans
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
@@ -39,6 +40,9 @@ class AppContainer(private val context: Context) {
     val sessionRepository by lazy {
         SessionRepository(database, database.sessionDao(), database.trackPointDao(), database.planDao())
     }
+
+    // Ghi một điểm GPS của buổi chạy, dùng trong RunTrackingService (SPEC 10.2)
+    val recordTrackPoint by lazy { RecordTrackPoint(sessionRepository) }
 
     val refreshMissedPlans by lazy { RefreshMissedPlans(planRepository) }
 

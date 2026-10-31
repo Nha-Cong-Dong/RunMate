@@ -58,6 +58,11 @@
     <string name="action_plan_this_day">Lên kế hoạch cho ngày này</string>
     <string name="action_run_now">Chạy ngay</string>
 
+    <!-- Thông báo khi đang ghi buổi chạy (SPEC 10.2) -->
+    <string name="notification_channel_name">Ghi buổi chạy</string>
+    <string name="notification_recording">Đang ghi buổi chạy</string>
+    <string name="notification_no_permission">Không có quyền vị trí, quãng đường không được ghi</string>
+
     <!-- S3 Chọn vị trí (DESIGN 9 S3, SPEC 10.3) -->
     <string name="cd_back">Quay lại</string>
     <string name="place_search_hint">Tìm địa điểm</string>
@@ -68,6 +73,8 @@
     <string name="location_permission_title">Cần quyền vị trí</string>
     <string name="location_off_title">Bật vị trí</string>
     <string name="location_off_message">Bật vị trí để lấy vị trí hiện tại.</string>
+    <string name="location_off_run_message">Bật vị trí để ghi buổi chạy.</string>
+    <string name="location_permission_run_message">RunMate dùng GPS để đo quãng đường. Điểm GPS chỉ lưu trên máy bạn.</string>
     <string name="action_open_settings">Mở cài đặt</string>
     <string name="action_later">Để sau</string>
     <string name="place_locate_failed">Chưa lấy được vị trí hiện tại. Thử lại ở chỗ thoáng hơn.</string>
