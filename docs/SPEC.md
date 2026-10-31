@@ -671,7 +671,8 @@ S2 dùng chung cho cả tạo và sửa. Khi sửa, form được điền sẵn 
 | Xác nhận xoá | S4, S7 | Mọi thao tác xoá (BR-54) |
 | Thông báo giữ buổi chạy | S4 | Xoá kế hoạch `COMPLETED`: buổi chạy được giữ lại thành chạy tự do (BR-52) |
 | Cảnh báo kế hoạch đổi trạng thái | S7 | Xoá buổi chạy thuộc một kế hoạch (BR-53) |
-| Giải thích quyền | S4, S5 | Người dùng từ chối quyền vị trí hoặc thông báo (UC4) |
+| Giải thích quyền | S3, S4, S5 | Người dùng từ chối quyền vị trí hoặc thông báo (UC4). Ở S3, khi bấm "Dùng vị trí hiện tại" mà quyền bị từ chối |
+| Bật vị trí | S3 | Bấm "Dùng vị trí hiện tại" mà GPS của máy đang tắt. Nút "Mở cài đặt" mở màn hình bật vị trí của máy |
 | Xác nhận kết thúc | S6 | Bấm Kết thúc, để tránh bấm nhầm |
 | Buổi chạy quá ngắn | S6 | Kết thúc mà chưa đạt ngưỡng lưu (BR-36) |
 | Lỗi thời tiết | S2, S5 | Không lấy được dự báo: Thử lại, hoặc tiếp tục không có thời tiết (UC1) |

@@ -65,6 +65,11 @@
     <string name="place_not_found">Không tìm thấy “%1$s”. Thử tên quận hoặc thành phố.</string>
     <string name="place_network_error">Cần mạng để tìm theo tên. Bạn vẫn có thể dùng vị trí hiện tại.</string>
     <string name="place_permission_denied">Cần quyền vị trí để dùng vị trí hiện tại.</string>
+    <string name="location_permission_title">Cần quyền vị trí</string>
+    <string name="location_off_title">Bật vị trí</string>
+    <string name="location_off_message">Bật vị trí để lấy vị trí hiện tại.</string>
+    <string name="action_open_settings">Mở cài đặt</string>
+    <string name="action_later">Để sau</string>
     <string name="place_locate_failed">Chưa lấy được vị trí hiện tại. Thử lại ở chỗ thoáng hơn.</string>
 
     <!-- S2 Tạo / Sửa kế hoạch (DESIGN 9 S2, 8.13, 8.14) -->

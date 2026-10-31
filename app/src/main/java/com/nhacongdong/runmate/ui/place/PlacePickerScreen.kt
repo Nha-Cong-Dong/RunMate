@@ -2,10 +2,19 @@ package com.nhacongdong.runmate.ui.place
 
 import android.Manifest
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.Configuration
+import android.location.LocationManager
+import android.net.Uri
+import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -51,6 +60,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import androidx.core.location.LocationManagerCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.nhacongdong.runmate.R
@@ -71,8 +81,9 @@ fun PlacePickerRoute(
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
-    val deniedMessage = stringResource(R.string.place_permission_denied)
     val locateFailedMessage = stringResource(R.string.place_locate_failed)
+    // Hộp thoại khi quyền bị từ chối hoặc GPS tắt (DESIGN 10, SPEC 9.2)
+    var locationDialog by rememberSaveable { mutableStateOf<LocationDialog?>(null) }
 
     val permissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
@@ -84,7 +95,7 @@ fun PlacePickerRoute(
         viewModel.events.collect { event ->
             when (event) {
                 is PlacePickerEvent.Selected -> onPlaceSelected(event.place)
-                PlacePickerEvent.PermissionDenied -> snackbarHostState.showSnackbar(deniedMessage)
+                PlacePickerEvent.PermissionDenied -> locationDialog = LocationDialog.PERMISSION
                 PlacePickerEvent.LocateFailed -> snackbarHostState.showSnackbar(locateFailedMessage)
             }
         }
@@ -95,21 +106,69 @@ fun PlacePickerRoute(
         snackbarHostState = snackbarHostState,
         onQueryChange = viewModel::onQueryChange,
         onUseCurrentLocation = {
-            if (context.hasLocationPermission()) {
-                viewModel.useCurrentLocation()
-            } else {
-                permissionLauncher.launch(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION))
+            when {
+                // Chưa có quyền: hệ thống hỏi. Nếu đã từ chối trước đó, hệ thống không hỏi nữa và trả về ngay
+                !context.hasLocationPermission() -> permissionLauncher.launch(
+                    arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION)
+                )
+                // Có quyền nhưng GPS của máy đang tắt
+                !context.isLocationOn() -> locationDialog = LocationDialog.LOCATION_OFF
+                else -> viewModel.useCurrentLocation()
             }
         },
         onSelect = onPlaceSelected,
         onBack = onBack,
     )
+
+    when (locationDialog) {
+        LocationDialog.PERMISSION -> AlertDialog(
+            onDismissRequest = { locationDialog = null },
+            title = { Text(stringResource(R.string.location_permission_title), style = MaterialTheme.typography.titleMedium) },
+            text = { Text(stringResource(R.string.place_permission_denied), style = MaterialTheme.typography.bodyMedium) },
+            confirmButton = {
+                TextButton(onClick = {
+                    locationDialog = null
+                    context.startActivity(appSettingsIntent(context))
+                }) { Text(stringResource(R.string.action_open_settings)) }
+            },
+            dismissButton = {
+                TextButton(onClick = { locationDialog = null }) { Text(stringResource(R.string.action_later)) }
+            },
+            tonalElevation = 0.dp,
+        )
+        LocationDialog.LOCATION_OFF -> AlertDialog(
+            onDismissRequest = { locationDialog = null },
+            title = { Text(stringResource(R.string.location_off_title), style = MaterialTheme.typography.titleMedium) },
+            text = { Text(stringResource(R.string.location_off_message), style = MaterialTheme.typography.bodyMedium) },
+            confirmButton = {
+                TextButton(onClick = {
+                    locationDialog = null
+                    context.startActivity(Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS))
+                }) { Text(stringResource(R.string.action_open_settings)) }
+            },
+            dismissButton = {
+                TextButton(onClick = { locationDialog = null }) { Text(stringResource(R.string.action_cancel)) }
+            },
+            tonalElevation = 0.dp,
+        )
+        null -> Unit
+    }
 }
+
+private enum class LocationDialog { PERMISSION, LOCATION_OFF }
 
 // Chỉ cần một trong hai quyền (SPEC 8.3)
 private fun Context.hasLocationPermission(): Boolean =
     listOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION)
         .any { ContextCompat.checkSelfPermission(this, it) == PackageManager.PERMISSION_GRANTED }
+
+// GPS của máy có đang bật không (minSdk 26 nên dùng LocationManagerCompat)
+private fun Context.isLocationOn(): Boolean =
+    LocationManagerCompat.isLocationEnabled(getSystemService(LocationManager::class.java))
+
+// Trang cài đặt quyền của chính app
+private fun appSettingsIntent(context: Context): Intent =
+    Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.fromParts("package", context.packageName, null))
 
 // S3 · Chọn vị trí (DESIGN 9 S3): thanh trên có ô tìm, dòng cố định, kết quả, các trạng thái
 @OptIn(ExperimentalMaterial3Api::class)
