@@ -25,6 +25,9 @@ class SessionRepository(
 
     fun observeSession(id: Long): Flow<RunSession?> = sessionDao.observeById(id)
 
+    // S6: điểm GPS của buổi chạy để tính số liệu sống
+    fun observeTrackPoints(sessionId: Long): Flow<List<TrackPoint>> = trackPointDao.observeBySession(sessionId)
+
     // Buổi đang RECORDING hoặc PAUSED (BR-08, SPEC 10.1)
     suspend fun getActiveSession(): RunSession? =
         sessionDao.getFirstWithStatus(listOf(SessionStatus.RECORDING, SessionStatus.PAUSED))
