@@ -30,6 +30,7 @@ import com.nhacongdong.runmate.ui.navigation.Stats
 import com.nhacongdong.runmate.ui.plan.PlanDetailRoute
 import com.nhacongdong.runmate.ui.plan.PlanEditRoute
 import com.nhacongdong.runmate.ui.plan.PlanListRoute
+import com.nhacongdong.runmate.ui.run.FreeRunRoute
 import com.nhacongdong.runmate.ui.place.PlacePickerRoute
 import com.nhacongdong.runmate.ui.screens.PlaceholderAction
 import com.nhacongdong.runmate.ui.screens.PlaceholderScreen
@@ -114,19 +115,22 @@ fun RunMateApp() {
                     onDeleted = { navController.popBackStack() },
                 )
             }
-            composable<FreeRunSetup> {
-                PlaceholderScreen(R.string.screen_free_run_setup, listOf(
-                    PlaceholderAction(R.string.action_change_location) { navController.navigate(LocationPicker) },
-                    // Chạy theo kế hoạch (BR-44): thay S5 bằng S4
-                    PlaceholderAction(R.string.action_run_with_plan) {
-                        navController.navigate(PlanDetail(SAMPLE_ID)) {
-                            popUpTo<FreeRunSetup> { inclusive = true }
-                        }
+            composable<FreeRunSetup> { entry ->
+                val picked by entry.savedStateHandle
+                    .getStateFlow<Place?>(PICKED_PLACE_KEY, null)
+                    .collectAsStateWithLifecycle()
+                FreeRunRoute(
+                    onBack = { navController.popBackStack() },
+                    onPickLocation = { navController.navigate(LocationPicker) },
+                    // Chạy theo kế hoạch (BR-44): thay S5 bằng S4 của kế hoạch đó
+                    onOpenPlanRun = { planId ->
+                        navController.navigate(PlanDetail(planId)) { popUpTo<FreeRunSetup> { inclusive = true } }
                     },
-                    PlaceholderAction(R.string.action_start_run) {
-                        navController.navigate(Running) { popUpTo<FreeRunSetup> { inclusive = true } }
-                    },
-                ))
+                    // Bắt đầu chạy xong thì sang S6 và bỏ S5 khỏi lịch sử
+                    onStarted = { navController.navigate(Running) { popUpTo<FreeRunSetup> { inclusive = true } } },
+                    pickedPlace = picked,
+                    onPlaceConsumed = { entry.savedStateHandle.remove<Place>(PICKED_PLACE_KEY) },
+                )
             }
             composable<Running> {
                 PlaceholderScreen(R.string.screen_running, listOf(

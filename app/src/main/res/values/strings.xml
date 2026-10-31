@@ -103,6 +103,11 @@
     <string name="suggestion_text">Bạn có kế hoạch lúc %1$s · %2$s. Chạy theo kế hoạch này?</string>
     <string name="suggestion_run_plan">Chạy theo kế hoạch</string>
     <string name="suggestion_dismiss">Bỏ qua</string>
+
+    <!-- S5 Chạy ngay (DESIGN 9 S5) -->
+    <string name="free_run_title">Chạy ngay</string>
+    <string name="start_need_location">Chọn vị trí để bắt đầu chạy</string>
+    <string name="start_active_run">Đang có buổi chạy chưa kết thúc. Kết thúc buổi đó trước.</string>
     <string name="action_cancel">Huỷ</string>
 
     <!-- S4 Chi tiết kế hoạch (DESIGN 9 S4, 10) -->
