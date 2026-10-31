@@ -722,6 +722,8 @@ Dùng `AlertDialog` của Material 3: bo `radiusXL`, nền `surface`, không đ�
 | Thông báo giữ buổi chạy | S4 | Xoá kế hoạch? | Buổi chạy lúc 06:02 (5,24 km) sẽ được giữ lại dưới dạng chạy tự do. | Huỷ · **Xoá kế hoạch** |
 | Kế hoạch đổi trạng thái | S7 | Xoá buổi chạy này? | Kế hoạch lúc 06:00 sẽ quay về "Đã lên kế hoạch" (hoặc "Bỏ lỡ"). Không khôi phục được. | Huỷ · **Xoá** |
 | Giải thích quyền | S4, S5 | Cần quyền vị trí | RunMate dùng GPS để đo quãng đường. Điểm GPS chỉ lưu trên máy bạn. | Để sau · **Mở cài đặt** |
+| Giải thích quyền | S3 | Cần quyền vị trí | Cần quyền vị trí để dùng vị trí hiện tại. | Để sau · **Mở cài đặt** |
+| Bật vị trí | S3 | Bật vị trí | Bật vị trí để lấy vị trí hiện tại. | Huỷ · **Mở cài đặt** |
 | Xác nhận kết thúc | S6 | Kết thúc buổi chạy? | 5,24 km · 26:55 | Chạy tiếp · **Kết thúc** |
 | Buổi chạy quá ngắn | S6 | Buổi chạy quá ngắn | Dưới 100 m hoặc dưới 1 phút nên không được lưu. | **Đã hiểu** |
 | Lỗi thời tiết | S2, S5 | Không lấy được thời tiết | Kiểm tra kết nối mạng. Bạn vẫn có thể tiếp tục. | Tiếp tục không có thời tiết · **Thử lại** |
