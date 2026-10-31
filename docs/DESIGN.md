@@ -521,6 +521,7 @@ Dùng ở S2, S4, S5, S7. Nền `surfaceContainer`, bo `radiusL`, đệm 16 dp.
 - Rộng hết lề, cao 56 dp, bo `radiusFull`.
 - Viền gradient 2 dp, nền `inverse`, chữ `onInverse` "Bắt đầu chạy" + biểu tượng `play_arrow`.
 - Bị vô hiệu hoá: viền `outline`, nền `surfaceContainerHigh`, chữ `textDisabled`, và **luôn có một dòng giải thích** ngay bên dưới (SPEC 6.4).
+- Ở S4 và S5, nút bị vô hiệu hoá khi đang có buổi chạy dở (`RECORDING` hoặc `PAUSED`), với dòng giải thích "Đang có buổi chạy chưa kết thúc. Kết thúc buổi đó trước." Kiểm tra khi mở màn hình và khi quay lại màn hình.
 
 ### 8.16 `StatTile`: ô thống kê
 
@@ -618,8 +619,8 @@ Thứ Năm, 29/10             2 buổi · 15,4 km
 - `WeatherBlock` → `WarningList` → `GearChips`.
 - Khối cảnh báo tiết kiệm pin (BR-61) nếu cần, kiểu giống `WarningList` với biểu tượng `battery_saver`.
 - **Đáy cố định:**
-  - `PLANNED`: `StartRunButton`.
-  - `MISSED`: `StartRunButton` với chữ "Chạy muộn".
+  - `PLANNED`: `StartRunButton`. Tắt khi đang có buổi chạy dở (mục 8.15).
+  - `MISSED`: `StartRunButton` với chữ "Chạy muộn". Tắt khi đang có buổi chạy dở (mục 8.15).
   - `IN_PROGRESS`: nút "Về buổi chạy" mở S6.
   - `COMPLETED`: không có nút đáy (đã có hàng kết quả ở trên).
   - `CANCELLED`: không có nút chạy. Dòng gợi ý: "Sửa sang giờ ở tương lai để lên lịch lại".
