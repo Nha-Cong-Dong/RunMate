@@ -752,6 +752,7 @@ Xoá kế hoạch `COMPLETED` ở S4: vòng chạy của ngày đó **vẫn gi�
 | Chấm "đang ghi" | Độ mờ 100% → 40% → 100%, chu kỳ 1,2 giây, lặp |
 | Vòng xoay (`RunButton`, ngày đang chạy) | Gradient xoay 360° mỗi 4 giây, tuyến tính |
 | Vòng tiến độ ở S6 | Mỗi lần số liệu cập nhật thì cung nhích tới giá trị mới trong 400 ms |
+| Số chính ở S6 (thử nghiệm) | Hai cách, chọn bằng một hằng số trong code để thử trên máy rồi giữ một cách. **Cách 1, nhảy thẳng:** số đổi ngay, không hiệu ứng. **Cách 2, cuộn số:** chỉ chữ số đổi mới trượt từ dưới lên trong 150 ms (`motionFast`), giống đồng hồ đếm giờ |
 | Đạt mục tiêu ở S6 | Cung chạy nốt tới đầy, vòng phóng 1,0 → 1,06 → 1,0 trong 500 ms |
 | Quỹ đạo tự vẽ ở S7 | Cắt dần đường (path trim) từ 0 → 100% trong 1 000 ms, theo thứ tự thời gian |
 | Vòng chạy vẽ vào ở S1 | Gradient quét 0° → 360° trong 600 ms, rồi huy hiệu ✓ phóng 0 → 1,15 → 1,0 trong 300 ms |
