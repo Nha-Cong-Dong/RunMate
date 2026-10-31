@@ -293,9 +293,11 @@ Tất cả user story đều là của **người chạy** (tác nhân duy nhấ
 
 **Dữ liệu thời tiết:**
 - Lưu cùng kế hoạch hoặc buổi chạy kèm **thời điểm lấy**, để dùng khi không có mạng.
-- Mở chi tiết kế hoạch và có mạng thì lấy lại nếu dữ liệu đã lưu **hơn 3 giờ**.
-- Kế hoạch `COMPLETED` hoặc `CANCELLED` thì **không lấy lại** thời tiết, chỉ hiện dữ liệu đã lưu.
-- Không có mạng thì hiện dữ liệu đã lưu kèm nhãn "cập nhật lúc …". Chưa từng có dữ liệu thì hiện thông báo không có thời tiết.
+- Mở chi tiết kế hoạch (S4) hoặc sửa kế hoạch đã có (S2): hiện dữ liệu đã lưu, **không tự gọi API**. Nếu dữ liệu đã lưu **hơn 3 giờ**, hoặc chưa có dữ liệu, thì hiện nút **Lấy lại thời tiết**. Bấm nút khi có mạng thì lấy dữ liệu mới và lưu lại.
+- Khi **đổi ngày, giờ hoặc vị trí** ở S2: app tự lấy thời tiết cho giờ và vị trí mới, không cần bấm nút. Chỉ đổi trong cùng một giờ chẵn và cùng vị trí thì không lấy lại.
+- Khi bấm **Lưu** ở S2: nếu đã có dữ liệu thời tiết đúng giờ bắt đầu đã làm tròn và đúng vị trí đang chọn thì lưu kèm dữ liệu đó. Chưa có thì lưu không kèm, và S4 sẽ hiện nút lấy lại.
+- Kế hoạch `COMPLETED`, `CANCELLED` hoặc `MISSED` thì **không lấy lại** thời tiết, chỉ hiện dữ liệu đã lưu. Giờ bắt đầu của kế hoạch `MISSED` đã qua, thường nằm ngoài dự báo của Open-Meteo.
+- Khi bấm lấy lại mà không có mạng (mất mạng hoặc quá thời gian chờ) thì giữ dữ liệu đã lưu kèm nhãn "cập nhật lúc …", và ghi **Không có mạng**. App không kiểm tra mạng trước khi mở màn hình, nên nhãn này chỉ hiện sau lần bấm thất bại. Chưa từng có dữ liệu thì hiện "Không có dữ liệu" kèm nút lấy lại.
 - Lỗi thời tiết **không chặn** lưu kế hoạch hay bắt đầu chạy.
 
 ### 5.3 Ghi buổi chạy
@@ -672,7 +674,8 @@ S2 dùng chung cho cả tạo và sửa. Khi sửa, form được điền sẵn 
 | Giải thích quyền | S4, S5 | Người dùng từ chối quyền vị trí hoặc thông báo (UC4) |
 | Xác nhận kết thúc | S6 | Bấm Kết thúc, để tránh bấm nhầm |
 | Buổi chạy quá ngắn | S6 | Kết thúc mà chưa đạt ngưỡng lưu (BR-36) |
-| Lỗi thời tiết | S2, S4, S5 | Không lấy được dự báo: Thử lại, hoặc tiếp tục không có thời tiết (UC1) |
+| Lỗi thời tiết | S2, S5 | Không lấy được dự báo: Thử lại, hoặc tiếp tục không có thời tiết (UC1) |
+| Lỗi thời tiết | S4 | Không lấy được dự báo: chỉ tiếp tục không có thời tiết, không có Thử lại. S4 không sửa được, chỉ S2 lấy lại thời tiết (UC1) |
 | Cảnh báo tiết kiệm pin | S4, S5, S6 | Tiết kiệm pin đang bật và làm ảnh hưởng vị trí (BR-61). Chỉ cảnh báo, vẫn cho chạy |
 | Khôi phục buổi chạy dở | S1 | Mở app khi còn buổi chạy chưa kết thúc (mục 6.4, chi tiết ở mục 10.1) |
 
