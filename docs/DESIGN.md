@@ -664,6 +664,7 @@ Màn hình quan trọng nhất. Mục tiêu: **liếc 1 giây là đọc đượ
   - Mỗi nút có chữ nhãn bên dưới (`labelMedium`). Kích thước đều vượt 48 dp (SPEC 10.6).
 - **Đạt mục tiêu** (BR-38): vòng đầy, phóng 1,0 → 1,06 → 1,0, rung một lần, băng nhỏ phía trên số chính "Đạt mục tiêu 5 km" với dấu ✓ `success` trong 4 giây. Không dừng buổi chạy.
 - Cảnh báo tiết kiệm pin bật giữa chừng (BR-61): băng `warningContainer` dưới thanh trên, có nút đóng.
+- **Quyền vị trí bị tắt** khi đang ghi: băng `warningContainer` dưới thanh trên, biểu tượng `location_off` (hoặc `warning`) màu `warning`, chữ "Quyền vị trí đang tắt, không nhận được GPS, chỉ tính thời gian" (`bodyMedium`). Bên phải có nút chữ **Cấp quyền**. Bấm thì làm như nút Bắt đầu chạy ở S4: chưa từ chối vĩnh viễn thì hệ thống hỏi lại, đã từ chối thì mở Cài đặt của app. Khi quyền được cấp lại thì băng tự biến mất và GPS được nhận lại. Băng hiện khi mở S6 hoặc khi đang ở S6 mà quyền bị tắt.
 - **Không có bản đồ trực tiếp** trong MVP (v1.2).
 - **Màn hình tắt theo hệ thống** (D2): S6 không giữ màn hình luôn sáng. Người chạy thường để máy tự tắt màn hình, khi muốn xem thì bật lên. Vì vậy:
   - Khi màn hình bật lại, số liệu hiện **ngay giá trị mới nhất** (đọc từ Room qua Flow, SPEC 8.5). `GoalRing` nhảy thẳng tới tỷ lệ hiện tại, không quét lại từ giá trị cũ, để liếc 1 giây là đọc được.
@@ -723,7 +724,7 @@ Dùng `AlertDialog` của Material 3: bo `radiusXL`, nền `surface`, không đ�
 | Kế hoạch đổi trạng thái | S7 | Xoá buổi chạy này? | Kế hoạch lúc 06:00 sẽ quay về "Đã lên kế hoạch" (hoặc "Bỏ lỡ"). Không khôi phục được. | Huỷ · **Xoá** |
 | Giải thích quyền | S4, S5 | Cần quyền vị trí | RunMate dùng GPS để đo quãng đường. Điểm GPS chỉ lưu trên máy bạn. | Để sau · **Mở cài đặt** |
 | Giải thích quyền | S3 | Cần quyền vị trí | Cần quyền vị trí để dùng vị trí hiện tại. | Để sau · **Mở cài đặt** |
-| Bật vị trí | S3 | Bật vị trí | Bật vị trí để lấy vị trí hiện tại. | Huỷ · **Mở cài đặt** |
+| Bật vị trí | S3, S4, S5 | Bật vị trí | Bật vị trí để lấy vị trí hiện tại (S3) hoặc để ghi buổi chạy (S4, S5). | Huỷ · **Mở cài đặt** |
 | Xác nhận kết thúc | S6 | Kết thúc buổi chạy? | 5,24 km · 26:55 | Chạy tiếp · **Kết thúc** |
 | Buổi chạy quá ngắn | S6 | Buổi chạy quá ngắn | Dưới 100 m hoặc dưới 1 phút nên không được lưu. | **Đã hiểu** |
 | Lỗi thời tiết | S2, S5 | Không lấy được thời tiết | Kiểm tra kết nối mạng. Bạn vẫn có thể tiếp tục. | Tiếp tục không có thời tiết · **Thử lại** |
