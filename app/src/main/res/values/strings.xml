@@ -98,6 +98,11 @@
     <string name="unit_minutes">phút</string>
     <string name="action_save_plan">Lưu kế hoạch</string>
     <string name="action_select">Chọn</string>
+
+    <!-- Gợi ý chạy theo kế hoạch trên S5 (BR-44, DESIGN 9 S5) -->
+    <string name="suggestion_text">Bạn có kế hoạch lúc %1$s · %2$s. Chạy theo kế hoạch này?</string>
+    <string name="suggestion_run_plan">Chạy theo kế hoạch</string>
+    <string name="suggestion_dismiss">Bỏ qua</string>
     <string name="action_cancel">Huỷ</string>
 
     <!-- S4 Chi tiết kế hoạch (DESIGN 9 S4, 10) -->
