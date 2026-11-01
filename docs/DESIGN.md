@@ -677,43 +677,53 @@ Màn hình quan trọng nhất. Mục tiêu: **liếc 1 giây là đọc đượ
 
 ### S8 · Thống kê
 
-Thống kê theo **tuần** hoặc **tháng** (SPEC 9.1). Chỉ có số liệu, bảng và lịch; không có biểu đồ đường hay cột.
+Thống kê theo **tuần** hoặc **tháng** (SPEC 9.1). Gồm lưới 4 ô số liệu chính (2 hàng × 2 cột), thanh hoàn thành kế hoạch, và biểu đồ cột quãng đường (theo ngày ở kỳ Tuần, theo tuần ở kỳ Tháng).
 
 ```
 Thống kê
 [ Tuần | Tháng ]
 ‹      26/10 – 01/11      ›
 ──────────────────────────────────────────
-Tổng quãng đường
-32,6 km                                      ← displayMedium
-┌────────────┬────────────┬───────────┐
-│ Số buổi    │ Thời gian  │ Pace      │
-│ 5          │ 2 giờ 51   │ 5:15 /km  │
-│ Bỏ lỡ      │            │           │
-│ 1          │            │           │
-└────────────┴────────────┴───────────┘
-Hoàn thành kế hoạch                 80%
-[████████████████████░░░░░]           ← thanh ngang
+┌─────────────────────┬──────────────────┐
+│ Tổng quãng đường    │ Số buổi chạy     │
+│ 32,6 km             │ 5                │
+├─────────────────────┼──────────────────┤
+│ Tổng thời gian      │ Pace trung bình  │
+│ 2 giờ 51            │ 5:15 /km         │
+└─────────────────────┴──────────────────┘
+
+Hoàn thành kế hoạch                  80%
+[████████████████████░░░░░]            ← thanh ngang bo tròn
 4 hoàn thành · 1 bỏ lỡ
 ──────────────────────────────────────────
-T2   5,2 km
-T3   –
-...
-CN   8,0 km                              ← bảng theo ngày
+  5,2       –       10,0               ← số km trên đầu cột (hoặc "–")
+ ┌───┐             ┌───┐
+ │   │             │   │               ← cột màu nhipBlue, bo góc trên
+ │   │     ───     │   │               ← ngày không chạy: thanh ringTrack 2 dp
+  T2       T3       T4                 ← hàng 1: thứ
+ 26/10    27/10    28/10               ← hàng 2: ngày/tháng (dd/MM)
 ──────────────────────────────────────────
    Lịch            (RUN)        Thống kê
 ```
 
-- **Thanh trên:** "Thống kê" (`titleLarge`). Dưới đó là `PeriodSwitcher` (mục 8.18).
-- **Số lớn:** tổng quãng đường (`displayMedium`, `tnum`).
-- **Lưới 3 `StatTile`** (mục 8.16): số buổi chạy, tổng thời gian, pace trung bình (BR-56). Ô "Bỏ lỡ" là ô thứ tư, đặt cùng lưới thành hai hàng. Tổng thời gian dưới 1 giờ hiện `m:ss`, từ 1 giờ trở lên hiện `h:mm:ss`.
-- **Thanh hoàn thành kế hoạch:** thanh ngang cao 8 dp, bo tròn, nền `ringTrack`, phần đã đạt tô theo dải gradient `nhipLinear`. Trên thanh có nhãn tỷ lệ (`labelLarge`, `tnum`), dưới thanh là "x hoàn thành · y bỏ lỡ" (`bodyMedium`). Tỷ lệ tính theo BR-55, làm tròn xuống.
-- **Bảng theo ngày (kỳ tuần):** bảy dòng từ T2 đến CN, mỗi dòng là tên ngày (`labelMedium`) và quãng đường trong ngày (`bodyLarge`, `tnum`). Ngày không chạy hiện `–`. Ngăn cách bằng kẻ `outline` 1 dp.
-- **Bảng theo tuần (kỳ tháng):** mỗi dòng là một tuần trong tháng, ghi khoảng ngày (ví dụ "01/10 – 04/10") và quãng đường của tuần. Tuần bị cắt bởi đầu hoặc cuối tháng chỉ tính các ngày trong tháng.
-- **Lịch tháng (kỳ tháng):** lưới 7 cột T2 đến CN, đủ các tuần của tháng. Ô ngày ngoài tháng để trống. Mỗi ngày có ít nhất một buổi chạy đã lưu có một chấm tròn 6 dp màu `textPrimary` ngay dưới số ngày. Ngày không có chấm thì chỉ có số. Lịch chỉ dùng để xem tần suất, không bấm để mở chi tiết.
-- **Kỳ trống** (không có buổi chạy): số liệu là `0`, pace `--`, dòng "Chưa có buổi chạy nào trong kỳ này". Thanh hoàn thành có nhãn `--`, dòng dưới là "Chưa có kế hoạch trong kỳ này" nếu không có kế hoạch nào.
-- **Đổi kỳ:** số đếm lên từ giá trị cũ tới giá trị mới trong 400 ms (`motionSlow`), thanh quét tới tỷ lệ mới trong cùng khoảng thời gian.
-- `contentDescription` của lịch tháng đọc theo từng ngày, ví dụ "Ngày 5 tháng 10, có chạy".
+- **Thanh trên:** "Thống kê" (`titleLarge`). Dưới đó là `PeriodSwitcher` (mục 8.18) và bộ điều hướng kỳ (`‹ khoảng ngày ›`).
+- **Lưới 4 ô số liệu** (lưới 2 hàng × 2 cột dùng `StatTile`):
+  - Hàng 1: **Tổng quãng đường** (`headlineMedium`, `tnum` kèm đơn vị `km`), **Số buổi chạy** (`headlineMedium`, `tnum`).
+  - Hàng 2: **Tổng thời gian** (dưới 1 giờ hiện `m:ss`, từ 1 giờ trở lên hiện `h:mm:ss` hoặc `h giờ m phút`), **Pace trung bình** (BR-56, dạng `m:ss /km`).
+  - Kỳ trống: Quãng đường `0,0 km`, Số buổi `0`, Thời gian `0:00`, Pace `--`.
+- **Thanh hoàn thành kế hoạch:** thanh ngang cao 8 dp, bo tròn, nền `ringTrack`, phần đã đạt tô theo dải gradient `nhipLinear`. Phía trên thanh có nhãn tỷ lệ (`labelLarge`, `tnum`), phía dưới thanh là "x hoàn thành · y bỏ lỡ" (`bodyMedium`). Tỷ lệ tính theo BR-55, làm tròn xuống. Nếu kỳ không có kế hoạch nào: thanh chỉ có track xám, nhãn `--`, dòng dưới ghi "Chưa có kế hoạch trong kỳ này".
+- **Biểu đồ cột kỳ Tuần (theo ngày):**
+  - 7 cột tương ứng Thứ Hai đến Chủ Nhật. Vùng biểu đồ cao khoảng 140 dp.
+  - Cột có chạy: màu `nhipBlue`, bo góc trên (`radiusS` = 4 dp). Chiều cao cột tỷ lệ thuận theo ngày có quãng đường cao nhất trong tuần.
+  - Ngày không chạy (0 km): thanh ngang màu `ringTrack` dày 2 dp ở đáy cột.
+  - **Trên đầu cột:** số km của ngày (`labelSmall`, `tnum`), ngày không chạy hiện `–`.
+  - **Dưới chân cột:** dòng 1 là thứ (`labelMedium`, ví dụ `T2`), dòng 2 là ngày/tháng (`bodySmall`, ví dụ `26/10`).
+- **Biểu đồ cột kỳ Tháng (theo tuần):**
+  - 4 đến 5 cột tương ứng các tuần trong tháng.
+  - Cột có chạy: màu `nhipBlue`, bo góc trên (`radiusS`). Tuần 0 km: thanh ngang `ringTrack` dày 2 dp.
+  - **Trên đầu cột:** số km tổng của tuần (`labelSmall`, `tnum`, ví dụ `25,0`), tuần không chạy hiện `–`.
+  - **Dưới chân cột:** dòng 1 là tên tuần (`labelMedium`, ví dụ `Tuần 1`), dòng 2 là khoảng ngày (`bodySmall`, ví dụ `01/10 – 04/10`).
+- **Đổi kỳ:** số đếm lên từ giá trị cũ tới giá trị mới trong 400 ms (`motionSlow`), các cột quét tới chiều cao mới trong cùng khoảng thời gian.
 
 ---
 

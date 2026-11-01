@@ -41,6 +41,7 @@ import com.nhacongdong.runmate.ui.place.PlacePickerRoute
 import com.nhacongdong.runmate.ui.screens.PlaceholderAction
 import com.nhacongdong.runmate.ui.screens.PlaceholderScreen
 import com.nhacongdong.runmate.ui.session.SessionDetailRoute
+import com.nhacongdong.runmate.ui.stats.StatsRoute
 import com.nhacongdong.runmate.ui.theme.RunMateTheme
 import java.time.LocalDate
 
@@ -178,9 +179,7 @@ fun RunMateApp(
                 )
             }
             composable<Stats> {
-                PlaceholderScreen(R.string.screen_stats, listOf(
-                    PlaceholderAction(R.string.action_open_session) { navController.navigate(SessionDetail(SAMPLE_ID)) },
-                ))
+                StatsRoute()
             }
         }
     }
