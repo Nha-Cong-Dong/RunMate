@@ -1,10 +1,7 @@
 package com.nhacongdong.runmate.ui.components
 
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -20,13 +17,15 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
@@ -54,30 +53,32 @@ fun RunRing(
     size: RunRingSize,
     modifier: Modifier = Modifier,
     thumbnail: List<Offset>? = null,
+    // Khoảnh khắc hoàn thành (DESIGN 3.4, nhịp 2): vòng vẽ vào, rồi huy hiệu ✓ phóng. Chỉ chạy khi người gọi bật
+    animateIn: Boolean = false,
 ) {
-    val reducedMotion = rememberReducedMotion()
-    val transition = rememberInfiniteTransition(label = "runRing")
-    // Vòng xoay 360° mỗi 4 giây, chấm nhấp nháy chu kỳ 1,2 giây (DESIGN 11)
-    val spin by transition.animateFloat(
-        initialValue = 0f, targetValue = 360f,
-        animationSpec = infiniteRepeatable(tween(4_000, easing = LinearEasing)), label = "spin",
-    )
-    val blink by transition.animateFloat(
-        initialValue = 1f, targetValue = 0.4f,
-        animationSpec = infiniteRepeatable(tween(600), RepeatMode.Reverse), label = "blink",
-    )
-    val running = state is DayRingState.Running
-    val angle = if (running && !reducedMotion) spin else 0f
-    val dotAlpha = if (running && !reducedMotion) blink else 1f
-
     val colors = MaterialTheme.colorScheme
-    val hasCore = state is DayRingState.Ran || running
+    val hasCore = state is DayRingState.Ran
+    val reducedMotion = rememberReducedMotion()
+    // Gradient quét 0 → 360° trong 600 ms, rồi huy hiệu ✓ phóng 0 → 1,15 → 1,0 trong 300 ms. Tắt hoạt ảnh thì hiện thẳng
+    val sweep = remember { Animatable(if (animateIn) 0f else 1f) }
+    val pop = remember { Animatable(if (animateIn) 0f else 1f) }
+    LaunchedEffect(animateIn, reducedMotion) {
+        if (animateIn && !reducedMotion) {
+            sweep.snapTo(0f)
+            pop.snapTo(0f)
+            sweep.animateTo(1f, tween(600, easing = LinearEasing))
+            pop.animateTo(1.15f, tween(150))
+            pop.animateTo(1f, tween(150))
+        } else {
+            sweep.snapTo(1f)
+            pop.snapTo(1f)
+        }
+    }
 
     Box(modifier.size(size.outer), contentAlignment = Alignment.Center) {
         Canvas(Modifier.fillMaxSize()) {
             when (state) {
-                is DayRingState.Ran -> drawGradientRing(size, state.runCount, angle)
-                DayRingState.Running -> drawGradientRing(size, 1, angle)
+                is DayRingState.Ran -> drawGradientRing(size, state.runCount, sweep.value)
                 DayRingState.Planned -> drawOutline(colors.onSurfaceVariant, dashed = true)
                 DayRingState.Missed -> drawOutline(colors.outline, dashed = false)
                 DayRingState.Empty -> Unit
@@ -85,9 +86,6 @@ fun RunRing(
             if (hasCore) drawCircle(colors.surfaceContainer, radius = size.core.toPx() / 2)
             if (state is DayRingState.Ran && thumbnail != null && thumbnail.size >= 2) {
                 drawThumbnail(thumbnail, size, colors.onSurface)
-            }
-            if (running) {
-                drawCircle(brush = nhipSweep(center), radius = 5.dp.toPx(), alpha = dotAlpha)
             }
         }
 
@@ -109,7 +107,13 @@ fun RunRing(
                     }
                 }
                 if (state.allGoalsReached) {
-                    Badge(size.badge, colors.primary, Modifier.align(Alignment.BottomEnd)) {
+                    Badge(
+                        size.badge, colors.primary,
+                        Modifier.align(Alignment.BottomEnd).graphicsLayer {
+                            scaleX = pop.value
+                            scaleY = pop.value
+                        },
+                    ) {
                         Icon(
                             painterResource(R.drawable.ic_check), contentDescription = null,
                             tint = colors.onPrimary, modifier = Modifier.size(size.badge * 0.7f),
@@ -138,21 +142,30 @@ private fun Badge(size: Dp, color: Color, modifier: Modifier, content: @Composab
 }
 
 // Vòng gradient đầy hoặc chia đoạn bằng nhau, tối đa 4 đoạn, khe 6° (DESIGN 3.2, 13.4, D4)
-private fun DrawScope.drawGradientRing(ringSize: RunRingSize, runCount: Int, angle: Float) {
+// fraction: phần của vòng đã vẽ, 0..1. Bình thường là 1 (đầy). Khoảnh khắc hoàn thành thì tăng dần từ 0 (DESIGN 3.4)
+private fun DrawScope.drawGradientRing(ringSize: RunRingSize, runCount: Int, fraction: Float) {
     val width = ringSize.ring.toPx()
     val radius = size.minDimension / 2 - width / 2
-    rotate(-90f + angle) {
+    rotate(-90f) {
         if (runCount <= 1) {
-            drawCircle(brush = nhipSweep(center), radius = radius, style = Stroke(width))
+            drawArc(
+                brush = nhipSweep(center),
+                startAngle = 0f,
+                sweepAngle = 360f * fraction,
+                useCenter = false,
+                topLeft = Offset(center.x - radius, center.y - radius),
+                size = Size(radius * 2, radius * 2),
+                style = Stroke(width),
+            )
         } else {
             val segments = runCount.coerceAtMost(RunRingStroke.MAX_SEGMENTS)
             val gap = RunRingStroke.SEGMENT_GAP_DEG
-            val sweep = 360f / segments - gap
+            val fullSweep = 360f / segments - gap
             repeat(segments) { i ->
                 drawArc(
                     brush = nhipSweep(center),
-                    startAngle = i * (sweep + gap) + gap / 2,
-                    sweepAngle = sweep,
+                    startAngle = i * (fullSweep + gap) + gap / 2,
+                    sweepAngle = fullSweep * fraction,
                     useCenter = false,
                     topLeft = Offset(center.x - radius, center.y - radius),
                     size = Size(radius * 2, radius * 2),
@@ -192,7 +205,6 @@ private fun RunRingPreview() = PreviewBox {
     val states = listOf(
         DayRingState.Ran(runCount = 1, allGoalsReached = true, thumbnailSessionId = 1),
         DayRingState.Ran(runCount = 3, allGoalsReached = false, thumbnailSessionId = 1),
-        DayRingState.Running,
         DayRingState.Planned,
         DayRingState.Missed,
         DayRingState.Empty,

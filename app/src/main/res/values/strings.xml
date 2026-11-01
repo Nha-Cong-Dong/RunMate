@@ -43,7 +43,6 @@
     <string name="cd_prev_week">Tuần trước</string>
     <string name="cd_next_week">Tuần sau</string>
     <string name="plan_limit">Chỉ lên kế hoạch được trong 16 ngày tới</string>
-    <string name="day_cd_running">%1$s, đang chạy</string>
     <string name="day_cd_ran">%1$s, đã chạy %2$d buổi</string>
     <string name="day_cd_ran_reached">%1$s, đã chạy %2$d buổi, đạt mục tiêu</string>
     <string name="day_cd_plans">%1$s, %2$d kế hoạch</string>
@@ -58,6 +57,11 @@
     <string name="action_plan_this_day">Lên kế hoạch cho ngày này</string>
     <string name="action_run_now">Chạy ngay</string>
 
+    <!-- Thông báo khi đang ghi buổi chạy (SPEC 10.2) -->
+    <string name="notification_channel_name">Ghi buổi chạy</string>
+    <string name="notification_recording">Đang ghi buổi chạy</string>
+    <string name="notification_no_permission">Không có quyền vị trí, quãng đường không được ghi</string>
+
     <!-- S3 Chọn vị trí (DESIGN 9 S3, SPEC 10.3) -->
     <string name="cd_back">Quay lại</string>
     <string name="place_search_hint">Tìm địa điểm</string>
@@ -68,6 +72,8 @@
     <string name="location_permission_title">Cần quyền vị trí</string>
     <string name="location_off_title">Bật vị trí</string>
     <string name="location_off_message">Bật vị trí để lấy vị trí hiện tại.</string>
+    <string name="location_off_run_message">Bật vị trí để ghi buổi chạy.</string>
+    <string name="location_permission_run_message">RunMate dùng GPS để đo quãng đường. Điểm GPS chỉ lưu trên máy bạn.</string>
     <string name="action_open_settings">Mở cài đặt</string>
     <string name="action_later">Để sau</string>
     <string name="place_locate_failed">Chưa lấy được vị trí hiện tại. Thử lại ở chỗ thoáng hơn.</string>
@@ -91,6 +97,39 @@
     <string name="unit_minutes">phút</string>
     <string name="action_save_plan">Lưu kế hoạch</string>
     <string name="action_select">Chọn</string>
+
+    <!-- Gợi ý chạy theo kế hoạch trên S5 (BR-44, DESIGN 9 S5) -->
+    <string name="suggestion_text">Bạn có kế hoạch lúc %1$s · %2$s. Chạy theo kế hoạch này?</string>
+    <string name="suggestion_run_plan">Chạy theo kế hoạch</string>
+    <string name="suggestion_dismiss">Bỏ qua</string>
+
+    <!-- S5 Chạy ngay (DESIGN 9 S5) -->
+    <string name="free_run_title">Chạy ngay</string>
+
+    <!-- S6 Đang chạy (DESIGN 9 S6) -->
+    <string name="run_pause">Tạm dừng</string>
+    <string name="run_resume">Tiếp tục</string>
+    <string name="run_finish">Kết thúc</string>
+    <string name="run_recording">Đang ghi</string>
+    <string name="run_paused">Tạm dừng</string>
+    <string name="run_goal_percent">%1$s%%</string>
+    <string name="run_distance_unit">km</string>
+    <string name="run_pace_unit">/km</string>
+    <string name="run_stat_time">Thời gian</string>
+    <string name="run_stat_distance">Quãng đường</string>
+    <string name="run_stat_pace">Pace</string>
+    <string name="run_percent_remaining">%1$s · còn %2$s</string>
+    <string name="run_goal_reached_banner">Đạt mục tiêu %1$s</string>
+    <string name="run_gps_off">Quyền vị trí đang tắt, không nhận được GPS, chỉ tính thời gian</string>
+    <string name="action_grant_location">Cấp quyền</string>
+    <string name="cd_gps">Tín hiệu GPS</string>
+    <string name="finish_confirm_title">Kết thúc buổi chạy?</string>
+    <string name="action_continue_run">Chạy tiếp</string>
+    <string name="too_short_title">Buổi chạy quá ngắn</string>
+    <string name="too_short_message">Dưới 100 m hoặc dưới 1 phút nên không được lưu.</string>
+    <string name="action_understood">Đã hiểu</string>
+    <string name="start_need_location">Chọn vị trí để bắt đầu chạy</string>
+    <string name="start_active_run">Đang có buổi chạy chưa kết thúc. Kết thúc buổi đó trước.</string>
     <string name="action_cancel">Huỷ</string>
 
     <!-- S4 Chi tiết kế hoạch (DESIGN 9 S4, 10) -->
@@ -107,6 +146,40 @@
     <string name="blocked_cancel_completed">Kế hoạch đã hoàn thành nên không huỷ được.</string>
     <string name="blocked_cancel_done">Kế hoạch đã được huỷ.</string>
     <string name="blocked_delete_running">Kết thúc buổi chạy trước khi xoá.</string>
+
+    <!-- Khôi phục buổi chạy dở khi mở app (SPEC 10.1, DESIGN 9 S1) -->
+    <string name="recover_title">Buổi chạy chưa kết thúc</string>
+    <string name="recover_message">Buổi chạy lúc %1$s chưa kết thúc (%2$s km · %3$s).</string>
+
+    <!-- Quỹ đạo ở S7 (DESIGN 8.17) -->
+    <string name="track_label">Quỹ đạo chạy</string>
+    <string name="track_too_few_points">Buổi chạy quá ít dữ liệu để vẽ quỹ đạo</string>
+
+    <!-- Màn S7 chi tiết buổi chạy (DESIGN 9 S7) -->
+    <string name="session_from_plan">Theo kế hoạch</string>
+    <string name="session_stat_time">Thời gian chạy</string>
+    <string name="session_pace_avg">Pace</string>
+    <string name="session_delete_menu">Xoá buổi chạy</string>
+    <string name="plan_delete_menu">Xoá kế hoạch</string>
+    <string name="session_delete_title">Xoá buổi chạy?</string>
+    <string name="session_delete_plan_note">Kế hoạch sẽ quay về \"%1$s\". Không khôi phục được.</string>
+    <string name="plan_delete_keep_session">Buổi chạy lúc %1$s (%2$s km) sẽ được giữ lại dưới dạng chạy tự do.</string>
+
+    <!-- Quyền thông báo trước khi chạy ở S4, S5 (SPEC 8.3, 9.2) -->
+    <string name="notification_denied_title">Thông báo đang tắt</string>
+    <string name="notification_denied_message">Buổi chạy vẫn được ghi, nhưng RunMate sẽ không hiện ở thanh thông báo. Bật thông báo trong cài đặt để xem nhanh khi màn hình khoá.</string>
+
+    <!-- Cảnh báo tiết kiệm pin trước khi chạy ở S4, S5 (BR-61, DESIGN 10) -->
+    <string name="power_save_title">Tiết kiệm pin đang bật</string>
+    <string name="power_save_message">GPS có thể bị tắt khi khoá màn hình, quãng đường sẽ không chính xác. Nên tắt khi chạy.</string>
+    <string name="action_run_anyway">Vẫn chạy</string>
+
+    <!-- Nút Chạy ở thanh dưới khi đang có buổi dở (DESIGN 8.1) -->
+    <string name="cd_run_active">Về buổi chạy đang diễn ra</string>
+
+    <!-- Băng "Đang có buổi chạy" ở S1 (DESIGN 8.4) -->
+    <string name="active_run_recording">Đang chạy · %1$s km · %2$s</string>
+    <string name="active_run_paused">Tạm dừng · %1$s km · %2$s</string>
 
     <!-- Thời tiết (DESIGN 8.10 đến 8.12, 10; SPEC 5.2) -->
     <string name="weather_forecast_for">Dự báo cho %1$s · cập nhật lúc %2$s</string>

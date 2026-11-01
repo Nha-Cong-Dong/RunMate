@@ -37,6 +37,7 @@ fun BottomBar(
     selected: BottomTab,
     onSelect: (BottomTab) -> Unit,
     onRun: () -> Unit,
+    hasActiveRun: Boolean = false,   // có buổi chạy dở: nút Chạy đổi trạng thái và mở thẳng S6 (DESIGN 8.1)
     modifier: Modifier = Modifier,
 ) {
     Surface(modifier.fillMaxWidth(), color = MaterialTheme.colorScheme.surface) {
@@ -55,7 +56,7 @@ fun BottomBar(
                     onClick = { onSelect(BottomTab.Calendar) },
                     modifier = Modifier.weight(1f),
                 )
-                RunButton(onClick = onRun)
+                RunButton(onClick = onRun, running = hasActiveRun)
                 TabItem(
                     label = R.string.tab_stats,
                     icon = R.drawable.ic_insights,

@@ -15,13 +15,10 @@ sealed interface DayRingState {
         val allGoalsReached: Boolean,                      // huy hiệu ✓
         val thumbnailSessionId: Long,                      // buổi dài nhất, vẽ trong lõi
     ) : DayRingState
-    data object Running : DayRingState                     // vòng xoay
 }
 
-// Ưu tiên: Running > Ran > Planned > Missed > Empty
+// Ưu tiên: Ran > Planned > Missed > Empty. Buổi đang dở không làm đổi ô ngày, băng ở S1 đã báo (DESIGN 3.2)
 fun dayRingState(plans: List<RunPlan>, sessions: List<RunSession>): DayRingState {
-    if (sessions.any { it.status != SessionStatus.FINISHED }) return DayRingState.Running
-
     val finished = sessions.filter { it.status == SessionStatus.FINISHED }
     if (finished.isNotEmpty()) {
         return DayRingState.Ran(

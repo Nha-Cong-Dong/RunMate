@@ -313,6 +313,7 @@ Tất cả user story đều là của **người chạy** (tác nhân duy nhấ
 | BR-36 | **Ngưỡng lưu:** buổi chạy ngắn hơn một trong hai mốc dưới đây thì không lưu | **100 m** hoặc **1 phút**. Báo người dùng rằng buổi chạy quá ngắn nên đã bỏ |
 | BR-37 | Điều kiện **đạt mục tiêu** | `DISTANCE`: quãng đường ≥ mục tiêu. `DURATION`: thời gian chạy ≥ mục tiêu |
 | BR-38 | Khi đạt mục tiêu | Báo cho người dùng một lần, **không tự dừng** |
+| BR-39 | **Khoảng trống GPS lớn:** nếu thời gian giữa hai điểm GPS liên tiếp vượt ngưỡng thì điểm sau bắt đầu một đoạn mới. Khoảng cách nối hai điểm đó **không** cộng vào quãng đường. Chỉ xét thời gian, không xét khoảng cách | **30 giây**. Gấp hơn 4 lần khoảng 6–7 giây một điểm đo được (BR-32) |
 
 **Kết thúc buổi chạy:** người dùng chủ động bấm Kết thúc. App không tự kết thúc buổi chạy.
 
@@ -654,7 +655,7 @@ flowchart LR
 | S1 | **Lịch** (màn hình chính) | UC1, UC3, UC6 | Lịch tuần: dải 7 ngày (T2–CN), ngày có kế hoạch hoặc buổi chạy có vòng chỉ trạng thái của ngày (xem DESIGN 3.2). Chọn một ngày để xem kế hoạch và buổi chạy của ngày đó (BR-50). Thẻ kế hoạch: giờ, vị trí, mục tiêu, nhãn trạng thái (mục 6.1), chưa hiện thời tiết. Kế hoạch Hoàn thành có thêm kết quả (quãng đường, tỷ lệ mục tiêu) và nút "Xem kết quả". Thẻ chạy tự do: giờ, quãng đường, thời gian, nút "Xem kết quả". Mặc định chọn hôm nay. ‹ › chuyển tuần, "Hôm nay" quay về tuần này. Lùi không giới hạn, tiến tối đa tới tuần chứa hôm nay + 16 ngày (BR-02). Có băng "Đang có buổi chạy" khi tồn tại buổi chạy RECORDING hoặc PAUSED | Tạo kế hoạch (nút +), mở kế hoạch (S4), xem kết quả (S7), bấm băng để về S6 |
 | S2 | **Tạo / Sửa kế hoạch** | UC1, UC2, UC3 | Form gồm ngày, giờ, vị trí, loại và giá trị mục tiêu. Khi đủ thông tin thì hiện thời tiết, cảnh báo và gợi ý vật dụng | Chọn vị trí (sang S3), Lưu |
 | S3 | **Chọn vị trí** | UC1, UC4 | Nút "Dùng vị trí hiện tại", ô tìm theo tên và danh sách kết quả (mục 8.2) | Chọn một vị trí rồi quay lại màn hình trước |
-| S4 | **Chi tiết kế hoạch** | UC2, UC3, UC4 | Thông tin kế hoạch, trạng thái, thời tiết, cảnh báo, gợi ý vật dụng. Áp dụng quy tắc 3 giờ và nhãn "cập nhật lúc …" (mục 5.2) | Bắt đầu chạy, Sửa, Huỷ, Xoá (bật hoặc tắt theo mục 6.4). Kế hoạch `COMPLETED` có thêm "Xem buổi chạy" |
+| S4 | **Chi tiết kế hoạch** | UC2, UC3, UC4 | Thông tin kế hoạch, trạng thái, thời tiết, cảnh báo, gợi ý vật dụng. Áp dụng quy tắc 3 giờ và nhãn "cập nhật lúc …" (mục 5.2) | Bắt đầu chạy (tắt khi đang có buổi chạy dở, BR-08), Sửa, Huỷ, Xoá (bật hoặc tắt theo mục 6.4). Kế hoạch `COMPLETED` có thêm "Xem buổi chạy" |
 | S5 | **Chuẩn bị chạy tự do** | UC2, UC4 | Vị trí (mặc định là vị trí hiện tại), mục tiêu, thời tiết, cảnh báo, gợi ý vật dụng (mục 5.4). Gợi ý kế hoạch đang trong khoảng gợi ý (BR-44) | Đổi vị trí (sang S3), Chạy theo kế hoạch (sang S4), Bắt đầu chạy |
 | S6 | **Đang chạy** | UC4 | Quãng đường, thời gian chạy, pace, tiến độ so với mục tiêu, trạng thái ghi hoặc tạm dừng | Tạm dừng, Tiếp tục, Kết thúc |
 | S7 | **Chi tiết buổi chạy** | UC5, UC6 | Quỹ đạo vẽ bằng Canvas, chia theo `segmentIndex`. Quãng đường, thời gian, pace trung bình, tỷ lệ đạt mục tiêu | Xoá buổi chạy. Nếu buổi chạy thuộc kế hoạch `COMPLETED` thì thêm Xoá kế hoạch |
@@ -671,8 +672,8 @@ S2 dùng chung cho cả tạo và sửa. Khi sửa, form được điền sẵn 
 | Xác nhận xoá | S4, S7 | Mọi thao tác xoá (BR-54) |
 | Thông báo giữ buổi chạy | S4 | Xoá kế hoạch `COMPLETED`: buổi chạy được giữ lại thành chạy tự do (BR-52) |
 | Cảnh báo kế hoạch đổi trạng thái | S7 | Xoá buổi chạy thuộc một kế hoạch (BR-53) |
-| Giải thích quyền | S3, S4, S5 | Người dùng từ chối quyền vị trí hoặc thông báo (UC4). Ở S3, khi bấm "Dùng vị trí hiện tại" mà quyền bị từ chối |
-| Bật vị trí | S3 | Bấm "Dùng vị trí hiện tại" mà GPS của máy đang tắt. Nút "Mở cài đặt" mở màn hình bật vị trí của máy |
+| Giải thích quyền | S3, S4, S5 | Người dùng từ chối quyền vị trí hoặc thông báo (UC4). Ở S3, khi bấm "Dùng vị trí hiện tại" mà quyền bị từ chối. Ở S4 và S5, khi bấm "Bắt đầu chạy" mà quyền bị từ chối. Chưa có quyền thì hệ thống hỏi trước |
+| Bật vị trí | S3, S4, S5 | Bấm "Dùng vị trí hiện tại" (S3), hoặc bấm "Bắt đầu chạy" (S4, S5), mà GPS của máy đang tắt. Nút "Mở cài đặt" mở màn hình bật vị trí của máy |
 | Xác nhận kết thúc | S6 | Bấm Kết thúc, để tránh bấm nhầm |
 | Buổi chạy quá ngắn | S6 | Kết thúc mà chưa đạt ngưỡng lưu (BR-36) |
 | Lỗi thời tiết | S2, S5 | Không lấy được dự báo: Thử lại, hoặc tiếp tục không có thời tiết (UC1) |
@@ -751,6 +752,14 @@ Phần này không thêm tính năng mới, mà nói app phải chạy **như th
 | Mã | Quy tắc | Giá trị (đề xuất) |
 |---|---|---|
 | BR-60 | Nếu điểm GPS cuối cùng đã cách bây giờ quá lâu, hộp thoại chỉ còn nút **Kết thúc**. Tiếp tục một buổi chạy bị gián đoạn quá lâu không còn ý nghĩa | **1 giờ** |
+
+### 10.2a Mất quyền vị trí khi đang ghi
+
+- Khi quyền vị trí bị tắt lúc đang ghi (`RECORDING`), buổi chạy **không tự dừng và không tự tạm dừng**. Thời gian vẫn tính (BR-34 chỉ bỏ lúc tạm dừng), nhưng không nhận được điểm GPS nên quãng đường không tăng.
+- Khi có lại quyền, điểm mới đầu tiên cách điểm trước hơn 30 giây nên mở đoạn mới theo BR-39. Khoảng trống không được cộng vào quãng đường.
+- Thông báo của service đổi thành "Không có quyền vị trí, quãng đường không được ghi" khi service phát hiện mất quyền. Nếu chưa phát hiện được thì đổi khi người dùng mở lại app.
+- Khi mở S6 mà quyền đang tắt, màn hình hiện băng cảnh báo có nút **Cấp quyền** (DESIGN mục 9 S6). Băng tự biến mất khi quyền được cấp lại.
+- Buổi chạy vẫn phải đạt BR-36 (100 m và 1 phút) mới được lưu.
 
 ### 10.2 Pin và hiệu năng
 

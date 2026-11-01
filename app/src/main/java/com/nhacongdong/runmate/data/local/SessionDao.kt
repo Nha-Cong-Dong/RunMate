@@ -26,6 +26,10 @@ interface SessionDao {
     @Query("SELECT * FROM run_session WHERE status IN (:statuses) LIMIT 1")
     suspend fun getFirstWithStatus(statuses: List<SessionStatus>): RunSession?
 
+    // S1: băng "Đang có buổi chạy" (DESIGN 8.4), cập nhật khi buổi dở đổi trạng thái
+    @Query("SELECT * FROM run_session WHERE status IN (:statuses) LIMIT 1")
+    fun observeFirstWithStatus(statuses: List<SessionStatus>): Flow<RunSession?>
+
     @Query("SELECT * FROM run_session WHERE planId = :planId")
     suspend fun getByPlanId(planId: Long): RunSession?
 }

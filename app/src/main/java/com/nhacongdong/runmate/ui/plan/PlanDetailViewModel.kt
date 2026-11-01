@@ -13,6 +13,8 @@ import com.nhacongdong.runmate.data.local.RunPlan
 import com.nhacongdong.runmate.data.model.PlanStatus
 import com.nhacongdong.runmate.domain.PlanRules
 import com.nhacongdong.runmate.domain.RefreshMissedPlans
+import com.nhacongdong.runmate.data.SessionRepository
+import com.nhacongdong.runmate.domain.StartPlanRun
 import com.nhacongdong.runmate.domain.WeatherRules
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
@@ -40,6 +42,8 @@ class PlanDetailViewModel(
     private val planRepository: PlanRepository,
     private val refreshMissedPlans: RefreshMissedPlans,
     private val weatherRepository: WeatherRepository,
+    private val startPlanRun: StartPlanRun,
+    private val sessions: SessionRepository,
     private val clock: () -> Long = System::currentTimeMillis,
     private val zone: ZoneId = ZoneId.systemDefault(),
 ) : ViewModel() {
@@ -54,6 +58,17 @@ class PlanDetailViewModel(
     // Lần bấm Lấy lại gần nhất không có mạng. Đổi lại khi bấm lần sau
     private val _offline = MutableStateFlow(false)
     val offline: StateFlow<Boolean> = _offline.asStateFlow()
+
+    // Đang có buổi chạy dở (BR-08): tắt nút Bắt đầu chạy ở S4
+    private val _hasActiveRun = MutableStateFlow(false)
+    val hasActiveRun: StateFlow<Boolean> = _hasActiveRun.asStateFlow()
+
+    fun refreshActiveRun() {
+        viewModelScope.launch { _hasActiveRun.value = sessions.getActiveSession() != null }
+    }
+
+    // Bắt đầu chạy theo kế hoạch này. Trả về id buổi chạy, hoặc null nếu không bắt đầu được
+    suspend fun startRun(): Long? = startPlanRun(planId)
 
     private val _events = Channel<PlanDetailEvent>(Channel.BUFFERED)
     val events: Flow<PlanDetailEvent> = _events.receiveAsFlow()
@@ -112,6 +127,8 @@ class PlanDetailViewModel(
                     container.planRepository,
                     container.refreshMissedPlans,
                     container.weatherRepository,
+                    container.startPlanRun,
+                    container.sessionRepository,
                 )
             }
         }
