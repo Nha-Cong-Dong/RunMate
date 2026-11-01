@@ -3,10 +3,14 @@ package com.nhacongdong.runmate.ui
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
@@ -31,9 +35,12 @@ import com.nhacongdong.runmate.ui.plan.PlanDetailRoute
 import com.nhacongdong.runmate.ui.plan.PlanEditRoute
 import com.nhacongdong.runmate.ui.plan.PlanListRoute
 import com.nhacongdong.runmate.ui.run.FreeRunRoute
+import com.nhacongdong.runmate.ui.run.RecoverRunDialog
+import com.nhacongdong.runmate.ui.run.RunRoute
 import com.nhacongdong.runmate.ui.place.PlacePickerRoute
 import com.nhacongdong.runmate.ui.screens.PlaceholderAction
 import com.nhacongdong.runmate.ui.screens.PlaceholderScreen
+import com.nhacongdong.runmate.ui.session.SessionDetailRoute
 import com.nhacongdong.runmate.ui.theme.RunMateTheme
 import java.time.LocalDate
 
@@ -44,10 +51,27 @@ private const val SAMPLE_ID = 1L
 private const val PICKED_PLACE_KEY = "picked_place"
 
 @Composable
-fun RunMateApp() {
+fun RunMateApp(
+    openRun: Boolean = false,           // bấm thông báo của service thì mở S6 (SPEC 8.3)
+    onOpenRunHandled: () -> Unit = {},
+) {
     val navController = rememberNavController()
+    LaunchedEffect(openRun) {
+        if (openRun) {
+            navController.navigate(Running) { launchSingleTop = true }
+            onOpenRunHandled()
+        }
+    }
     val backStackEntry by navController.currentBackStackEntryAsState()
     val destination = backStackEntry?.destination
+    val appViewModel: RunMateAppViewModel = viewModel(factory = RunMateAppViewModel.Factory)
+    val hasActiveRun by appViewModel.hasActiveRun.collectAsStateWithLifecycle()
+    val interrupted by appViewModel.interrupted.collectAsStateWithLifecycle()
+    // Mỗi lần app hiện lên thì kiểm tra buổi dở đã mất service chưa (SPEC 10.1)
+    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) { appViewModel.refresh() }
+    LaunchedEffect(appViewModel) {
+        appViewModel.openRun.collect { navController.navigate(Running) { launchSingleTop = true } }
+    }
     // Thanh dưới chỉ hiện ở 2 tab (SPEC 9.3, DESIGN 8.2)
     val tab = when {
         destination?.hasRoute<PlanList>() == true -> BottomTab.Calendar
@@ -61,8 +85,9 @@ fun RunMateApp() {
                 BottomBar(
                     selected = tab,
                     onSelect = { navController.navigateToTab(if (it == BottomTab.Calendar) PlanList else Stats) },
-                    // Nút hành động, không phải tab (SPEC 9.3). Giai đoạn D (D7): có buổi chạy dở thì mở thẳng S6 (BR-08)
-                    onRun = { navController.navigate(FreeRunSetup) },
+                    // Nút hành động, không phải tab (SPEC 9.3). Có buổi chạy dở thì mở thẳng S6 (BR-08), không thì mở S5
+                    onRun = { navController.navigate(if (hasActiveRun) Running else FreeRunSetup) },
+                    hasActiveRun = hasActiveRun,
                 )
             }
         },
@@ -80,6 +105,8 @@ fun RunMateApp() {
                     onOpenPlan = { navController.navigate(PlanDetail(it)) },
                     onViewResult = { navController.navigate(SessionDetail(it)) },
                     onRunNow = { navController.navigate(FreeRunSetup) },
+                    // Băng "Đang có buổi chạy" mở thẳng S6 (DESIGN 8.4)
+                    onOpenRun = { navController.navigate(Running) },
                 )
             }
             composable<PlanEdit> { entry ->
@@ -133,20 +160,22 @@ fun RunMateApp() {
                 )
             }
             composable<Running> {
-                PlaceholderScreen(R.string.screen_running, listOf(
-                    // Kết thúc thì sang S7 và bỏ S6 khỏi lịch sử, để Back không quay lại (SPEC 9.3)
-                    PlaceholderAction(R.string.action_finish_saved) {
-                        navController.navigate(SessionDetail(SAMPLE_ID)) {
-                            popUpTo<Running> { inclusive = true }
-                        }
+                RunRoute(
+                    // Lưu xong thì sang S7 và bỏ S6 khỏi lịch sử, để Back không quay lại (SPEC 9.3)
+                    onSaved = { id ->
+                        navController.navigate(SessionDetail(id)) { popUpTo<Running> { inclusive = true } }
                     },
-                    PlaceholderAction(R.string.action_finish_too_short) { navController.popBackStack() },
-                ))
+                    // Quá ngắn hoặc không có buổi dở thì quay lại màn trước
+                    onBack = { navController.popBackStack() },
+                )
             }
-            composable<SessionDetail> {
-                PlaceholderScreen(R.string.screen_session_detail, listOf(
-                    PlaceholderAction(R.string.action_delete) { navController.popBackStack() },
-                ))
+            composable<SessionDetail> { entry ->
+                SessionDetailRoute(
+                    sessionId = entry.toRoute<SessionDetail>().sessionId,
+                    onBack = { navController.popBackStack() },
+                    // Xoá xong thì về màn trước (buổi chạy đã mất) hoặc về S1 (kế hoạch đã xoá, SPEC 9.3)
+                    onDeleted = { navController.popBackStack() },
+                )
             }
             composable<Stats> {
                 PlaceholderScreen(R.string.screen_stats, listOf(
@@ -154,6 +183,11 @@ fun RunMateApp() {
                 ))
             }
         }
+    }
+    // Buổi dở đã mất service: hỏi Tiếp tục hay Kết thúc, chỉ hiện ở S1 (DESIGN 9 S1)
+    val pending = interrupted
+    if (pending != null && destination?.hasRoute<PlanList>() == true) {
+        RecoverRunDialog(run = pending, onResume = appViewModel::resume, onFinish = appViewModel::finish)
     }
 }
 

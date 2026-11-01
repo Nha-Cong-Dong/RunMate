@@ -45,4 +45,13 @@ object RunRules {
             .filter { it.status == PlanStatus.PLANNED }
             .filter { now in (it.startTime - SUGGEST_BEFORE_MS)..(it.startTime + PlanRules.GRACE_PERIOD_MS) }
             .minByOrNull { abs(it.startTime - now) }
+
+    // BR-60: buổi bị gián đoạn quá 1 giờ kể từ điểm GPS cuối thì chỉ còn Kết thúc (SPEC 10.1)
+    const val RESUME_LIMIT_MS = 60 * 60_000L
+
+    fun canResumeInterrupted(lastPointTime: Long?, startedAt: Long, now: Long): Boolean =
+        now - (lastPointTime ?: startedAt) <= RESUME_LIMIT_MS
+
+    // SPEC 10.1: giờ kết thúc của buổi bị gián đoạn là điểm GPS cuối, không phải lúc mở app
+    fun endedAtAfterInterruption(lastPointTime: Long?, startedAt: Long): Long = lastPointTime ?: startedAt
 }

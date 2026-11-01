@@ -24,8 +24,21 @@ class RecordTrackPointTest {
         }
     }
 
+    private val drops = GpsDropCounter()
+
     private fun record(store: FakeStore, lat: Double, timeOffsetMs: Long, accuracy: Float = 5f) = runBlocking {
-        RecordTrackPoint(store)(sessionId = 1, timestamp = t0 + timeOffsetMs, latitude = lat, longitude = 0.0, accuracyM = accuracy)
+        RecordTrackPoint(store, drops)(sessionId = 1, timestamp = t0 + timeOffsetMs, latitude = lat, longitude = 0.0, accuracyM = accuracy)
+    }
+
+    @Test
+    fun threeDroppedInRow_isWeakGps_andKeptPointResetsCount() {
+        val store = FakeStore()
+        record(store, 0.0, 0)
+        repeat(3) { record(store, lat100m, 10_000L + it * 1_000, accuracy = 50f) }
+        assertEquals(3, drops.consecutive.value)
+        assertTrue(GpsDropCounter.isWeak(drops.consecutive.value))
+        assertTrue(record(store, lat100m, 20_000))
+        assertEquals(0, drops.consecutive.value)
     }
 
     @Test

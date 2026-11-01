@@ -129,4 +129,26 @@ class RunRulesTest {
         val near = plan(2, startTime - 5 * minute)
         assertEquals(near, RunRules.suggestedPlan(listOf(far, near), now))
     }
+
+    // BR-60: đúng 1 giờ thì còn tiếp tục được, quá 1 giờ thì không
+    @Test
+    fun resumeAllowed_upToOneHourAfterLastPoint() {
+        val last = 1_000_000L
+        assertTrue(RunRules.canResumeInterrupted(last, startedAt = 0L, now = last + 60 * minute))
+        assertFalse(RunRules.canResumeInterrupted(last, startedAt = 0L, now = last + 60 * minute + 1))
+    }
+
+    // Chưa có điểm nào thì tính từ giờ bắt đầu
+    @Test
+    fun resumeUsesStartTime_whenNoPoints() {
+        assertTrue(RunRules.canResumeInterrupted(null, startedAt = 0L, now = 60 * minute))
+        assertFalse(RunRules.canResumeInterrupted(null, startedAt = 0L, now = 61 * minute))
+    }
+
+    // SPEC 10.1: giờ kết thúc là điểm GPS cuối, không có điểm thì là giờ bắt đầu
+    @Test
+    fun endedAt_isLastPoint_orStartWhenNone() {
+        assertEquals(500L, RunRules.endedAtAfterInterruption(lastPointTime = 500L, startedAt = 100L))
+        assertEquals(100L, RunRules.endedAtAfterInterruption(lastPointTime = null, startedAt = 100L))
+    }
 }

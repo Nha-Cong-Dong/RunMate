@@ -60,6 +60,10 @@ import com.nhacongdong.runmate.ui.components.GearChips
 import com.nhacongdong.runmate.ui.location.LocationDialog
 import com.nhacongdong.runmate.ui.location.LocationDialogs
 import com.nhacongdong.runmate.ui.location.rememberLocationGate
+import com.nhacongdong.runmate.ui.notification.NotificationDeniedDialog
+import com.nhacongdong.runmate.ui.notification.rememberNotificationGate
+import com.nhacongdong.runmate.ui.power.PowerSaveDialog
+import com.nhacongdong.runmate.ui.power.isPowerSaveWarningOn
 import com.nhacongdong.runmate.ui.components.StartRunButton
 import com.nhacongdong.runmate.ui.components.StatusChip
 import com.nhacongdong.runmate.ui.components.WarningList
@@ -89,8 +93,8 @@ fun PlanDetailRoute(
     val hasActiveRun by viewModel.hasActiveRun.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
-    // Bắt đầu chạy: kiểm tra quyền và GPS, rồi tạo buổi chạy, bật service và sang S6 (SPEC 6.3)
-    val gate = rememberLocationGate(onReady = {
+    // Bắt đầu chạy: tạo buổi chạy, bật service và sang S6 (SPEC 6.3)
+    val startNow: () -> Unit = {
         scope.launch {
             val sessionId = viewModel.startRun()
             if (sessionId != null) {
@@ -98,7 +102,32 @@ fun PlanDetailRoute(
                 onOpenRun()
             }
         }
-    })
+    }
+    // Tiết kiệm pin có thể làm mất GPS thì hỏi trước khi chạy (BR-61)
+    var powerWarning by rememberSaveable { mutableStateOf(false) }
+    // Sau khi có đủ quyền: hỏi tiết kiệm pin nếu cần, rồi mới bắt đầu
+    val afterPermissions: () -> Unit = {
+        if (context.isPowerSaveWarningOn()) powerWarning = true else startNow()
+    }
+    // Quyền thông báo (SPEC 8.3) sau quyền vị trí. Kiểm tra quyền và GPS theo DESIGN 10, SPEC 9.2
+    val notificationGate = rememberNotificationGate(onReady = afterPermissions)
+    val gate = rememberLocationGate(onReady = { notificationGate.start() })
+    NotificationDeniedDialog(
+        show = notificationGate.denied,
+        onContinue = {
+            notificationGate.dismiss()
+            afterPermissions()
+        },
+        onDismiss = notificationGate.dismiss,
+    )
+    PowerSaveDialog(
+        show = powerWarning,
+        onContinue = {
+            powerWarning = false
+            startNow()
+        },
+        onDismiss = { powerWarning = false },
+    )
     var showWeatherError by rememberSaveable { mutableStateOf(false) }
     // Mỗi lần S4 hiện lên thì cập nhật MISSED, giống S1 (SPEC 6.3)
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {

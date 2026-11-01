@@ -92,7 +92,8 @@ class FinishRun(
     private val plans: PlanRepository,
     private val clock: () -> Long = System::currentTimeMillis,
 ) {
-    suspend operator fun invoke(sessionId: Long): FinishResult? {
+    // endedAt: giờ kết thúc khi khôi phục buổi bị gián đoạn (SPEC 10.1). Không truyền thì là lúc bấm Kết thúc
+    suspend operator fun invoke(sessionId: Long, endedAt: Long? = null): FinishResult? {
         val session = sessions.observeSession(sessionId).first() ?: return null
         if (session.status == SessionStatus.FINISHED) return null
 
@@ -108,7 +109,7 @@ class FinishRun(
             sessions.completeSession(
                 session.copy(
                     status = SessionStatus.FINISHED,
-                    endedAt = now,
+                    endedAt = endedAt ?: now,
                     distanceMeters = distanceM,
                     activeDurationSec = durationMs / 1_000,
                 ),

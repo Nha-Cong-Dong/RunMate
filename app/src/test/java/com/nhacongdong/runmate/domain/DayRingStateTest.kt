@@ -57,16 +57,4 @@ class DayRingStateTest {
         )
         assertEquals(DayRingState.Ran(runCount = 2, allGoalsReached = false, thumbnailSessionId = 1), state)
     }
-
-    @Test
-    fun activeSession_runningWinsOverEverything() {
-        val state = dayRingState(
-            listOf(plan(PlanStatus.IN_PROGRESS)),
-            listOf(
-                session(null, distanceMeters = reached, id = 1),
-                session(null, status = SessionStatus.PAUSED, id = 2),
-            )
-        )
-        assertEquals(DayRingState.Running, state)
-    }
 }

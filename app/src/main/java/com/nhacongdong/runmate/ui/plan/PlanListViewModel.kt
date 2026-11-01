@@ -5,21 +5,28 @@ import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.AP
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import com.nhacongdong.runmate.RecentlyFinishedRun
 import com.nhacongdong.runmate.RunMateApplication
 import com.nhacongdong.runmate.data.PlanRepository
 import com.nhacongdong.runmate.data.SessionRepository
+import com.nhacongdong.runmate.data.model.SessionStatus
 import com.nhacongdong.runmate.domain.DayAgenda
 import com.nhacongdong.runmate.domain.DayData
 import com.nhacongdong.runmate.domain.DayEntry
 import com.nhacongdong.runmate.domain.PlanRules
 import com.nhacongdong.runmate.domain.RefreshMissedPlans
+import com.nhacongdong.runmate.domain.TrackRules
 import com.nhacongdong.runmate.domain.WeekRules
 import com.nhacongdong.runmate.domain.dayRingState
 import com.nhacongdong.runmate.ui.components.CalendarDay
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -29,6 +36,14 @@ import java.time.temporal.ChronoUnit
 
 // Tuần đang xem và ngày đang chọn trên S1
 private data class Navigation(val today: LocalDate, val weekStart: LocalDate, val selected: LocalDate)
+
+// Buổi đang dở và số liệu sống của nó, cho băng "Đang có buổi chạy" (DESIGN 8.4)
+data class ActiveRunInfo(
+    val sessionId: Long,
+    val status: SessionStatus,   // RECORDING hoặc PAUSED
+    val distanceM: Double,
+    val durationMs: Long,
+)
 
 // Mọi thứ S1 cần để vẽ (SPEC 9.1, DESIGN 9.1)
 data class PlanListUiState(
@@ -40,6 +55,8 @@ data class PlanListUiState(
     val entriesByDay: Map<LocalDate, List<DayEntry>> = emptyMap(), // thẻ của mọi ngày, để ngày cũ còn đúng lúc trượt đi
     val canGoNext: Boolean = true,                 // BR-02
     val isFirstUse: Boolean = false,               // chưa có kế hoạch hay buổi chạy nào (DESIGN 8.19)
+    val activeRun: ActiveRunInfo? = null,          // buổi đang dở, hiện băng ở S1
+    val celebrateDay: LocalDate? = null,           // ngày của buổi vừa lưu: vòng vẽ vào một lần (DESIGN 3.4)
     val isLoading: Boolean = true,
 )
 
@@ -47,17 +64,39 @@ class PlanListViewModel(
     planRepository: PlanRepository,
     sessionRepository: SessionRepository,
     private val refreshMissedPlans: RefreshMissedPlans,
+    private val recentlyFinished: RecentlyFinishedRun,
     private val clock: () -> Long = System::currentTimeMillis,
     private val zone: ZoneId = ZoneId.systemDefault(),
 ) : ViewModel() {
 
     private val navigation = MutableStateFlow(today().let { Navigation(it, WeekRules.weekStartOf(it), it) })
 
-    // Giai đoạn D (D7): thêm buổi đang RECORDING/PAUSED để vòng "đang chạy" hiện được
+    // Buổi đang dở, cùng số liệu sống của nó. Có điểm GPS mới thì số liệu cập nhật
+    private val activeRun: Flow<ActiveRunInfo?> = sessionRepository.observeActiveSession().flatMapLatest { session ->
+        if (session == null) {
+            flowOf(null)
+        } else {
+            sessionRepository.observeTrackPoints(session.id).map { points ->
+                ActiveRunInfo(
+                    sessionId = session.id,
+                    status = session.status,
+                    distanceM = TrackRules.totalDistanceM(points),
+                    durationMs = TrackRules.activeDurationMs(points),
+                )
+            }
+        }
+    }
+
+    // Giai đoạn D (D7): thêm buổi đang RECORDING/PAUSED để vòng "đang chạy" hiện được (D7 còn lại)
     val uiState: StateFlow<PlanListUiState> = combine(
-        navigation, planRepository.observePlans(), sessionRepository.observeFinishedSessions(),
-    ) { nav, plans, sessions ->
+        navigation, planRepository.observePlans(), sessionRepository.observeFinishedSessions(), activeRun,
+        recentlyFinished.sessionId,
+    ) { nav, plans, sessions, active, finishedId ->
         val byDay = DayAgenda.groupByDay(plans, sessions, zone)
+        // Buổi vừa lưu trong phiên này: ngày bắt đầu chạy của nó (BR-56) là ngày được vẽ hiệu ứng
+        val celebrateDay = finishedId?.let { id ->
+            sessions.firstOrNull { it.id == id }?.let { DayAgenda.dateOf(it.startedAt, zone) }
+        }
         PlanListUiState(
             today = nav.today,
             weekStart = nav.weekStart,
@@ -69,7 +108,9 @@ class PlanListViewModel(
             entries = DayAgenda.dayEntries(byDay[nav.selected] ?: DayData()),
             entriesByDay = byDay.mapValues { DayAgenda.dayEntries(it.value) },
             canGoNext = nav.weekStart < WeekRules.lastAllowedWeekStart(nav.today),
-            isFirstUse = plans.isEmpty() && sessions.isEmpty(),
+            isFirstUse = plans.isEmpty() && sessions.isEmpty() && active == null,
+            activeRun = active,
+            celebrateDay = celebrateDay,
             isLoading = false,
         )
     }.stateIn(
@@ -79,6 +120,9 @@ class PlanListViewModel(
     )
 
     fun selectDate(date: LocalDate) = navigation.update { it.copy(selected = date) }
+
+    // Hiệu ứng đã chạy xong: không chạy lại ở lần sau (DESIGN 3.4)
+    fun consumeCelebration() = recentlyFinished.consume()
 
     // Vuốt ngang trên danh sách (DESIGN 9 S1): đổi ngày, qua tuần thì lịch tuần đi theo.
     // Không vượt 16 ngày kể từ hôm nay (BR-02)
@@ -123,7 +167,12 @@ class PlanListViewModel(
         val Factory = viewModelFactory {
             initializer {
                 val container = (this[APPLICATION_KEY] as RunMateApplication).container
-                PlanListViewModel(container.planRepository, container.sessionRepository, container.refreshMissedPlans)
+                PlanListViewModel(
+                    container.planRepository,
+                    container.sessionRepository,
+                    container.refreshMissedPlans,
+                    container.recentlyFinished,
+                )
             }
         }
     }

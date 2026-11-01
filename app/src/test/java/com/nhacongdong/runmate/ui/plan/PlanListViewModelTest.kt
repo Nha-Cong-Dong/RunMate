@@ -1,5 +1,6 @@
 package com.nhacongdong.runmate.ui.plan
 
+import com.nhacongdong.runmate.RecentlyFinishedRun
 import com.nhacongdong.runmate.data.PlanRepository
 import com.nhacongdong.runmate.data.SessionRepository
 import com.nhacongdong.runmate.data.local.RunMateDatabase
@@ -47,6 +48,7 @@ class PlanListViewModelTest {
             planRepository,
             SessionRepository(db, db.sessionDao(), db.trackPointDao(), db.planDao()),
             RefreshMissedPlans(planRepository),
+            recentlyFinished = RecentlyFinishedRun(),
             clock = { now },
             zone = zone,
         )

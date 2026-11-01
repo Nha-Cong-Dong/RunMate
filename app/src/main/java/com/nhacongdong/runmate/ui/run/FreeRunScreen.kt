@@ -24,7 +24,10 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -50,6 +53,10 @@ import com.nhacongdong.runmate.ui.location.LocationDialog
 import com.nhacongdong.runmate.ui.location.LocationDialogs
 import com.nhacongdong.runmate.ui.location.hasLocationPermission
 import com.nhacongdong.runmate.ui.location.rememberLocationGate
+import com.nhacongdong.runmate.ui.notification.NotificationDeniedDialog
+import com.nhacongdong.runmate.ui.notification.rememberNotificationGate
+import com.nhacongdong.runmate.ui.power.PowerSaveDialog
+import com.nhacongdong.runmate.ui.power.isPowerSaveWarningOn
 import com.nhacongdong.runmate.ui.theme.Dimens
 import com.nhacongdong.runmate.ui.theme.RunMateTheme
 import kotlinx.coroutines.launch
@@ -92,7 +99,8 @@ fun FreeRunRoute(
         }
     }
 
-    val gate = rememberLocationGate(onReady = {
+    // Bắt đầu chạy: tạo buổi chạy, bật service và sang S6 (SPEC 6.3)
+    val startNow: () -> Unit = {
         scope.launch {
             val sessionId = viewModel.startRun()
             if (sessionId != null) {
@@ -100,7 +108,32 @@ fun FreeRunRoute(
                 onStarted()
             }
         }
-    })
+    }
+    // Tiết kiệm pin có thể làm mất GPS thì hỏi trước khi chạy (BR-61)
+    var powerWarning by rememberSaveable { mutableStateOf(false) }
+    // Sau khi có đủ quyền: hỏi tiết kiệm pin nếu cần, rồi mới bắt đầu
+    val afterPermissions: () -> Unit = {
+        if (context.isPowerSaveWarningOn()) powerWarning = true else startNow()
+    }
+    // Quyền thông báo (SPEC 8.3) sau quyền vị trí. Kiểm tra quyền và GPS theo DESIGN 10, SPEC 9.2
+    val notificationGate = rememberNotificationGate(onReady = afterPermissions)
+    val gate = rememberLocationGate(onReady = { notificationGate.start() })
+    NotificationDeniedDialog(
+        show = notificationGate.denied,
+        onContinue = {
+            notificationGate.dismiss()
+            afterPermissions()
+        },
+        onDismiss = notificationGate.dismiss,
+    )
+    PowerSaveDialog(
+        show = powerWarning,
+        onContinue = {
+            powerWarning = false
+            startNow()
+        },
+        onDismiss = { powerWarning = false },
+    )
 
     FreeRunScreen(
         state = state,

@@ -91,7 +91,8 @@ object TrackRules {
     fun justReached(wasReached: Boolean, isReached: Boolean): Boolean = !wasReached && isReached
 
     // Khoảng cách trên mặt đất giữa hai điểm (công thức haversine), đơn vị mét
-    private fun distanceM(a: TrackPoint, b: TrackPoint): Double {
+    // Khoảng cách giữa hai điểm, dùng chung với TrackPace để tô màu theo pace
+    internal fun distanceM(a: TrackPoint, b: TrackPoint): Double {
         val lat1 = Math.toRadians(a.latitude)
         val lat2 = Math.toRadians(b.latitude)
         val dLat = lat2 - lat1

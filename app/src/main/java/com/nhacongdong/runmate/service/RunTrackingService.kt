@@ -2,13 +2,16 @@ package com.nhacongdong.runmate.service
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.app.Service
 import android.content.Intent
+import android.database.SQLException
 import android.content.pm.ServiceInfo
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import androidx.core.app.ServiceCompat
 import com.nhacongdong.runmate.R
+import com.nhacongdong.runmate.MainActivity
 import com.nhacongdong.runmate.RunMateApplication
 import com.nhacongdong.runmate.domain.RecordTrackPoint
 import com.nhacongdong.runmate.ui.location.hasLocationPermission
@@ -31,6 +34,7 @@ class RunTrackingService : Service() {
 
     override fun onCreate() {
         super.onCreate()
+        isRunning = true
         createChannel()
         locationSource = TrackingLocationSource(this)
         recordTrackPoint = (application as RunMateApplication).container.recordTrackPoint
@@ -53,13 +57,16 @@ class RunTrackingService : Service() {
             ACTION_PAUSE -> locationSource.stop()
             ACTION_RESUME -> startLocation(hasPermission)
             // Kết thúc buổi chạy: ngừng nhận GPS và dừng service (SPEC 6.3)
-            ACTION_STOP -> {
-                locationSource.stop()
-                stopForeground(STOP_FOREGROUND_REMOVE)
-                stopSelf()
-            }
+            ACTION_STOP -> stopRecording()
         }
         return START_NOT_STICKY
+    }
+
+    // Dừng nhận GPS và dừng service. Dùng khi kết thúc, hoặc khi buổi chạy không còn để ghi
+    private fun stopRecording() {
+        locationSource.stop()
+        stopForeground(STOP_FOREGROUND_REMOVE)
+        stopSelf()
     }
 
     // Có quyền vị trí thì nhận GPS. Thiếu quyền thì không ghi quãng đường, service vẫn chạy để thời gian tiếp tục (SPEC 10.2a)
@@ -71,13 +78,19 @@ class RunTrackingService : Service() {
         try {
             locationSource.start { location ->
                 scope.launch {
-                    recordTrackPoint(
-                        sessionId = sessionId,
-                        timestamp = location.time,
-                        latitude = location.latitude,
-                        longitude = location.longitude,
-                        accuracyM = location.accuracy,
-                    )
+                    try {
+                        recordTrackPoint(
+                            sessionId = sessionId,
+                            timestamp = location.time,
+                            latitude = location.latitude,
+                            longitude = location.longitude,
+                            accuracyM = location.accuracy,
+                        )
+                    } catch (e: SQLException) {
+                        // Buổi chạy đã bị xoá hoặc không còn (lỗi FOREIGN KEY): không còn gì để ghi, nên dừng GPS và service
+                        // thay vì để lỗi làm app đóng
+                        stopRecording()
+                    }
                 }
             }
             updateNotification(R.string.notification_recording)
@@ -92,6 +105,7 @@ class RunTrackingService : Service() {
     }
 
     override fun onDestroy() {
+        isRunning = false
         locationSource.stop()
         scope.cancel()
         super.onDestroy()
@@ -112,9 +126,23 @@ class RunTrackingService : Service() {
         .setContentText(getString(textRes))
         .setSmallIcon(R.drawable.ic_directions_run)
         .setOngoing(true)
+        .setContentIntent(openRunPendingIntent())
         .build()
 
+    // Bấm thông báo thì mở RunMate và sang S6 (SPEC 8.3)
+    private fun openRunPendingIntent(): PendingIntent {
+        val intent = Intent(this, MainActivity::class.java)
+            .putExtra(EXTRA_OPEN_RUN, true)
+            .addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
+        return PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+    }
+
     companion object {
+        // Service đang chạy trong tiến trình này. Mở app mà cờ là false thì buổi dở đã mất service (SPEC 10.1)
+        @Volatile
+        var isRunning: Boolean = false
+            private set
+
         const val CHANNEL_ID = "run_tracking"
         const val NOTIFICATION_ID = 1
         const val ACTION_START = "com.nhacongdong.runmate.action.START"
@@ -122,5 +150,6 @@ class RunTrackingService : Service() {
         const val ACTION_PAUSE = "com.nhacongdong.runmate.action.PAUSE"
         const val ACTION_RESUME = "com.nhacongdong.runmate.action.RESUME"
         const val EXTRA_SESSION_ID = "session_id"
+        const val EXTRA_OPEN_RUN = "open_run"
     }
 }

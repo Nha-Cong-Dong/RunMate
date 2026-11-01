@@ -17,6 +17,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -33,6 +34,7 @@ import com.nhacongdong.runmate.data.model.PlanStatus
 import com.nhacongdong.runmate.domain.DayEntry
 import com.nhacongdong.runmate.domain.DayRingState
 import com.nhacongdong.runmate.domain.WeekRules
+import com.nhacongdong.runmate.ui.components.ActiveRunBanner
 import com.nhacongdong.runmate.ui.components.CalendarDay
 import com.nhacongdong.runmate.ui.components.DayList
 import com.nhacongdong.runmate.ui.components.EmptyState
@@ -42,9 +44,13 @@ import com.nhacongdong.runmate.ui.components.previewPlan
 import com.nhacongdong.runmate.ui.components.previewSession
 import com.nhacongdong.runmate.ui.theme.Dimens
 import com.nhacongdong.runmate.ui.theme.RunMateTheme
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.ZoneId
+
+// Thời gian hiệu ứng vòng chạy ở S1: 600 ms vẽ vào, rồi 300 ms huy hiệu (DESIGN 3.4)
+private const val CELEBRATE_MS = 900L
 
 // S1 nối với ViewModel: đọc trạng thái, cập nhật MISSED mỗi lần màn hình hiện lại (SPEC 6.3)
 @Composable
@@ -54,6 +60,7 @@ fun PlanListRoute(
     onOpenPlan: (Long) -> Unit,
     onViewResult: (Long) -> Unit,
     onRunNow: () -> Unit,
+    onOpenRun: () -> Unit,
     viewModel: PlanListViewModel = viewModel(factory = PlanListViewModel.Factory),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -70,7 +77,9 @@ fun PlanListRoute(
         onOpenPlan = onOpenPlan,
         onViewResult = onViewResult,
         onRunNow = onRunNow,
+        onOpenRun = onOpenRun,
         onSwipeDay = viewModel::swipeDay,
+        onCelebrated = viewModel::consumeCelebration,
     )
 }
 
@@ -88,9 +97,18 @@ fun PlanListScreen(
     onOpenPlan: (Long) -> Unit,
     onViewResult: (Long) -> Unit,
     onRunNow: () -> Unit,
+    onOpenRun: () -> Unit,
     onSwipeDay: (Long) -> Unit,
     zone: ZoneId = ZoneId.systemDefault(),
+    onCelebrated: () -> Unit = {},
 ) {
+    // Hiệu ứng vòng chạy (DESIGN 3.4) dài 900 ms. Chạy xong thì báo ViewModel để không chạy lại
+    LaunchedEffect(state.celebrateDay) {
+        if (state.celebrateDay != null) {
+            delay(CELEBRATE_MS)
+            onCelebrated()
+        }
+    }
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     val limitMessage = stringResource(R.string.plan_limit)
@@ -120,6 +138,7 @@ fun PlanListScreen(
                 selected = state.selected,
                 today = state.today,
                 canGoNext = state.canGoNext,
+                celebrateDay = state.celebrateDay,
                 onSelect = onSelectDate,
                 onPrevWeek = onPrevWeek,
                 onNextWeek = onNextWeek,
@@ -127,6 +146,15 @@ fun PlanListScreen(
                 onNextBlocked = { scope.launch { snackbarHostState.showSnackbar(limitMessage) } },
                 modifier = Modifier.padding(horizontal = Dimens.space4),
             )
+            state.activeRun?.let { run ->
+                ActiveRunBanner(
+                    status = run.status,
+                    distanceM = run.distanceM,
+                    durationMs = run.durationMs,
+                    onClick = onOpenRun,
+                    modifier = Modifier.padding(horizontal = Dimens.space4).padding(top = Dimens.space3),
+                )
+            }
             when {
                 // Chưa có dữ liệu thì chưa vẽ gì bên dưới, tránh chớp EmptyState
                 state.isLoading -> Unit
@@ -189,7 +217,7 @@ private fun previewState(isFirstUse: Boolean): PlanListUiState {
 
 @Composable
 private fun PreviewScreen(isFirstUse: Boolean) = RunMateTheme {
-    PlanListScreen(previewState(isFirstUse), {}, {}, {}, {}, {}, {}, {}, {}, {}, onSwipeDay = {}, zone = PreviewZone)
+    PlanListScreen(previewState(isFirstUse), {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, onSwipeDay = {}, zone = PreviewZone)
 }
 
 @Preview(name = "Sáng", widthDp = 360, heightDp = 720, showBackground = true)

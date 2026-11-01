@@ -71,6 +71,7 @@ fun WeekCalendar(
     onNextWeek: () -> Unit,
     onToday: () -> Unit,
     onNextBlocked: () -> Unit,          // màn hình hiện snackbar "Chỉ lên kế hoạch được trong 16 ngày tới"
+    celebrateDay: LocalDate? = null,    // ngày của buổi vừa lưu: vòng vẽ vào một lần (DESIGN 3.4)
     modifier: Modifier = Modifier,
 ) {
     val colors = MaterialTheme.colorScheme
@@ -139,6 +140,7 @@ fun WeekCalendar(
                         isToday = date == today,
                         showWeekday = showWeekday,
                         onClick = { onSelect(date) },
+                        animateRing = date == celebrateDay,
                         modifier = Modifier.weight(1f),
                     )
                 }
@@ -155,6 +157,7 @@ private fun DayColumn(
     isToday: Boolean,
     showWeekday: Boolean,
     onClick: () -> Unit,
+    animateRing: Boolean = false,
     modifier: Modifier = Modifier,
 ) {
     val colors = MaterialTheme.colorScheme
@@ -183,7 +186,7 @@ private fun DayColumn(
                     maxLines = 1, softWrap = false,
                 )
             }
-            RunRing(day.ring, RunRingSizes.S)
+            RunRing(day.ring, RunRingSizes.S, animateIn = animateRing)
             // Ngày đang chọn: số nằm trong viên inverse cao 24 dp
             Box(
                 Modifier
@@ -213,7 +216,6 @@ private fun DayColumn(
 private fun dayDescription(day: CalendarDay): String {
     val title = RunFormat.formatDayTitle(day.date)
     return when (val ring = day.ring) {
-        DayRingState.Running -> stringResource(R.string.day_cd_running, title)
         is DayRingState.Ran ->
             if (ring.allGoalsReached) stringResource(R.string.day_cd_ran_reached, title, ring.runCount)
             else stringResource(R.string.day_cd_ran, title, ring.runCount)
@@ -228,7 +230,7 @@ private val PreviewToday: LocalDate = LocalDate.of(2026, 10, 29)
 private fun previewDays(weekStart: LocalDate): List<CalendarDay> {
     val rings = listOf(
         DayRingState.Ran(1, true, 1), DayRingState.Missed, DayRingState.Ran(2, false, 2),
-        DayRingState.Running, DayRingState.Planned, DayRingState.Empty, DayRingState.Planned,
+        DayRingState.Empty, DayRingState.Planned, DayRingState.Empty, DayRingState.Planned,
     )
     return WeekRules.weekDays(weekStart).mapIndexed { i, d -> CalendarDay(d, rings[i], 1) }
 }

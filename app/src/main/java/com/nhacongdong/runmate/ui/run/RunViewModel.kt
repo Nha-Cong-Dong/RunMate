@@ -5,11 +5,13 @@ import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.AP
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import com.nhacongdong.runmate.RecentlyFinishedRun
 import com.nhacongdong.runmate.RunMateApplication
 import com.nhacongdong.runmate.data.SessionRepository
 import com.nhacongdong.runmate.data.model.GoalType
 import com.nhacongdong.runmate.data.model.SessionStatus
 import com.nhacongdong.runmate.domain.FinishRun
+import com.nhacongdong.runmate.domain.GpsDropCounter
 import com.nhacongdong.runmate.domain.PauseRun
 import com.nhacongdong.runmate.domain.ResumeRun
 import com.nhacongdong.runmate.domain.RunSummary
@@ -35,6 +37,7 @@ data class RunUiState(
     val goalType: GoalType = GoalType.DISTANCE,
     val goalValue: Int = 0,
     val locationName: String = "",
+    val gpsWeak: Boolean = false,        // 3 điểm liên tiếp bị bỏ (BR-30), đổi chỉ báo GPS sang cảnh báo
 )
 
 // Việc chỉ xảy ra một lần: báo đạt mục tiêu, kết thúc đã lưu, buổi quá ngắn, không có buổi chạy nào
@@ -48,6 +51,8 @@ sealed interface RunEvent {
 // S6: theo dõi buổi chạy đang dở, tạm dừng, tiếp tục, kết thúc. Gọi service qua các hàm onPause, onResume, onStop
 class RunViewModel(
     private val sessions: SessionRepository,
+    private val gpsDrops: GpsDropCounter,
+    private val recentlyFinished: RecentlyFinishedRun,
     private val pauseRun: PauseRun,
     private val resumeRun: ResumeRun,
     private val finishRun: FinishRun,
@@ -77,9 +82,13 @@ class RunViewModel(
         _uiState.update { it.copy(sessionId = sessionId) }
         binding?.cancel()
         binding = viewModelScope.launch {
-            combine(sessions.observeSession(sessionId), sessions.observeTrackPoints(sessionId)) { session, points ->
-                session to points
-            }.collect { (session, points) ->
+            combine(
+                sessions.observeSession(sessionId),
+                sessions.observeTrackPoints(sessionId),
+                gpsDrops.consecutive,
+            ) { session, points, drops ->
+                Triple(session, points, drops)
+            }.collect { (session, points, drops) ->
                 if (session == null) return@collect   // buổi chạy đã bị xoá khi kết thúc
                 val summary = RunSummaryRules.summarize(points, session.goalType, session.goalValue)
                 if (TrackRules.justReached(goalReachedBefore, summary.goalReached)) {
@@ -93,6 +102,7 @@ class RunViewModel(
                         goalType = session.goalType,
                         goalValue = session.goalValue,
                         locationName = session.locationName,
+                        gpsWeak = GpsDropCounter.isWeak(drops),
                     )
                 }
             }
@@ -113,8 +123,11 @@ class RunViewModel(
     fun finish() {
         val id = _uiState.value.sessionId ?: return
         viewModelScope.launch {
-            val result = finishRun(id) ?: return@launch
+            // Dừng GPS trước, rồi mới lưu hoặc xoá buổi chạy, để không có điểm nào được ghi vào buổi đã mất
             onStop()
+            val result = finishRun(id) ?: return@launch
+            // Buổi đã lưu thì S1 sẽ vẽ hiệu ứng vòng một lần (DESIGN 3.4)
+            if (result.saved) recentlyFinished.mark(id)
             _events.trySend(if (result.saved) RunEvent.Saved(id) else RunEvent.TooShort)
         }
     }
@@ -126,6 +139,8 @@ class RunViewModel(
                 val container = app.container
                 RunViewModel(
                     sessions = container.sessionRepository,
+                    gpsDrops = container.gpsDrops,
+                    recentlyFinished = container.recentlyFinished,
                     pauseRun = container.pauseRun,
                     resumeRun = container.resumeRun,
                     finishRun = container.finishRun,

@@ -74,10 +74,10 @@ MVP không có mạng xã hội (SPEC 3), nên không có bạn bè hay stories 
 |---|---|---|
 | **Vòng chạy** quanh ngày đã chạy | S1 (lịch tuần) | Đã chạy |
 | Vòng chạy trên thẻ kết quả | S1 (danh sách ngày) | Đã chạy |
-| Quỹ đạo tô theo pace | S7 | Đã chạy |
+| Quỹ đạo một màu `nhipBlue` | S7 | Đã chạy |
 | Vòng tiến độ mục tiêu | S6, S7 | Đang chạy / đã chạy |
 | Vòng tỷ lệ giữ lịch | S8 | Đã chạy |
-| Chấm "đang ghi", vòng xoay khi đang chạy | S1, S6 | Đang chạy |
+| Chấm "đang ghi" (băng ở S1, mục 8.4; S6) | S1, S6 | Đang chạy |
 | Nút **Chạy** ở thanh dưới | S1, S8 | Bấm để chạy |
 | Nút **Bắt đầu chạy** / **Tiếp tục** | S4, S5, S6 | Bấm để chạy |
 
@@ -90,17 +90,9 @@ MVP không có mạng xã hội (SPEC 3), nên không có bạn bè hay stories 
 
 **Kiểm tra nhanh:** mỗi chỗ có gradient phải trả lời được câu "nó nói gì về việc chạy?". Không trả lời được thì bỏ gradient.
 
-### 2.4 Tô quỹ đạo theo pace
+### 2.4 Màu quỹ đạo
 
-Dùng ở S7.
-
-1. Tính pace cho từng đoạn nhỏ giữa hai điểm liên tiếp **trong cùng `segmentIndex`**.
-2. Làm mượt bằng trung bình trượt 5 điểm, để GPS nhiễu không làm đường loang lổ.
-3. Lấy phân vị 10% và 90% của pace trong **chính buổi chạy đó** làm hai đầu thang. Đoạn chậm nhất ứng với `t = 0` (xanh dương), nhanh nhất ứng với `t = 1` (hồng). Giá trị ngoài khoảng thì kẹp lại.
-4. Màu của đoạn = nội suy trên dải gradient tại vị trí `t`.
-5. Không đủ điểm để tính pace (nhưng vẫn vẽ được): tô cả đường bằng gradient chéo mặc định.
-
-Thang là **tương đối theo từng buổi chạy**, nên luôn có chú thích "chậm → nhanh", không ghi số pace lên thang.
+Dùng ở S7. Quỹ đạo vẽ bằng một màu `nhipBlue`, không tô theo pace và không có thang "chậm → nhanh". Điểm đầu và điểm cuối như mục 8.17.
 
 ---
 
@@ -131,7 +123,7 @@ Một tuần chạy đều sẽ trông như một hàng stories đầy màu. M�
 | Nét quỹ đạo trong lõi | 1,75 dp, màu `textPrimary` | 2 dp, màu `textPrimary` |
 | Huy hiệu | 16 dp | 18 dp |
 
-- **Lõi** vẽ quỹ đạo thu nhỏ của buổi chạy (giữ tỷ lệ, căn giữa, đệm 6 dp). Một ngày có nhiều buổi thì vẽ buổi **dài nhất**. Quá ít điểm để vẽ thì thay bằng biểu tượng `directions_run`.
+- **Lõi** có biểu tượng `directions_run`. Lịch tuần không vẽ quỹ đạo thu nhỏ.
 - Quỹ đạo trong lõi dùng màu `textPrimary` chứ không dùng gradient, để vòng ngoài nổi bật và đường vẫn rõ ở cỡ nhỏ.
 
 ### 3.2 Các trạng thái của một ngày trên lịch tuần
@@ -140,7 +132,6 @@ Một tuần chạy đều sẽ trông như một hàng stories đầy màu. M�
 |---|---|---|---|
 | Một buổi chạy đã lưu | **Gradient đầy** | Quỹ đạo | ✓ nếu đạt mục tiêu |
 | Nhiều buổi chạy | **Gradient chia đoạn**, mỗi buổi một đoạn, khe 6° giữa các đoạn, tối đa 4 đoạn (giống Insta khi có nhiều story) | Quỹ đạo dài nhất | Số buổi ("2") ở góc trên phải; ✓ ở góc dưới phải nếu **mọi** buổi đều đạt mục tiêu |
-| Buổi chạy đang diễn ra | Gradient **xoay chậm** | Chấm gradient nhấp nháy | |
 | Chỉ có kế hoạch `PLANNED` (chưa chạy) | **Nét đứt** 1,5 dp, màu `textSecondary` | Trống (số ngày hiện ở dưới vòng, DESIGN 8.3) | |
 | Chỉ có kế hoạch `MISSED` | Nét liền 1,5 dp, màu `outlineStrong` | Trống | `!` nền `error` |
 | Không có gì, hoặc chỉ có `CANCELLED` | Không có vòng | Trống | |
@@ -371,7 +362,7 @@ Tháng 10, 2026            [Hôm nay]  ‹  ›
 
 - **Hàng tiêu đề:** tên tháng (`titleMedium`). Tuần vắt qua hai tháng thì ghi "Tháng 10 – 11, 2026". Bên phải: chip **Hôm nay** (chỉ hiện khi đang không ở tuần này, hoặc đang không chọn hôm nay), rồi hai nút `‹` `›` 48 dp.
 - **7 cột** T2 → CN chia đều chiều rộng (khoảng 46 dp mỗi cột ở màn 360 dp), không cuộn.
-- Mỗi cột từ trên xuống: thứ (`labelMedium`), `RunRing` cỡ S (mục 3.2), số ngày (`labelLarge`, `tnum`).
+- Mỗi cột từ trên xuống: thứ (`labelMedium`), `RunRing` cỡ S (mục 3.2), số ngày (`labelLarge`, `tnum`). Buổi chạy đang dở không có vòng riêng trên lịch: băng ở S1 (mục 8.4) đã báo buổi đó, ô ngày giữ trạng thái theo kế hoạch và các buổi đã lưu.
 - **Ngày đang chọn:** số ngày nằm trong viên `inverse` cao 24 dp, chữ `onInverse`. Mặc định chọn hôm nay (SPEC 9.1).
 - **Hôm nay** (khi không được chọn): thứ và số ngày đậm 700, màu `textPrimary`.
 - Cả cột là một vùng bấm (≥ 48 dp cao). Bấm thì đổi ngày đang chọn, danh sách bên dưới đổi theo.
@@ -459,7 +450,7 @@ Cao 24 dp, bo `radiusFull`, chữ `labelSmall`. Luôn có chữ, không chỉ c�
 ### 8.9 `GoalRing`: vòng tiến độ
 
 - Tham số: `progress` (0 trở lên, có thể > 1), `size`, `strokeWidth`.
-- Nền vòng màu `ringTrack`. Phần đã đạt là cung gradient xoay, bắt đầu từ 12 giờ, đầu cung bo tròn.
+- Nền vòng màu `ringTrack`. Phần đã đạt là cung gradient, bắt đầu từ 12 giờ, đầu cung bo tròn. Màu xanh (`nhipBlue`) luôn nằm ở điểm 12 giờ, rồi chuyển dần theo chiều kim đồng hồ.
 - `progress ≥ 1`: vòng đầy. Không vẽ vòng thứ hai. Con số % cho biết đã vượt bao nhiêu.
 - Cỡ dùng: 280 dp / nét 10 dp (S6), 96 dp / nét 8 dp (S7, S8).
 - Luôn đi kèm con số, vì vòng gradient không đủ tương phản để tự mang thông tin.
@@ -532,10 +523,10 @@ Dùng ở S2, S4, S5, S7. Nền `surfaceContainer`, bo `radiusL`, đệm 16 dp.
 
 - Vẽ bằng Compose Canvas (SPEC F4), không có bản đồ nền.
 - Nền `surfaceContainer`, bo `radiusL`, đệm trong 24 dp. Giữ đúng tỷ lệ Bắc–Nam / Đông–Tây (chiếu Mercator đơn giản), căn giữa.
-- Nét 5 dp, đầu và góc bo tròn, màu theo pace (mục 2.4).
+- Nét 5 dp, đầu và góc bo tròn, màu `nhipBlue` (mục 2.4).
 - **Mỗi `segmentIndex` là một đường riêng, không nối với nhau** (BR-33).
 - Điểm đầu: tròn rỗng 12 dp, viền 3 dp `nhipBlue`. Điểm cuối: tròn đặc 12 dp màu `nhipPink`, viền 3 dp `surface`.
-- Chú thích ở góc trên trái: thanh gradient 40×6 dp + chữ "chậm → nhanh".
+- Ở góc trên trái có chữ "Quỹ đạo chạy" (`labelMedium`, `onSurfaceVariant`) để người xem biết đây là quỹ đạo.
 - Không đủ điểm (UC5): biểu tượng `route` + "Buổi chạy quá ít dữ liệu để vẽ quỹ đạo".
 - Bản thu nhỏ trong lõi `RunRing` dùng chung hàm chiếu toạ độ nhưng một màu `textPrimary`, không vẽ điểm đầu/cuối.
 - Nhiều điểm (tới ~21 600, SPEC 10.2): giảm điểm khi vẽ (ví dụ thuật toán Ramer–Douglas–Peucker) **sau khi đo**, không làm trước. Bản thu nhỏ thì luôn giảm điểm (khoảng 100 điểm là đủ).
@@ -641,7 +632,7 @@ Mở chồng lên từ nút Chạy, trượt từ dưới lên.
 Màn hình quan trọng nhất. Mục tiêu: **liếc 1 giây là đọc được**.
 
 ```
-[● Đang ghi]                     [GPS ●]
+[←] [● Đang ghi]                 [GPS ●]
              ╭───────────╮
             ╱             ╲
            │     5,24      │   ← GoalRing 280 dp
@@ -658,7 +649,8 @@ Màn hình quan trọng nhất. Mục tiêu: **liếc 1 giây là đọc đượ
 - **Số chính** (`displayLarge`) là chỉ số của mục tiêu: mục tiêu `DISTANCE` thì số chính là quãng đường, `DURATION` thì là thời gian chạy. Chỉ số còn lại và pace xuống hàng dưới (`headlineMedium`).
 - **`GoalRing`** bao quanh số chính. Dưới số: "62% · còn 3,2 km" (`labelLarge`).
 - **Pace** chưa đủ 100 m hiện `--` (BR-35).
-- **Pill trạng thái** góc trên trái: "Đang ghi" với chấm gradient nhấp nháy, hoặc "Tạm dừng" với chấm `textSecondary`. Góc phải: tín hiệu GPS (`satellite_alt` + chấm `success`, hoặc `warning` khi điểm GPS bị lọc liên tục theo BR-30).
+- **Thanh trên:** `arrow_back` ở góc trái, vùng chạm 48 dp, nhãn "Quay lại". Bấm thì quay về màn trước nhưng **buổi chạy vẫn tiếp tục** (SPEC 9.3). Muốn mở lại S6 thì bấm băng ở S1 hoặc thông báo của Service.
+- **Pill trạng thái** cạnh nút quay lại: "Đang ghi" với chấm gradient nhấp nháy, hoặc "Tạm dừng" với chấm `textSecondary`. Góc phải: tín hiệu GPS (`satellite_alt` + chấm `success`, hoặc `warning` khi điểm GPS bị lọc liên tục theo BR-30).
 - **Nút điều khiển** cố định ở đáy, trên inset hệ thống:
   - `RECORDING`: **Tạm dừng** 96 dp ở giữa (vòng gradient 4 dp, nền `surface`, biểu tượng `pause` 40 dp); **Kết thúc** 64 dp bên trái (nền `surfaceContainerHigh`, `stop`).
   - `PAUSED`: nút giữa đổi thành **Tiếp tục** (nền gradient đầy, biểu tượng `play_arrow` màu `#111111` để đủ tương phản), Kết thúc giữ nguyên. Các con số giảm độ đậm còn 50%, cung gradient đứng yên.
@@ -680,7 +672,7 @@ Màn hình quan trọng nhất. Mục tiêu: **liếc 1 giây là đọc đượ
 - **Phần đầu:** "Thứ Năm, 29/10 · 06:02" (`labelMedium`), tên địa điểm (`titleMedium`), nhãn "Theo kế hoạch" hoặc "Chạy tự do".
 - `TrackCanvas` vuông, rộng hết lề.
 - Hàng kết quả: quãng đường lớn (`displayMedium`) bên trái; `GoalRing` 96 dp bên phải, trong vòng ghi tỷ lệ "104%". Đạt mục tiêu thì dưới vòng có "Đạt mục tiêu" màu `success` + ✓.
-- Lưới `StatTile` 3 cột: Thời gian chạy · Pace trung bình · Mục tiêu.
+- Ba `StatTile` cách đều nhau theo chiều ngang: Thời gian chạy · Pace · Mục tiêu. Số km chạy ở hàng kết quả nằm cùng hàng với chữ "km" (căn theo đường nền chữ). Thời gian chạy chỉ có phút và giây (dưới 1 giờ) thì ô căn giữa, cùng với nhãn. Ô pace và ô mục tiêu căn giữa, nhãn nằm giữa phía trên số liệu.
 - Mở từ S6: chạy hoạt ảnh mục 3.4 bước 1. Mở từ S1 hoặc S4: hiện thẳng, không hoạt ảnh.
 
 ### S8 · Thống kê
@@ -750,7 +742,7 @@ Xoá kế hoạch `COMPLETED` ở S4: vòng chạy của ngày đó **vẫn gi�
 | Hiệu ứng | Mô tả |
 |---|---|
 | Chấm "đang ghi" | Độ mờ 100% → 40% → 100%, chu kỳ 1,2 giây, lặp |
-| Vòng xoay (`RunButton`, ngày đang chạy) | Gradient xoay 360° mỗi 4 giây, tuyến tính |
+| Vòng xoay (`RunButton`, khi có buổi dở) | Gradient xoay 360° mỗi 4 giây, tuyến tính |
 | Vòng tiến độ ở S6 | Mỗi lần số liệu cập nhật thì cung nhích tới giá trị mới trong 400 ms |
 | Số chính ở S6 (thử nghiệm) | Hai cách, chọn bằng một hằng số trong code để thử trên máy rồi giữ một cách. **Cách 1, nhảy thẳng:** số đổi ngay, không hiệu ứng. **Cách 2, cuộn số:** chỉ chữ số đổi mới trượt từ dưới lên trong 150 ms (`motionFast`), giống đồng hồ đếm giờ |
 | Đạt mục tiêu ở S6 | Cung chạy nốt tới đầy, vòng phóng 1,0 → 1,06 → 1,0 trong 500 ms |
@@ -799,7 +791,7 @@ Xoá kế hoạch `COMPLETED` ở S4: vòng chạy của ngày đó **vẫn gi�
 | `ui/theme/Theme.kt` | `RunMateTheme`: chọn bảng sáng/tối, cung cấp `RunMateColors` qua `CompositionLocal` |
 | `ui/components/RunRing.kt` | Vòng chạy (mục 3) |
 | `ui/components/…` | Các thành phần khác ở mục 8, mỗi thành phần một file |
-| `domain/…` | Hàm thuần: trạng thái của một ngày (bảng 3.2), tô màu theo pace (mục 2.4), giảm điểm quỹ đạo |
+| `domain/…` | Hàm thuần: trạng thái của một ngày (bảng 3.2), màu quỹ đạo (mục 2.4), giảm điểm quỹ đạo |
 
 Mỗi thành phần có `@Preview` cho cả chế độ sáng và tối và cho **từng trạng thái** (với `RunRing`: đủ 6 dòng của bảng 3.2).
 
@@ -817,10 +809,9 @@ sealed interface DayRingState {
         val allGoalsReached: Boolean,                      // huy hiệu ✓
         val thumbnailSessionId: Long,                      // buổi dài nhất, vẽ trong lõi
     ) : DayRingState
-    data object Running : DayRingState                     // vòng xoay
 }
 
-// Ưu tiên: Running > Ran > Planned > Missed > Empty
+// Ưu tiên: Ran > Planned > Missed > Empty. Buổi đang dở không làm đổi ô ngày: băng ở S1 (mục 8.4) đã báo buổi đó
 fun dayRingState(plans: List<RunPlan>, sessions: List<RunSession>): DayRingState
 ```
 
@@ -882,7 +873,6 @@ Vòng nét đứt (`Planned`): `Stroke(width, pathEffect = PathEffect.dashPathEf
 
 - Theme: `dynamicColor = false`.
 - Số liệu: `style = MaterialTheme.typography.displayLarge.merge(TextStyle(fontFeatureSettings = "tnum"))`.
-- Ảnh thu nhỏ quỹ đạo trong lịch tuần: tính sẵn đường đã giảm điểm trong ViewModel (không đọc hàng nghìn điểm cho mỗi ô lịch lúc vẽ). Có thể thêm truy vấn DAO chỉ lấy mỗi điểm thứ N.
 
 ---
 
