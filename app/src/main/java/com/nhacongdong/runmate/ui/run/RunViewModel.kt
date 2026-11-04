@@ -119,6 +119,13 @@ class RunViewModel(
         viewModelScope.launch { if (resumeRun(id)) onResume(id) }
     }
 
+    // Buổi đang ghi mà vừa được cấp lại quyền hoặc bật lại công tắc Vị trí: bật lại GPS (SPEC 10.2a)
+    fun restartLocation() {
+        val state = _uiState.value
+        val id = state.sessionId ?: return
+        if (state.status == SessionStatus.RECORDING) onResume(id)
+    }
+
     // Kết thúc sau khi người dùng xác nhận. Dừng service rồi báo kết quả
     fun finish() {
         val id = _uiState.value.sessionId ?: return

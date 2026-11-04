@@ -134,6 +134,8 @@ fun RunRoute(
         if (resumeWanted) {
             resumeWanted = false
             viewModel.resume()
+        } else if (locationOk) {
+            viewModel.restartLocation()
         }
     })
 

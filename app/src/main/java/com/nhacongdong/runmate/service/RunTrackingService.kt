@@ -72,6 +72,7 @@ class RunTrackingService : Service() {
                 // Có mã buổi chạy trong lệnh thì dùng mã đó, để điểm mới luôn vào đúng buổi
                 val id = intent.getLongExtra(EXTRA_SESSION_ID, -1L)
                 if (id >= 0) sessionId = id
+                locationSource.stop()
                 startLocation(hasPermission)
             }
             // Kết thúc buổi chạy: ngừng nhận GPS và dừng service (SPEC 6.3)
