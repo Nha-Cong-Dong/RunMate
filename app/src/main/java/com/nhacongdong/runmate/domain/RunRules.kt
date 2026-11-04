@@ -18,6 +18,10 @@ object RunRules {
         else -> null
     }
 
+    // SPEC 10.2a: mở app mà buổi đang ghi thì phải tự tạm dừng nếu service đã mất, hoặc thiếu quyền vị trí / công tắc Vị trí
+    fun needsAutoPause(status: SessionStatus, serviceRunning: Boolean, locationReady: Boolean): Boolean =
+        status == SessionStatus.RECORDING && (!serviceRunning || !locationReady)
+
     // Tạm dừng: RECORDING thành PAUSED
     fun sessionAfterPause(status: SessionStatus): SessionStatus? = when (status) {
         SessionStatus.RECORDING -> SessionStatus.PAUSED

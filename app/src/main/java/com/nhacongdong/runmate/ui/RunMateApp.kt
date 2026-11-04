@@ -35,6 +35,8 @@ import com.nhacongdong.runmate.ui.plan.PlanDetailRoute
 import com.nhacongdong.runmate.ui.plan.PlanEditRoute
 import com.nhacongdong.runmate.ui.plan.PlanListRoute
 import com.nhacongdong.runmate.ui.run.FreeRunRoute
+import com.nhacongdong.runmate.ui.location.LocationDialogs
+import com.nhacongdong.runmate.ui.location.rememberLocationGate
 import com.nhacongdong.runmate.ui.run.RecoverRunDialog
 import com.nhacongdong.runmate.ui.run.RunRoute
 import com.nhacongdong.runmate.ui.place.PlacePickerRoute
@@ -68,6 +70,8 @@ fun RunMateApp(
     val appViewModel: RunMateAppViewModel = viewModel(factory = RunMateAppViewModel.Factory)
     val hasActiveRun by appViewModel.hasActiveRun.collectAsStateWithLifecycle()
     val interrupted by appViewModel.interrupted.collectAsStateWithLifecycle()
+    // Tiếp tục buổi dở cần quyền vị trí và GPS như S4 và S5 (SPEC 9.2)
+    val resumeGate = rememberLocationGate(onReady = appViewModel::resume)
     // Mỗi lần app hiện lên thì kiểm tra buổi dở đã mất service chưa (SPEC 10.1)
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) { appViewModel.refresh() }
     LaunchedEffect(appViewModel) {
@@ -186,7 +190,13 @@ fun RunMateApp(
     // Buổi dở đã mất service: hỏi Tiếp tục hay Kết thúc, chỉ hiện ở S1 (DESIGN 9 S1)
     val pending = interrupted
     if (pending != null && destination?.hasRoute<PlanList>() == true) {
-        RecoverRunDialog(run = pending, onResume = appViewModel::resume, onFinish = appViewModel::finish)
+        RecoverRunDialog(run = pending, onResume = resumeGate.start, onFinish = appViewModel::finish)
+        LocationDialogs(
+            dialog = resumeGate.dialog,
+            permissionMessage = R.string.location_permission_run_message,
+            locationOffMessage = R.string.location_off_run_message,
+            onDismiss = resumeGate.dismiss,
+        )
     }
 }
 

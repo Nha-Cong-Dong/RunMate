@@ -61,6 +61,9 @@
     <string name="notification_channel_name">Ghi buổi chạy</string>
     <string name="notification_recording">Đang ghi buổi chạy</string>
     <string name="notification_no_permission">Không có quyền vị trí, quãng đường không được ghi</string>
+    <string name="notification_paused_no_permission">Đã tạm dừng: không có quyền vị trí</string>
+    <string name="notification_paused_app_stopped">Buổi chạy đã tạm dừng vì app đã bị dừng</string>
+    <string name="notification_paused_location_off">Đã tạm dừng: vị trí đang tắt</string>
 
     <!-- S3 Chọn vị trí (DESIGN 9 S3, SPEC 10.3) -->
     <string name="cd_back">Quay lại</string>
@@ -120,7 +123,7 @@
     <string name="run_stat_pace">Pace</string>
     <string name="run_percent_remaining">%1$s · còn %2$s</string>
     <string name="run_goal_reached_banner">Đạt mục tiêu %1$s</string>
-    <string name="run_gps_off">Quyền vị trí đang tắt, không nhận được GPS, chỉ tính thời gian</string>
+    <string name="run_gps_off">Không có quyền vị trí hoặc vị trí đang tắt. Cấp quyền rồi bấm Tiếp tục</string>
     <string name="action_grant_location">Cấp quyền</string>
     <string name="cd_gps">Tín hiệu GPS</string>
     <string name="finish_confirm_title">Kết thúc buổi chạy?</string>

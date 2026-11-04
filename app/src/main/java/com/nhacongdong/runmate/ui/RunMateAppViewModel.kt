@@ -11,7 +11,11 @@ import com.nhacongdong.runmate.data.model.SessionStatus
 import com.nhacongdong.runmate.domain.FinishRun
 import com.nhacongdong.runmate.domain.RunRules
 import com.nhacongdong.runmate.domain.TrackRules
+import com.nhacongdong.runmate.domain.PauseRun
+import com.nhacongdong.runmate.service.RunAlerts
 import com.nhacongdong.runmate.service.RunServiceControl
+import com.nhacongdong.runmate.ui.location.hasLocationPermission
+import com.nhacongdong.runmate.ui.location.isLocationOn
 import com.nhacongdong.runmate.service.RunTrackingService
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
@@ -41,6 +45,9 @@ class RunMateAppViewModel(
     private val finishRun: FinishRun,
     private val startService: (Long) -> Unit,
     private val pauseService: () -> Unit,
+    private val pauseRun: PauseRun,
+    private val onAutoPaused: () -> Unit,
+    private val isLocationReady: () -> Boolean,
     private val clock: () -> Long = System::currentTimeMillis,
 ) : ViewModel() {
 
@@ -55,13 +62,30 @@ class RunMateAppViewModel(
     private val _openRun = Channel<Unit>(Channel.BUFFERED)
     val openRun: Flow<Unit> = _openRun.receiveAsFlow()
 
-    // Gọi mỗi khi app hiện lên. Có buổi dở mà service không chạy thì chuẩn bị hộp thoại (SPEC 10.1)
+    // Gọi mỗi khi app hiện lên (SPEC 10.1, 10.2a). Buổi đang ghi mà thiếu quyền vị trí hoặc công tắc Vị trí tắt,
+    // hoặc service đã mất, thì tự chuyển sang tạm dừng rồi báo người dùng. Buổi đang ghi bình thường thì không làm gì
     fun refresh() {
         viewModelScope.launch {
-            val active = sessions.getActiveSession()
-            if (active == null || RunTrackingService.isRunning) {
+            val found = sessions.getActiveSession() ?: run {
                 _interrupted.value = null
                 return@launch
+            }
+            val serviceRunning = RunTrackingService.isRunning
+            val needsAutoPause = RunRules.needsAutoPause(found.status, serviceRunning, isLocationReady())
+            if (serviceRunning && !needsAutoPause) {
+                _interrupted.value = null
+                return@launch
+            }
+            val active = if (needsAutoPause) {
+                if (serviceRunning) pauseService()
+                if (pauseRun(found.id)) {
+                    onAutoPaused()
+                    found.copy(status = SessionStatus.PAUSED)
+                } else {
+                    found
+                }
+            } else {
+                found
             }
             val points = sessions.getTrackPoints(active.id)
             val lastPointTime = sessions.lastPoint(active.id)?.timestamp
@@ -105,6 +129,9 @@ class RunMateAppViewModel(
                     finishRun = container.finishRun,
                     startService = { id -> RunServiceControl.start(app, id) },
                     pauseService = { RunServiceControl.pause(app) },
+                    pauseRun = container.pauseRun,
+                    onAutoPaused = { RunAlerts.pausedAfterInterruption(app) },
+                    isLocationReady = { app.hasLocationPermission() && app.isLocationOn() },
                 )
             }
         }
