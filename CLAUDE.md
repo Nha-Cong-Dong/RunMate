@@ -5,7 +5,7 @@ Hướng dẫn cho Claude khi làm việc trong dự án này.
 ## Dự án
 
 - **RunMate**: ứng dụng Android đồng hành cho người chạy bộ (ghi lộ trình GPS, quãng đường, pace, lịch sử).
-- Ngôn ngữ: Kotlin · Build: Gradle · JDK 17
+- Ngôn ngữ: Kotlin · Build: Gradle · Gradle daemon chạy JDK 25 (tự tải), code biên dịch ở mức Java 17
 - Tài liệu: `README.md` (giới thiệu), `docs/SPEC.md` (đặc tả sản phẩm: app làm gì),
   `docs/DESIGN.md` (thiết kế giao diện: app trông thế nào), `docs/PLAN.md` (kế hoạch và tiến độ)
 - SPEC và DESIGN mâu thuẫn thì **SPEC thắng** (DESIGN đã ghi ở đầu file)

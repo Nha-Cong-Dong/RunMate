@@ -70,7 +70,7 @@ Mục tiêu chính: học qua vibe code. Hiểu được thứ AI viết ra quan
 ### Yêu cầu
 
 - Android Studio Rabbit 1 (2026.2.1) trở lên
-- JDK 17
+- Không cần cài JDK riêng: Gradle tự tải JDK 25 ở lần build đầu tiên (cần mạng). Code biên dịch ở mức Java 17
 - Android SDK: `minSdk` 26 (Android 8.0) / `targetSdk` 36 (Android 16)
 
 ### Cài đặt
@@ -80,8 +80,10 @@ git clone https://github.com/Nha-Cong-Dong/RunMate.git
 cd RunMate
 ```
 
-1. Mở thư mục bằng Android Studio và chờ Gradle sync.
+1. Mở thư mục bằng Android Studio và chờ Gradle sync (lần đầu sẽ tải JDK 25 nếu máy chưa có).
 2. Chạy app trên máy ảo hoặc thiết bị thật (nên dùng máy thật để thử GPS).
+
+Build APK từ dòng lệnh:
 
 ```bash
 ./gradlew assembleDebug
