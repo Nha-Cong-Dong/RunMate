@@ -34,6 +34,7 @@ data class StatsUiState(
     val isWeekTab: Boolean,              // true: tab Tuần, false: tab Tháng
     val isEmptyPeriod: Boolean,          // true: kỳ này không có buổi chạy nào
     val isLoading: Boolean = false,
+    val runningDays: Set<LocalDate> = emptySet(), // Kỳ Tháng: các ngày có buổi chạy đã lưu, để vẽ chấm trên lịch
 )
 
 // ViewModel quản lý số liệu thống kê ở màn hình S8
@@ -145,11 +146,17 @@ class StatsViewModel(
                 }
             }
 
+            val runningDays = when (period) {
+                is StatsPeriod.Month -> StatsRules.runningDaysInMonth(period, sessions, zone)
+                is StatsPeriod.Week -> emptySet()
+            }
+
             return StatsUiState(
                 period = period,
                 periodTitle = formatPeriodTitle(period),
                 summary = summary,
                 barItems = barItems,
+                runningDays = runningDays,
                 canGoNext = period.canGoNext(today),
                 isWeekTab = period is StatsPeriod.Week,
                 isEmptyPeriod = summary.sessionCount == 0,

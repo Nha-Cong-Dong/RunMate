@@ -677,7 +677,7 @@ Màn hình quan trọng nhất. Mục tiêu: **liếc 1 giây là đọc đượ
 
 ### S8 · Thống kê
 
-Thống kê theo **tuần** hoặc **tháng** (SPEC 9.1). Gồm lưới 4 ô số liệu chính (2 hàng × 2 cột), thanh hoàn thành kế hoạch, và biểu đồ cột quãng đường (theo ngày ở kỳ Tuần, theo tuần ở kỳ Tháng).
+Thống kê theo **tuần** hoặc **tháng** (SPEC 9.1). Gồm lưới 4 ô số liệu chính (2 hàng × 2 cột), thanh hoàn thành kế hoạch, và biểu đồ cột quãng đường theo ngày (kỳ Tuần). Kỳ Tháng thay biểu đồ cột bằng lịch có chấm và dòng quãng đường từng tuần.
 
 ```
 Thống kê
@@ -718,12 +718,11 @@ Hoàn thành kế hoạch                  80%
   - Ngày không chạy (0 km): thanh ngang màu `ringTrack` dày 2 dp ở đáy cột.
   - **Trên đầu cột:** số km của ngày (`labelSmall`, `tnum`), ngày không chạy hiện `–`.
   - **Dưới chân cột:** dòng 1 là thứ (`labelMedium`, ví dụ `T2`), dòng 2 là ngày/tháng (`bodySmall`, ví dụ `26/10`).
-- **Biểu đồ cột kỳ Tháng (theo tuần):**
-  - 4 đến 5 cột tương ứng các tuần trong tháng.
-  - Cột có chạy: màu `nhipBlue`, bo góc trên (`radiusS`). Tuần 0 km: thanh ngang `ringTrack` dày 2 dp.
-  - **Trên đầu cột:** số km tổng của tuần (`labelSmall`, `tnum`, ví dụ `25,0`), tuần không chạy hiện `–`.
-  - **Dưới chân cột:** dòng 1 là tên tuần (`labelMedium`, ví dụ `Tuần 1`), dòng 2 là khoảng ngày (`bodySmall`, ví dụ `01/10 – 04/10`).
-- **Đổi kỳ:** số đếm lên từ giá trị cũ tới giá trị mới trong 400 ms (`motionSlow`), các cột quét tới chiều cao mới trong cùng khoảng thời gian.
+- **Kỳ Tháng: lịch có chấm.**
+  - Lưới 7 cột T2 đến CN với đủ các tuần của tháng. Dòng tiêu đề là thứ (`labelMedium`). Ngày ngoài tháng vẫn hiện số nhưng mờ (độ đậm 40%), không có chấm.
+  - Ngày có ít nhất một buổi chạy đã lưu có một chấm tròn 6 dp màu `nhipBlue` ngay dưới số ngày. Ngày không chạy chỉ có số.
+  - Lịch chỉ để xem tần suất, không bấm để mở chi tiết.
+- **Đổi kỳ:** số đếm lên từ giá trị cũ tới giá trị mới trong 400 ms (`motionSlow`). Kỳ Tuần: các cột quét tới chiều cao mới trong cùng khoảng thời gian.
 
 ---
 

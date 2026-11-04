@@ -41,6 +41,7 @@ import com.nhacongdong.runmate.ui.components.BarChartItem
 import com.nhacongdong.runmate.ui.components.PlanCompletionBar
 import com.nhacongdong.runmate.ui.components.StatTile
 import com.nhacongdong.runmate.ui.components.StatsBarChart
+import com.nhacongdong.runmate.ui.components.StatsMonthCalendar
 import com.nhacongdong.runmate.ui.format.RunFormat
 import com.nhacongdong.runmate.ui.theme.Dimens
 import com.nhacongdong.runmate.ui.theme.RunMateTheme
@@ -215,8 +216,13 @@ fun StatsScreen(
 
             Spacer(Modifier.height(Dimens.space5))
 
-            // 5. Biểu đồ cột quãng đường (Tuần / Tháng)
-            StatsBarChart(items = state.barItems)
+            // 5. Kỳ Tuần: biểu đồ cột theo ngày. Kỳ Tháng: lịch có chấm và quãng đường từng tuần
+            val period = state.period
+            if (period is StatsPeriod.Month) {
+                StatsMonthCalendar(yearMonth = period.yearMonth, runningDays = state.runningDays)
+            } else {
+                StatsBarChart(items = state.barItems)
+            }
 
             // 6. Trạng thái kỳ trống
             if (state.isEmptyPeriod) {

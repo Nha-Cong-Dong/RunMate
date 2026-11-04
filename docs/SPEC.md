@@ -659,7 +659,7 @@ flowchart LR
 | S5 | **Chuẩn bị chạy tự do** | UC2, UC4 | Vị trí (mặc định là vị trí hiện tại), mục tiêu, thời tiết, cảnh báo, gợi ý vật dụng (mục 5.4). Gợi ý kế hoạch đang trong khoảng gợi ý (BR-44) | Đổi vị trí (sang S3), Chạy theo kế hoạch (sang S4), Bắt đầu chạy |
 | S6 | **Đang chạy** | UC4 | Quãng đường, thời gian chạy, pace, tiến độ so với mục tiêu, trạng thái ghi hoặc tạm dừng | Tạm dừng, Tiếp tục, Kết thúc |
 | S7 | **Chi tiết buổi chạy** | UC5, UC6 | Quỹ đạo vẽ bằng Canvas, chia theo `segmentIndex`. Quãng đường, thời gian, pace trung bình, tỷ lệ đạt mục tiêu | Xoá buổi chạy. Nếu buổi chạy thuộc kế hoạch `COMPLETED` thì thêm Xoá kế hoạch |
-| S8 | **Thống kê** | UC6 | Chọn Tuần hoặc Tháng, ‹ › chuyển kỳ. Lưới 2x2: tổng quãng đường, số buổi, tổng thời gian, pace trung bình (BR-56). Thanh hoàn thành kế hoạch (BR-55). Biểu đồ cột quãng đường: theo ngày (kỳ Tuần) và theo tuần (kỳ Tháng). | Chuyển kỳ |
+| S8 | **Thống kê** | UC6 | Chọn Tuần hoặc Tháng, ‹ › chuyển kỳ. Lưới 2x2: tổng quãng đường, số buổi, tổng thời gian, pace trung bình (BR-56). Thanh hoàn thành kế hoạch (BR-55). Biểu đồ cột quãng đường theo ngày (kỳ Tuần). Kỳ Tháng: lịch có chấm các ngày chạy. | Chuyển kỳ |
 
 S2 dùng chung cho cả tạo và sửa. Khi sửa, form được điền sẵn dữ liệu cũ (UC3). S5 là màn hình riêng vì chạy tự do không có ngày giờ và không lưu kế hoạch, nhưng dùng lại các thành phần giao diện của S2 (vị trí, mục tiêu, khối thời tiết).
 
