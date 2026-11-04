@@ -21,7 +21,6 @@ class StartPlanRun(
     suspend operator fun invoke(planId: Long): Long? {
         val plan = plans.getPlan(planId) ?: return null
         val planStatus = RunRules.planAfterStart(plan.status) ?: return null
-        if (!RunRules.canStartRun(hasActiveSession = sessions.getActiveSession() != null)) return null
         val session = RunSession(
             planId = planId,
             status = SessionStatus.RECORDING,
@@ -49,7 +48,6 @@ class StartFreeRun(
         goalType: GoalType,
         goalValue: Int,
     ): Long? {
-        if (!RunRules.canStartRun(hasActiveSession = sessions.getActiveSession() != null)) return null
         val session = RunSession(
             planId = null,
             status = SessionStatus.RECORDING,

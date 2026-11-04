@@ -42,8 +42,13 @@ class SessionRepository(
     suspend fun addTrackPoint(point: TrackPoint) = trackPointDao.insert(point)
 
     // Tạo buổi chạy và đổi trạng thái kế hoạch trong cùng một transaction (SPEC 6.3)
-    suspend fun startSession(session: RunSession, planId: Long?, planStatus: PlanStatus?): Long =
+    // Kiểm tra không có buổi dở và ghi buổi mới nằm trong cùng transaction, nên hai lần bấm sát nhau chỉ tạo một buổi (BR-08).
+    // Trả về null nếu đang có buổi RECORDING hoặc PAUSED
+    suspend fun startSession(session: RunSession, planId: Long?, planStatus: PlanStatus?): Long? =
         database.withWriteTransaction {
+            if (sessionDao.getFirstWithStatus(listOf(SessionStatus.RECORDING, SessionStatus.PAUSED)) != null) {
+                return@withWriteTransaction null
+            }
             if (planId != null && planStatus != null) planDao.updateStatus(planId, planStatus)
             sessionDao.insert(session)
         }
