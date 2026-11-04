@@ -18,6 +18,7 @@ import com.nhacongdong.runmate.domain.StartPlanRun
 import com.nhacongdong.runmate.domain.WeatherRules
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -48,6 +49,9 @@ class PlanDetailViewModel(
     private val zone: ZoneId = ZoneId.systemDefault(),
 ) : ViewModel() {
 
+    // Khoá chống bấm Bắt đầu chạy nhiều lần cùng lúc (BR-08)
+    private val startLock = Mutex()
+
     // Null khi kế hoạch không còn trong database
     val plan: StateFlow<RunPlan?> = planRepository.observePlan(planId)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
@@ -68,7 +72,15 @@ class PlanDetailViewModel(
     }
 
     // Bắt đầu chạy theo kế hoạch này. Trả về id buổi chạy, hoặc null nếu không bắt đầu được
-    suspend fun startRun(): Long? = startPlanRun(planId)
+    suspend fun startRun(): Long? {
+        // Đang bắt đầu một lần thì bỏ qua các lần bấm thêm (tránh tạo hai buổi)
+        if (!startLock.tryLock()) return null
+        try {
+            return startPlanRun(planId)
+        } finally {
+            startLock.unlock()
+        }
+    }
 
     private val _events = Channel<PlanDetailEvent>(Channel.BUFFERED)
     val events: Flow<PlanDetailEvent> = _events.receiveAsFlow()

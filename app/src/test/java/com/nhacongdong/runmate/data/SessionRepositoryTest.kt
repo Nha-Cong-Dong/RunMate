@@ -2,6 +2,7 @@ package com.nhacongdong.runmate.data
 
 import com.nhacongdong.runmate.data.local.RunMateDatabase
 import com.nhacongdong.runmate.data.model.PlanStatus
+import com.nhacongdong.runmate.data.model.SessionStatus
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.After
@@ -60,4 +61,36 @@ class SessionRepositoryTest {
 
         assertNull(db.sessionDao().observeById(sessionId).first())
     }
+
+    // BR-08: gọi bắt đầu hai lần liên tiếp chỉ tạo một buổi, lần sau trả về null
+    @Test
+    fun startSession_secondCallWhileRecording_returnsNullAndCreatesOnlyOne() = runTest {
+        val first = repo.startSession(session(null, status = SessionStatus.RECORDING), null, null)
+        val second = repo.startSession(session(null, status = SessionStatus.RECORDING), null, null)
+
+        assertNotNull(first)
+        assertNull(second)
+        assertEquals(1, db.sessionDao().observeByStatus(SessionStatus.RECORDING).first().size)
+    }
+
+    // Lần bắt đầu thứ hai bị chặn thì kế hoạch không bị đổi trạng thái lần nữa
+    @Test
+    fun startSession_blockedSecondCall_doesNotChangePlanStatus() = runTest {
+        val planId = db.planDao().insert(plan(status = PlanStatus.PLANNED))
+        val first = repo.startSession(session(planId, status = SessionStatus.RECORDING), planId, PlanStatus.IN_PROGRESS)
+        val second = repo.startSession(session(planId, status = SessionStatus.RECORDING), planId, PlanStatus.IN_PROGRESS)
+
+        assertNotNull(first)
+        assertNull(second)
+        assertEquals(PlanStatus.IN_PROGRESS, db.planDao().getById(planId)?.status)
+    }
+
+    // Buổi dở đã PAUSED cũng chặn bắt đầu buổi mới (BR-08)
+    @Test
+    fun startSession_whilePaused_returnsNull() = runTest {
+        repo.startSession(session(null, status = SessionStatus.PAUSED), null, null)
+        val next = repo.startSession(session(null, status = SessionStatus.RECORDING), null, null)
+        assertNull(next)
+    }
 }
+

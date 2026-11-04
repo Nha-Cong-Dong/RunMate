@@ -24,6 +24,7 @@ import com.nhacongdong.runmate.ui.components.DEFAULT_DURATION_S
 import com.nhacongdong.runmate.ui.place.PlacePickerViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -55,6 +56,9 @@ class FreeRunViewModel(
     private val clock: () -> Long = System::currentTimeMillis,
     private val zone: ZoneId = ZoneId.systemDefault(),
 ) : ViewModel() {
+
+    // Khoá chống bấm Bắt đầu chạy nhiều lần cùng lúc (BR-08)
+    private val startLock = Mutex()
 
     private val _uiState = MutableStateFlow(FreeRunUiState())
     val uiState: StateFlow<FreeRunUiState> = _uiState.asStateFlow()
@@ -121,17 +125,23 @@ class FreeRunViewModel(
 
     // Bắt đầu chạy tự do. Trả về id buổi chạy, hoặc null nếu không bắt đầu được (thiếu vị trí, có buổi dở)
     suspend fun startRun(): Long? {
-        val state = _uiState.value
-        val location = state.location ?: return null
-        val goalErrors = PlanRules.validate(clock(), state.goalType, state.goalValue, clock())
-        if (goalErrors.isNotEmpty()) return null
-        return startFreeRun(
-            locationName = location.name,
-            latitude = location.latitude,
-            longitude = location.longitude,
-            goalType = state.goalType,
-            goalValue = state.goalValue,
-        )
+        // Đang bắt đầu một lần thì bỏ qua các lần bấm thêm (tránh tạo hai buổi)
+        if (!startLock.tryLock()) return null
+        try {
+            val state = _uiState.value
+            val location = state.location ?: return null
+            val goalErrors = PlanRules.validate(clock(), state.goalType, state.goalValue, clock())
+            if (goalErrors.isNotEmpty()) return null
+            return startFreeRun(
+                locationName = location.name,
+                latitude = location.latitude,
+                longitude = location.longitude,
+                goalType = state.goalType,
+                goalValue = state.goalValue,
+            )
+        } finally {
+            startLock.unlock()
+        }
     }
 
     private fun onLocationChanged(place: Place) {
