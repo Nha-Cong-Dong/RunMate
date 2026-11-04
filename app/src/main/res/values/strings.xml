@@ -219,4 +219,19 @@
     <string name="action_finish_saved">Kết thúc (đã lưu)</string>
     <string name="action_finish_too_short">Kết thúc (quá ngắn, không lưu)</string>
     <string name="action_open_session">Mở một buổi chạy</string>
+
+    <!-- S8 Thống kê (SPEC 9.1, DESIGN 9 S8) -->
+    <string name="stats_title">Thống kê</string>
+    <string name="stats_tab_week">Tuần</string>
+    <string name="stats_tab_month">Tháng</string>
+    <string name="stats_total_distance">Tổng quãng đường</string>
+    <string name="stats_total_sessions">Số buổi chạy</string>
+    <string name="stats_total_duration">Tổng thời gian</string>
+    <string name="stats_avg_pace">Pace trung bình</string>
+    <string name="stats_plan_completion">Hoàn thành kế hoạch</string>
+    <string name="stats_completion_summary">%1$d hoàn thành · %2$d bỏ lỡ</string>
+    <string name="stats_no_plans">Chưa có kế hoạch trong kỳ này</string>
+    <string name="stats_empty_period">Chưa có buổi chạy nào trong kỳ này</string>
+    <string name="stats_week_prefix">Tuần %1$d</string>
+    <string name="stats_sessions_count">%1$d buổi</string>
 </resources>

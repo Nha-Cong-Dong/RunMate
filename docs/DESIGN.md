@@ -76,7 +76,7 @@ MVP không có mạng xã hội (SPEC 3), nên không có bạn bè hay stories 
 | Vòng chạy trên thẻ kết quả | S1 (danh sách ngày) | Đã chạy |
 | Quỹ đạo một màu `nhipBlue` | S7 | Đã chạy |
 | Vòng tiến độ mục tiêu | S6, S7 | Đang chạy / đã chạy |
-| Vòng tỷ lệ giữ lịch | S8 | Đã chạy |
+| Thanh tỷ lệ hoàn thành kế hoạch | S8 | Đã chạy |
 | Chấm "đang ghi" (băng ở S1, mục 8.4; S6) | S1, S6 | Đang chạy |
 | Nút **Chạy** ở thanh dưới | S1, S8 | Bấm để chạy |
 | Nút **Bắt đầu chạy** / **Tiếp tục** | S4, S5, S6 | Bấm để chạy |
@@ -165,7 +165,7 @@ Khi người dùng tắt hoạt ảnh hệ thống: bỏ hết các hiệu ứng
 |---|---|---|
 | Lịch tuần S1 | S | Theo bảng 3.2 |
 | Thẻ kế hoạch Hoàn thành, thẻ chạy tự do (S1) | M | Như avatar bên trái thẻ |
-| S8 Thống kê | | **Không dùng.** S8 dùng `GoalRing` cho tỷ lệ giữ lịch |
+| S8 Thống kê | | **Không dùng.** S8 dùng thanh ngang cho tỷ lệ hoàn thành kế hoạch |
 
 ---
 
@@ -452,7 +452,7 @@ Cao 24 dp, bo `radiusFull`, chữ `labelSmall`. Luôn có chữ, không chỉ c�
 - Tham số: `progress` (0 trở lên, có thể > 1), `size`, `strokeWidth`.
 - Nền vòng màu `ringTrack`. Phần đã đạt là cung gradient, bắt đầu từ 12 giờ, đầu cung bo tròn. Màu xanh (`nhipBlue`) luôn nằm ở điểm 12 giờ, rồi chuyển dần theo chiều kim đồng hồ.
 - `progress ≥ 1`: vòng đầy. Không vẽ vòng thứ hai. Con số % cho biết đã vượt bao nhiêu.
-- Cỡ dùng: 280 dp / nét 10 dp (S6), 96 dp / nét 8 dp (S7, S8).
+- Cỡ dùng: 280 dp / nét 10 dp (S6), 96 dp / nét 8 dp (S7).
 - Luôn đi kèm con số, vì vòng gradient không đủ tương phản để tự mang thông tin.
 - Khác `RunRing`: `GoalRing` thể hiện **tỷ lệ** (có phần track xám), `RunRing` thể hiện **sự kiện đã chạy** (luôn đầy hoặc chia đoạn).
 
@@ -677,32 +677,52 @@ Màn hình quan trọng nhất. Mục tiêu: **liếc 1 giây là đọc đượ
 
 ### S8 · Thống kê
 
-SPEC: chỉ có số liệu, **chưa có biểu đồ**.
+Thống kê theo **tuần** hoặc **tháng** (SPEC 9.1). Gồm lưới 4 ô số liệu chính (2 hàng × 2 cột), thanh hoàn thành kế hoạch, và biểu đồ cột quãng đường theo ngày (kỳ Tuần). Kỳ Tháng thay biểu đồ cột bằng lịch có chấm và dòng quãng đường từng tuần.
 
 ```
 Thống kê
 [ Tuần | Tháng ]
 ‹      26/10 – 01/11      ›
 ──────────────────────────────────────────
-Tổng quãng đường
-32,6 km                                      ← displayMedium
-┌────────────┬────────────┬───────────┐
-│ Số buổi    │ Thời gian  │ Pace TB   │
-│ 5          │ 2 giờ 51   │ 5:15 /km  │
-└────────────┴────────────┴───────────┘
-Giữ lịch
- (  80%  )    4 hoàn thành · 1 bỏ lỡ        ← GoalRing 96 dp
+┌─────────────────────┬──────────────────┐
+│ Tổng quãng đường    │ Số buổi chạy     │
+│ 32,6 km             │ 5                │
+├─────────────────────┼──────────────────┤
+│ Tổng thời gian      │ Pace trung bình  │
+│ 2 giờ 51            │ 5:15 /km         │
+└─────────────────────┴──────────────────┘
+
+Hoàn thành kế hoạch                  80%
+[████████████████████░░░░░]            ← thanh ngang bo tròn
+4 hoàn thành · 1 bỏ lỡ
+──────────────────────────────────────────
+  5,2       –       10,0               ← số km trên đầu cột (hoặc "–")
+ ┌───┐             ┌───┐
+ │   │             │   │               ← cột màu nhipBlue, bo góc trên
+ │   │     ───     │   │               ← ngày không chạy: thanh ringTrack 2 dp
+  T2       T3       T4                 ← hàng 1: thứ
+ 26/10    27/10    28/10               ← hàng 2: ngày/tháng (dd/MM)
 ──────────────────────────────────────────
    Lịch            (RUN)        Thống kê
 ```
 
-- **Thanh trên:** "Thống kê" (`titleLarge`).
-- `PeriodSwitcher` (mục 8.18).
-- **Số lớn:** tổng quãng đường (`displayMedium`).
-- **Lưới 3 `StatTile`:** số buổi chạy, tổng thời gian, pace trung bình (BR-56).
-- **Khối Giữ lịch:** `GoalRing` 96 dp với tỷ lệ ở giữa (BR-55), bên phải là "4 hoàn thành · 1 bỏ lỡ". Kỳ không có kế hoạch nào: vòng chỉ có track xám, giữa ghi `--`, chữ "Chưa có kế hoạch trong kỳ này".
-- Đổi kỳ: các con số đếm lên từ giá trị cũ tới giá trị mới trong 400 ms, vòng quét tới tỷ lệ mới.
-- **Kỳ trống** (không có buổi chạy): các số là `0` và pace `--`, kèm dòng "Chưa có buổi chạy nào trong kỳ này".
+- **Thanh trên:** "Thống kê" (`titleLarge`). Dưới đó là `PeriodSwitcher` (mục 8.18) và bộ điều hướng kỳ (`‹ khoảng ngày ›`).
+- **Lưới 4 ô số liệu** (lưới 2 hàng × 2 cột dùng `StatTile`):
+  - Hàng 1: **Tổng quãng đường** (`headlineMedium`, `tnum` kèm đơn vị `km`), **Số buổi chạy** (`headlineMedium`, `tnum`).
+  - Hàng 2: **Tổng thời gian** (dưới 1 giờ hiện `m:ss`, từ 1 giờ trở lên hiện `h:mm:ss` hoặc `h giờ m phút`), **Pace trung bình** (BR-56, dạng `m:ss /km`).
+  - Kỳ trống: Quãng đường `0,0 km`, Số buổi `0`, Thời gian `0:00`, Pace `--`.
+- **Thanh hoàn thành kế hoạch:** thanh ngang cao 8 dp, bo tròn, nền `ringTrack`, phần đã đạt tô theo dải gradient `nhipLinear`. Phía trên thanh có nhãn tỷ lệ (`labelLarge`, `tnum`), phía dưới thanh là "x hoàn thành · y bỏ lỡ" (`bodyMedium`). Tỷ lệ tính theo BR-55, làm tròn xuống. Nếu kỳ không có kế hoạch nào: thanh chỉ có track xám, nhãn `--`, dòng dưới ghi "Chưa có kế hoạch trong kỳ này".
+- **Biểu đồ cột kỳ Tuần (theo ngày):**
+  - 7 cột tương ứng Thứ Hai đến Chủ Nhật. Vùng biểu đồ cao khoảng 140 dp.
+  - Cột có chạy: màu `nhipBlue`, bo góc trên (`radiusS` = 4 dp). Chiều cao cột tỷ lệ thuận theo ngày có quãng đường cao nhất trong tuần.
+  - Ngày không chạy (0 km): thanh ngang màu `ringTrack` dày 2 dp ở đáy cột.
+  - **Trên đầu cột:** số km của ngày (`labelSmall`, `tnum`), ngày không chạy hiện `–`.
+  - **Dưới chân cột:** dòng 1 là thứ (`labelMedium`, ví dụ `T2`), dòng 2 là ngày/tháng (`bodySmall`, ví dụ `26/10`).
+- **Kỳ Tháng: lịch có chấm.**
+  - Lưới 7 cột T2 đến CN với đủ các tuần của tháng. Dòng tiêu đề là thứ (`labelMedium`). Ngày ngoài tháng vẫn hiện số nhưng mờ (độ đậm 40%), không có chấm.
+  - Ngày có ít nhất một buổi chạy đã lưu có một chấm tròn 6 dp màu `nhipBlue` ngay dưới số ngày. Ngày không chạy chỉ có số.
+  - Lịch chỉ để xem tần suất, không bấm để mở chi tiết.
+- **Đổi kỳ:** số đếm lên từ giá trị cũ tới giá trị mới trong 400 ms (`motionSlow`). Kỳ Tuần: các cột quét tới chiều cao mới trong cùng khoảng thời gian.
 
 ---
 
