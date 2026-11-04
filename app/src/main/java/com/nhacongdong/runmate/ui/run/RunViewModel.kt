@@ -57,7 +57,7 @@ class RunViewModel(
     private val resumeRun: ResumeRun,
     private val finishRun: FinishRun,
     private val onPause: () -> Unit,
-    private val onResume: () -> Unit,
+    private val onResume: (Long) -> Unit,
     private val onStop: () -> Unit,
 ) : ViewModel() {
 
@@ -116,7 +116,7 @@ class RunViewModel(
 
     fun resume() {
         val id = _uiState.value.sessionId ?: return
-        viewModelScope.launch { if (resumeRun(id)) onResume() }
+        viewModelScope.launch { if (resumeRun(id)) onResume(id) }
     }
 
     // Kết thúc sau khi người dùng xác nhận. Dừng service rồi báo kết quả
@@ -145,7 +145,7 @@ class RunViewModel(
                     resumeRun = container.resumeRun,
                     finishRun = container.finishRun,
                     onPause = { RunServiceControl.pause(app) },
-                    onResume = { RunServiceControl.resume(app) },
+                    onResume = { id -> RunServiceControl.resume(app, id) },
                     onStop = { RunServiceControl.stop(app) },
                 )
             }

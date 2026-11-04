@@ -755,10 +755,12 @@ Phần này không thêm tính năng mới, mà nói app phải chạy **như th
 
 ### 10.2a Mất quyền vị trí khi đang ghi
 
-- Khi quyền vị trí bị tắt lúc đang ghi (`RECORDING`), buổi chạy **không tự dừng và không tự tạm dừng**. Thời gian vẫn tính (BR-34 chỉ bỏ lúc tạm dừng), nhưng không nhận được điểm GPS nên quãng đường không tăng.
-- Khi có lại quyền, điểm mới đầu tiên cách điểm trước hơn 30 giây nên mở đoạn mới theo BR-39. Khoảng trống không được cộng vào quãng đường.
-- Thông báo của service đổi thành "Không có quyền vị trí, quãng đường không được ghi" khi service phát hiện mất quyền. Nếu chưa phát hiện được thì đổi khi người dùng mở lại app.
-- Khi mở S6 mà quyền đang tắt, màn hình hiện băng cảnh báo có nút **Cấp quyền** (DESIGN mục 9 S6). Băng tự biến mất khi quyền được cấp lại.
+- Khi đang ghi (`RECORDING`) mà quyền vị trí hoặc công tắc Vị trí bị tắt lúc app ở nền hoặc màn hình khoá, app **không biết** cho đến khi người dùng mở lại app. Trong thời gian đó buổi vẫn hiện là đang ghi nhưng không có điểm GPS mới. Giới hạn này đã chấp nhận.
+- **Mỗi lần mở app**, nếu có buổi đang `RECORDING`, app kiểm tra giống lúc bấm Bắt đầu chạy: quyền vị trí của app, rồi công tắc Vị trí của máy. Nếu thiếu một trong hai, buổi đó **tự chuyển sang tạm dừng** (`PAUSED`), thông báo đổi thành "Đã tạm dừng: không có quyền vị trí" hoặc "Đã tạm dừng: vị trí đang tắt" (nếu cả hai đều bật thì "Buổi chạy đã tạm dừng vì app đã bị dừng"), và **rung một lần**. Thời gian không được tính trong lúc tạm dừng (BR-34).
+- Buổi tự tạm dừng **không tự tiếp tục**. Người dùng cấp quyền rồi bấm Tiếp tục ở hộp thoại khôi phục (mục 10.1) hoặc ở S6. Tiếp tục khi thiếu quyền thì phải cấp quyền trước.
+- Khi mở S6 mà quyền vị trí hoặc công tắc Vị trí đang tắt, màn hình hiện băng cảnh báo có nút **Cấp quyền** (DESIGN mục 9 S6). Chấm GPS chuyển sang vàng. Băng và chấm dùng cùng điều kiện với lúc mở app, nhưng khi đang mở S6 thì buổi chỉ tự tạm dừng khi bạn mở lại app.
+- Điểm mới đầu tiên sau khi tiếp tục cách điểm trước hơn 30 giây nên mở đoạn mới theo BR-39. Khoảng trống không được cộng vào quãng đường.
+- Quyền **Gần đúng** vẫn được coi là có quyền vị trí. Nếu người dùng chỉ tắt **Chính xác** mà giữ **Gần đúng** thì buổi chạy không tự tạm dừng (giới hạn đã biết).
 - Buổi chạy vẫn phải đạt BR-36 (100 m và 1 phút) mới được lưu.
 
 ### 10.2 Pin và hiệu năng

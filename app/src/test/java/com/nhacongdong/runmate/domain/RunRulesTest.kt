@@ -151,4 +151,28 @@ class RunRulesTest {
         assertEquals(500L, RunRules.endedAtAfterInterruption(lastPointTime = 500L, startedAt = 100L))
         assertEquals(100L, RunRules.endedAtAfterInterruption(lastPointTime = null, startedAt = 100L))
     }
+
+    // SPEC 10.2a: đang ghi mà service còn chạy và vị trí vẫn bật thì không tự tạm dừng
+    @Test
+    fun autoPause_notNeeded_whenRecordingWithServiceAndLocation() {
+        assertFalse(RunRules.needsAutoPause(SessionStatus.RECORDING, serviceRunning = true, locationReady = true))
+    }
+
+    // Service đã mất thì buổi đang ghi phải tự tạm dừng, dù vị trí đang bật
+    @Test
+    fun autoPause_needed_whenServiceGone() {
+        assertTrue(RunRules.needsAutoPause(SessionStatus.RECORDING, serviceRunning = false, locationReady = true))
+    }
+
+    // Thiếu quyền hoặc công tắc Vị trí tắt khi đang ghi thì phải tự tạm dừng
+    @Test
+    fun autoPause_needed_whenLocationNotReady() {
+        assertTrue(RunRules.needsAutoPause(SessionStatus.RECORDING, serviceRunning = true, locationReady = false))
+    }
+
+    // Đã tạm dừng thì không cần tự tạm dừng nữa
+    @Test
+    fun autoPause_notNeeded_whenAlreadyPaused() {
+        assertFalse(RunRules.needsAutoPause(SessionStatus.PAUSED, serviceRunning = false, locationReady = false))
+    }
 }

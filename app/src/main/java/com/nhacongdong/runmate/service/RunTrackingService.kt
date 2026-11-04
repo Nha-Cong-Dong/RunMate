@@ -29,6 +29,8 @@ class RunTrackingService : Service() {
     private lateinit var recordTrackPoint: RecordTrackPoint
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private var sessionId: Long = -1L
+    // Đã gọi startForeground trong tiến trình này chưa (dùng khi tiếp tục mà thiếu quyền)
+    private var foregroundStarted = false
 
     override fun onBind(intent: Intent?): IBinder? = null
 
@@ -42,6 +44,16 @@ class RunTrackingService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         val hasPermission = hasLocationPermission()
+        // Tiếp tục mà thiếu quyền vị trí: startForeground loại location sẽ ném SecurityException, nên không gọi.
+        // Đang chạy thì chỉ đổi thông báo và giữ service để thời gian vẫn tính (SPEC 10.2a). Chưa chạy thì dừng
+        if (intent?.action == ACTION_RESUME && !hasPermission) {
+            if (foregroundStarted) {
+                updateNotification(R.string.notification_no_permission)
+            } else {
+                stopSelf()
+            }
+            return START_NOT_STICKY
+        }
         // Phải gọi startForeground trong vòng 5 giây sau khi service được khởi động
         ServiceCompat.startForeground(
             this,
@@ -49,13 +61,19 @@ class RunTrackingService : Service() {
             buildNotification(if (hasPermission) R.string.notification_recording else R.string.notification_no_permission),
             ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION,
         )
+        foregroundStarted = true
         when (intent?.action) {
             ACTION_START -> {
                 sessionId = intent.getLongExtra(EXTRA_SESSION_ID, -1L)
                 startLocation(hasPermission)
             }
             ACTION_PAUSE -> locationSource.stop()
-            ACTION_RESUME -> startLocation(hasPermission)
+            ACTION_RESUME -> {
+                // Có mã buổi chạy trong lệnh thì dùng mã đó, để điểm mới luôn vào đúng buổi
+                val id = intent.getLongExtra(EXTRA_SESSION_ID, -1L)
+                if (id >= 0) sessionId = id
+                startLocation(hasPermission)
+            }
             // Kết thúc buổi chạy: ngừng nhận GPS và dừng service (SPEC 6.3)
             ACTION_STOP -> stopRecording()
         }
@@ -106,6 +124,7 @@ class RunTrackingService : Service() {
 
     override fun onDestroy() {
         isRunning = false
+        foregroundStarted = false
         locationSource.stop()
         scope.cancel()
         super.onDestroy()

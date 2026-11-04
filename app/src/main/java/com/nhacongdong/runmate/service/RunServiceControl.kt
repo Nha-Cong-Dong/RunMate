@@ -17,7 +17,11 @@ object RunServiceControl {
 
     fun pause(context: Context) = context.startService(intent(context, RunTrackingService.ACTION_PAUSE))
 
-    fun resume(context: Context) = context.startService(intent(context, RunTrackingService.ACTION_RESUME))
+    // Gửi mã buổi chạy kèm lệnh tiếp tục, vì service có thể vừa được bật lại và chưa nhớ buổi nào
+    fun resume(context: Context, sessionId: Long) = context.startService(
+        intent(context, RunTrackingService.ACTION_RESUME)
+            .putExtra(RunTrackingService.EXTRA_SESSION_ID, sessionId),
+    )
 
     fun stop(context: Context) = context.startService(intent(context, RunTrackingService.ACTION_STOP))
 

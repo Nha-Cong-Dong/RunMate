@@ -77,6 +77,7 @@ import com.nhacongdong.runmate.ui.format.RunFormat
 import com.nhacongdong.runmate.ui.location.LocationDialog
 import com.nhacongdong.runmate.ui.location.LocationDialogs
 import com.nhacongdong.runmate.ui.location.hasLocationPermission
+import com.nhacongdong.runmate.ui.location.isLocationOn
 import com.nhacongdong.runmate.ui.location.rememberLocationGate
 import com.nhacongdong.runmate.ui.power.PowerSaveBanner
 import com.nhacongdong.runmate.ui.power.rememberPowerSaveWarningOn
@@ -102,14 +103,16 @@ fun RunRoute(
 ) {
     val context = LocalContext.current
     val state by viewModel.uiState.collectAsStateWithLifecycle()
-    var locationOk by remember { mutableStateOf(context.hasLocationPermission()) }
+    var locationOk by remember { mutableStateOf(context.hasLocationPermission() && context.isLocationOn()) }
     var finishAsked by remember { mutableStateOf(false) }
     var tooShort by remember { mutableStateOf(false) }
     // Tăng mỗi lần đạt mục tiêu, để banner và vòng phóng chạy lại
     var goalTick by remember { mutableIntStateOf(0) }
+    // Bấm Tiếp tục đang chờ quyền vị trí: cấp quyền xong thì tiếp tục luôn
+    var resumeWanted by remember { mutableStateOf(false) }
 
     // Quay lại từ màn cài đặt thì kiểm tra lại quyền vị trí
-    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) { locationOk = context.hasLocationPermission() }
+    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) { locationOk = context.hasLocationPermission() && context.isLocationOn() }
 
     LaunchedEffect(Unit) {
         viewModel.events.collect { event ->
@@ -125,7 +128,14 @@ fun RunRoute(
         }
     }
 
-    val gate = rememberLocationGate(onReady = { locationOk = context.hasLocationPermission() })
+    // Cấp quyền ở banner thì chỉ cập nhật giao diện. Chỉ khi người dùng bấm Tiếp tục thì mới tiếp tục buổi chạy
+    val gate = rememberLocationGate(onReady = {
+        locationOk = context.hasLocationPermission() && context.isLocationOn()
+        if (resumeWanted) {
+            resumeWanted = false
+            viewModel.resume()
+        }
+    })
 
     RunScreen(
         state = state,
@@ -133,11 +143,17 @@ fun RunRoute(
         goalTick = goalTick,
         onBack = onBack,
         onPause = viewModel::pause,
-        onResume = viewModel::resume,
+        onResume = {
+            resumeWanted = true
+            gate.start()
+        },
         onAskFinish = { finishAsked = true },
         onGrantLocation = gate.start,
         locationDialog = gate.dialog,
-        onDismissLocationDialog = gate.dismiss,
+        onDismissLocationDialog = {
+            resumeWanted = false
+            gate.dismiss()
+        },
         finishAsked = finishAsked,
         onDismissFinish = { finishAsked = false },
         onConfirmFinish = {
