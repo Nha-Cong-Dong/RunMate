@@ -82,4 +82,33 @@ class RecordTrackPointTest {
         record(store, lat100m * 2, 20_000)
         assertEquals(listOf(0, 0, 0), store.saved.map { it.segmentIndex })
     }
+
+    // US9, SPEC 7.4: tạm dừng dưới 30 giây nhưng có forceNewSegment thì mở đoạn mới, không tính thời gian dừng
+    @Test
+    fun pauseUnderThirtySeconds_withForceNewSegment_opensNewSegment_andActiveDurationExcludesPause() {
+        val store = FakeStore()
+        val recorder = RecordTrackPoint(store, drops)
+
+        // Đoạn 1: chạy 60 giây (t=0s, 30s, 60s: khoảng cách giữa các điểm ≤ 30s nên chung đoạn 0)
+        runBlocking {
+            recorder(sessionId = 1, timestamp = t0, latitude = 0.0, longitude = 0.0, accuracyM = 5f)
+            recorder(sessionId = 1, timestamp = t0 + 30_000L, latitude = lat100m, longitude = 0.0, accuracyM = 5f)
+            recorder(sessionId = 1, timestamp = t0 + 60_000L, latitude = lat100m * 2, longitude = 0.0, accuracyM = 5f)
+        }
+
+        // Tạm dừng 20 giây (t=60s đến t=80s). Bấm Tiếp tục -> forceNewSegment = true
+        // Điểm đầu tiên sau tiếp tục đến ở t=80s (cách điểm trước chỉ 20s ≤ 30s)
+        // Các điểm tiếp theo ở t=110s, t=140s (khoảng cách ≤ 30s nên chung đoạn 1)
+        runBlocking {
+            recorder(sessionId = 1, timestamp = t0 + 80_000L, latitude = lat100m * 2, longitude = 0.0, accuracyM = 5f, forceNewSegment = true)
+            recorder(sessionId = 1, timestamp = t0 + 110_000L, latitude = lat100m * 3, longitude = 0.0, accuracyM = 5f)
+            recorder(sessionId = 1, timestamp = t0 + 140_000L, latitude = lat100m * 4, longitude = 0.0, accuracyM = 5f)
+        }
+
+        // 3 điểm đầu thuộc segment 0, 3 điểm sau thuộc segment 1
+        assertEquals(listOf(0, 0, 0, 1, 1, 1), store.saved.map { it.segmentIndex })
+
+        // Tổng thời gian chạy phải là 120 giây (đoạn 1: 60s + đoạn 2: 60s), KHÔNG tính 20 giây lúc tạm dừng
+        assertEquals(120_000L, TrackRules.activeDurationMs(store.saved))
+    }
 }

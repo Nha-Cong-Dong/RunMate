@@ -48,6 +48,7 @@ class RecordTrackPoint(
         latitude: Double,
         longitude: Double,
         accuracyM: Float,
+        forceNewSegment: Boolean = false,
     ): Boolean {
         val last = store.lastPoint(sessionId)
         val candidate = TrackPoint(
@@ -58,12 +59,12 @@ class RecordTrackPoint(
             longitude = longitude,
             accuracyM = accuracyM,
         )
-        if (!TrackRules.shouldKeep(last, candidate)) {
+        if (!TrackRules.shouldKeep(last, candidate, forceNewSegment)) {
             drops.onDropped()
             return false
         }
         drops.onKept()
-        store.addPoint(candidate.copy(segmentIndex = TrackRules.segmentFor(last, candidate)))
+        store.addPoint(candidate.copy(segmentIndex = TrackRules.segmentFor(last, candidate, forceNewSegment)))
         return true
     }
 }

@@ -33,18 +33,18 @@ object TrackRules {
     fun isNewSegment(last: TrackPoint, point: TrackPoint): Boolean =
         point.timestamp - last.timestamp > MAX_GAP_MS
 
-    // Số đoạn của điểm mới: điểm đầu tiên là đoạn 0, khoảng trống lớn thì tăng số đoạn
-    fun segmentFor(last: TrackPoint?, point: TrackPoint): Int = when {
+    // Số đoạn của điểm mới: điểm đầu tiên là đoạn 0. Bị ép mở đoạn (sau tạm dừng) hoặc khoảng trống lớn thì tăng số đoạn
+    fun segmentFor(last: TrackPoint?, point: TrackPoint, forceNewSegment: Boolean = false): Int = when {
         last == null -> 0
-        isNewSegment(last, point) -> last.segmentIndex + 1
+        forceNewSegment || isNewSegment(last, point) -> last.segmentIndex + 1
         else -> last.segmentIndex
     }
 
-    // Giữ điểm đủ chính xác (BR-30). Sau khoảng trống lớn thì mở đoạn mới và không kiểm tra tốc độ (BR-39).
+    // Giữ điểm đủ chính xác (BR-30). Sau khoảng trống lớn hoặc ép mở đoạn thì mở đoạn mới và không kiểm tra tốc độ (BR-39).
     // Trong các trường hợp còn lại thì phải đạt BR-31 so với điểm trước
-    fun shouldKeep(last: TrackPoint?, point: TrackPoint): Boolean {
+    fun shouldKeep(last: TrackPoint?, point: TrackPoint, forceNewSegment: Boolean = false): Boolean {
         if (!isAccurate(point.accuracyM)) return false
-        if (last == null || isNewSegment(last, point)) return true
+        if (last == null || forceNewSegment || isNewSegment(last, point)) return true
         return isPlausibleStep(last, point)
     }
 
