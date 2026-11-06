@@ -31,6 +31,8 @@ class RunTrackingService : Service() {
     private var sessionId: Long = -1L
     // Đã gọi startForeground trong tiến trình này chưa (dùng khi tiếp tục mà thiếu quyền)
     private var foregroundStarted = false
+    // Ép mở đoạn GPS mới khi tiếp tục sau tạm dừng (SPEC 7.4)
+    private var forceNewSegment = false
 
     override fun onBind(intent: Intent?): IBinder? = null
 
@@ -72,6 +74,7 @@ class RunTrackingService : Service() {
                 // Có mã buổi chạy trong lệnh thì dùng mã đó, để điểm mới luôn vào đúng buổi
                 val id = intent.getLongExtra(EXTRA_SESSION_ID, -1L)
                 if (id >= 0) sessionId = id
+                forceNewSegment = true
                 locationSource.stop()
                 startLocation(hasPermission)
             }
@@ -98,13 +101,18 @@ class RunTrackingService : Service() {
             locationSource.start { location ->
                 scope.launch {
                     try {
-                        recordTrackPoint(
+                        val shouldForce = forceNewSegment
+                        val kept = recordTrackPoint(
                             sessionId = sessionId,
                             timestamp = location.time,
                             latitude = location.latitude,
                             longitude = location.longitude,
                             accuracyM = location.accuracy,
+                            forceNewSegment = shouldForce,
                         )
+                        if (kept && shouldForce) {
+                            forceNewSegment = false
+                        }
                     } catch (e: SQLException) {
                         // Buổi chạy đã bị xoá hoặc không còn (lỗi FOREIGN KEY): không còn gì để ghi, nên dừng GPS và service
                         // thay vì để lỗi làm app đóng

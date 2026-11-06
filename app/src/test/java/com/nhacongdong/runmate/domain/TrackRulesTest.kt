@@ -84,6 +84,20 @@ class TrackRulesTest {
         assertEquals(3, TrackRules.segmentFor(last, point(0.0, 0.0, 30_001, segment = 2)))
     }
 
+    // SPEC 7.4, US9: forceNewSegment ép mở đoạn mới kể cả khi khoảng cách thời gian dưới 30 giây
+    @Test
+    fun segmentFor_forcedNewSegment_underThirtySeconds_incrementsSegment() {
+        val last = point(0.0, 0.0, 0, segment = 0)
+        assertEquals(1, TrackRules.segmentFor(last, point(0.0, 0.0, 10_000), forceNewSegment = true))
+    }
+
+    @Test
+    fun shouldKeep_forcedNewSegment_skipsSpeedCheck() {
+        val last = point(0.0, 0.0, 0)
+        val next = point(lat100m * 50, 0.0, 10_000)
+        assertTrue(TrackRules.shouldKeep(last, next, forceNewSegment = true))
+    }
+
     @Test
     fun shouldKeep_firstPoint_kept() =
         assertTrue(TrackRules.shouldKeep(null, point(0.0, 0.0, 0)))
