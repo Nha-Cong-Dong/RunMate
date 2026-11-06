@@ -11,7 +11,7 @@ import java.time.temporal.ChronoUnit
 // Quy tắc kế hoạch (SPEC 5.1, 6.3, 6.4). Hàm thuần: giờ hiện tại luôn truyền vào qua `now` (SPEC 10.7).
 object PlanRules {
     const val GRACE_PERIOD_MS = 30 * 60_000L          // BR-09
-    const val MAX_DAYS_AHEAD = 16                      // BR-02
+    const val MAX_DAYS_AHEAD = 15                      // BR-02
     private const val MINUTE_MS = 60_000L
     private const val DAY_MS = 24 * 60 * MINUTE_MS
 

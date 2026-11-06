@@ -231,7 +231,7 @@ Tất cả user story đều là của **người chạy** (tác nhân duy nhấ
 
 | Mã | User story | Tiêu chí chấp nhận | Liên quan |
 |---|---|---|---|
-| US1 | Là người chạy, tôi muốn **đặt kế hoạch** với ngày giờ, vị trí và mục tiêu, để chủ động sắp xếp lịch tập | Không chọn được giờ trong quá khứ hoặc quá 16 ngày (BR-01, BR-02). Mục tiêu nằm trong giới hạn (BR-04, BR-05). Lưu xong thì thấy kế hoạch ở S1 với nhãn "Đã lên kế hoạch" | UC1 |
+| US1 | Là người chạy, tôi muốn **đặt kế hoạch** với ngày giờ, vị trí và mục tiêu, để chủ động sắp xếp lịch tập | Không chọn được giờ trong quá khứ hoặc quá 15 ngày (BR-01, BR-02). Mục tiêu nằm trong giới hạn (BR-04, BR-05). Lưu xong thì thấy kế hoạch ở S1 với nhãn "Đã lên kế hoạch" | UC1 |
 | US2 | Tôi muốn **chọn vị trí** bằng vị trí hiện tại hoặc gõ tên, để không phải nhập toạ độ | Có cả 2 cách (mục 8.2). Mất mạng thì tìm theo tên báo lỗi nhưng vẫn dùng được vị trí hiện tại (10.3) | UC1 |
 | US3 | Tôi muốn **xem dự báo thời tiết** đúng giờ và nơi sẽ chạy, để quyết định có chạy hay không | Hiện nhiệt độ, mưa, gió, UV của giờ bắt đầu (5.2). Không có mạng thì hiện "cập nhật lúc …". Lỗi thời tiết không chặn việc lưu | UC2 |
 | US4 | Tôi muốn **được cảnh báo và gợi ý vật dụng**, để chuẩn bị đồ phù hợp | Cảnh báo theo BR-10 đến BR-13, nhiều cảnh báo thì hiện tất cả. Gợi ý theo BR-20 đến BR-24 | UC2 |
@@ -254,7 +254,7 @@ Tất cả user story đều là của **người chạy** (tác nhân duy nhấ
 | Mã | Quy tắc | Giá trị |
 |---|---|---|
 | BR-01 | Thời điểm bắt đầu của kế hoạch phải **không nằm trong quá khứ** | ≥ thời điểm hiện tại, so theo phút (bỏ giây lẻ): chọn 06:00 rồi bấm Lưu lúc 06:00:20 vẫn hợp lệ |
-| BR-02 | Chỉ đặt kế hoạch trong vòng tối đa kể từ hiện tại | **16 ngày** (theo giới hạn dự báo theo giờ của Open-Meteo trong README) |
+| BR-02 | Chỉ đặt kế hoạch trong vòng tối đa kể từ hiện tại | **15 ngày** (khớp với dải dự báo `forecast_days=16` tính từ ngày hiện tại của Open-Meteo) |
 | BR-03 | Mỗi kế hoạch có đúng **một** mục tiêu, bắt buộc | Loại `DISTANCE` (km) hoặc `DURATION` (phút) |
 | BR-04 | Mục tiêu quãng đường | **0,5 km đến 100 km**, bước nhập 0,1 km |
 | BR-05 | Mục tiêu thời gian | **5 phút đến 12 giờ** (720 phút), bước nhập 1 phút |
@@ -265,7 +265,7 @@ Tất cả user story đều là của **người chạy** (tác nhân duy nhấ
 
 ### 5.2 Thời tiết, cảnh báo và gợi ý vật dụng
 
-**Mốc thời gian dự báo:** lấy dự báo theo giờ của **giờ bắt đầu**, làm tròn xuống giờ chẵn. Với chạy tự do, giờ bắt đầu là bây giờ. App chưa ước tính giờ kết thúc.
+**Mốc thời gian dự báo:** lấy dự báo theo giờ của **giờ bắt đầu**, làm tròn xuống giờ tròn (bỏ phút và giây lẻ, ví dụ 06:30 lấy 06:00, 07:15 lấy 07:00). Với chạy tự do, giờ bắt đầu là bây giờ. App chưa ước tính giờ kết thúc.
 
 **Ngưỡng cảnh báo:**
 
@@ -557,13 +557,13 @@ Enum lưu dạng chuỗi (tên enum, ví dụ `"PLANNED"`) bằng converter có 
 | Endpoint | `GET https://api.open-meteo.com/v1/forecast` |
 | Tài liệu | https://open-meteo.com/en/docs |
 | API key | Không cần |
-| Tham số | `latitude`, `longitude`, `hourly=temperature_2m,precipitation_probability,wind_speed_10m,uv_index`, `forecast_days=16`, `timeformat=unixtime` |
-| Chọn giờ | Trong mảng `hourly.time`, lấy phần tử bằng giờ bắt đầu làm tròn xuống giờ chẵn (mục 5.2) |
+| Tham số | `latitude`, `longitude`, `hourly=temperature_2m,precipitation_probability,wind_speed_10m,uv_index`, `forecast_days=16`, `timeformat=unixtime`, `timezone=auto`, `past_days=1` |
+| Chọn giờ | Trong mảng `hourly.time`, lấy phần tử bằng giờ bắt đầu làm tròn xuống giờ tròn (mục 5.2) |
 | Đơn vị mặc định | °C, %, km/h: khớp với ngưỡng BR-10 đến BR-13, không cần đổi |
 | Timeout | 10 giây (đề xuất) |
 | Lỗi | Mất mạng, timeout hoặc mã HTTP khác 2xx thì đều coi là "không lấy được dự báo" (UC1, mục 5.2) |
 
-Dùng `timeformat=unixtime` để so thẳng với `startTime` (epoch), khỏi phải xử lý múi giờ.
+Dùng `timeformat=unixtime` để so thẳng với `startTime` (epoch), kết hợp `timezone=auto` và `past_days=1` để dải dữ liệu khớp với giờ địa phương và không bị thiếu mốc giờ rạng sáng.
 
 ### 8.2 Chọn vị trí
 
@@ -652,7 +652,7 @@ flowchart LR
 
 | Mã | Màn hình | Use case | Nội dung chính | Hành động |
 |---|---|---|---|---|
-| S1 | **Lịch** (màn hình chính) | UC1, UC3, UC6 | Lịch tuần: dải 7 ngày (T2–CN), ngày có kế hoạch hoặc buổi chạy có vòng chỉ trạng thái của ngày (xem DESIGN 3.2). Chọn một ngày để xem kế hoạch và buổi chạy của ngày đó (BR-50). Thẻ kế hoạch: giờ, vị trí, mục tiêu, nhãn trạng thái (mục 6.1), chưa hiện thời tiết. Kế hoạch Hoàn thành có thêm kết quả (quãng đường, tỷ lệ mục tiêu) và nút "Xem kết quả". Thẻ chạy tự do: giờ, quãng đường, thời gian, nút "Xem kết quả". Mặc định chọn hôm nay. ‹ › chuyển tuần, "Hôm nay" quay về tuần này. Lùi không giới hạn, tiến tối đa tới tuần chứa hôm nay + 16 ngày (BR-02). Có băng "Đang có buổi chạy" khi tồn tại buổi chạy RECORDING hoặc PAUSED | Tạo kế hoạch (nút +), mở kế hoạch (S4), xem kết quả (S7), bấm băng để về S6 |
+| S1 | **Lịch** (màn hình chính) | UC1, UC3, UC6 | Lịch tuần: dải 7 ngày (T2–CN), ngày có kế hoạch hoặc buổi chạy có vòng chỉ trạng thái của ngày (xem DESIGN 3.2). Chọn một ngày để xem kế hoạch và buổi chạy của ngày đó (BR-50). Thẻ kế hoạch: giờ, vị trí, mục tiêu, nhãn trạng thái (mục 6.1), chưa hiện thời tiết. Kế hoạch Hoàn thành có thêm kết quả (quãng đường, tỷ lệ mục tiêu) và nút "Xem kết quả". Thẻ chạy tự do: giờ, quãng đường, thời gian, nút "Xem kết quả". Mặc định chọn hôm nay. ‹ › chuyển tuần, "Hôm nay" quay về tuần này. Lùi không giới hạn, tiến tối đa tới tuần chứa hôm nay + 15 ngày (BR-02). Có băng "Đang có buổi chạy" khi tồn tại buổi chạy RECORDING hoặc PAUSED | Tạo kế hoạch (nút +), mở kế hoạch (S4), xem kết quả (S7), bấm băng để về S6 |
 | S2 | **Tạo / Sửa kế hoạch** | UC1, UC2, UC3 | Form gồm ngày, giờ, vị trí, loại và giá trị mục tiêu. Khi đủ thông tin thì hiện thời tiết, cảnh báo và gợi ý vật dụng | Chọn vị trí (sang S3), Lưu |
 | S3 | **Chọn vị trí** | UC1, UC4 | Nút "Dùng vị trí hiện tại", ô tìm theo tên và danh sách kết quả (mục 8.2) | Chọn một vị trí rồi quay lại màn hình trước |
 | S4 | **Chi tiết kế hoạch** | UC2, UC3, UC4 | Thông tin kế hoạch, trạng thái, thời tiết, cảnh báo, gợi ý vật dụng. Áp dụng quy tắc 3 giờ và nhãn "cập nhật lúc …" (mục 5.2) | Bắt đầu chạy (tắt khi đang có buổi chạy dở, BR-08), Sửa, Huỷ, Xoá (bật hoặc tắt theo mục 6.4). Kế hoạch `COMPLETED` có thêm "Xem buổi chạy" |

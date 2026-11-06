@@ -22,11 +22,11 @@ object WeatherRules {
     const val LONG_DURATION_S = 3_600  // BR-24: 60 phút
     const val REFRESH_AFTER_MS = 3 * 60 * 60_000L  // SPEC 5.2: dữ liệu đã lưu quá 3 giờ thì lấy lại
 
-    // SPEC 5.2: dự báo lấy theo giờ chẵn, làm tròn xuống. 06:30 lấy dữ liệu 06:00, 07:00 cũng lấy 06:00.
-    // Trả về epoch millis của giờ chẵn đó
+    // SPEC 5.2: dự báo lấy theo giờ bắt đầu, làm tròn xuống giờ tròn (06:30 lấy 06:00, 07:00 lấy 07:00).
+    // Trả về epoch millis của giờ tròn đó
     fun forecastHour(startTime: Long, zone: ZoneId): Long {
         val time = Instant.ofEpochMilli(startTime).atZone(zone)
-        return time.withMinute(0).withSecond(0).withNano(0).withHour(time.hour - time.hour % 2).toInstant().toEpochMilli()
+        return time.withMinute(0).withSecond(0).withNano(0).toInstant().toEpochMilli()
     }
 
     // SPEC 5.2: dữ liệu đã lưu hơn 3 giờ thì coi là cũ

@@ -29,16 +29,16 @@ class WeekRulesTest {
     }
 
     @Test
-    fun lastAllowedWeekStart_isWeekOfTodayPlus16Days() {
-        // 29/10 + 16 ngày = 14/11 (Thứ Bảy), tuần đó bắt đầu 09/11
+    fun lastAllowedWeekStart_isWeekOfTodayPlus15Days() {
+        // 29/10 + 15 ngày = 13/11 (Thứ Sáu), tuần đó bắt đầu 09/11
         assertEquals(LocalDate.of(2026, 11, 9), WeekRules.lastAllowedWeekStart(today))
     }
 
     @Test
-    fun isPlannable_fromTodayTo16DaysAhead() {
+    fun isPlannable_fromTodayTo15DaysAhead() {
         assertTrue(WeekRules.isPlannable(today, today))
-        assertTrue(WeekRules.isPlannable(today.plusDays(16), today))
+        assertTrue(WeekRules.isPlannable(today.plusDays(15), today))
         assertFalse(WeekRules.isPlannable(today.minusDays(1), today))
-        assertFalse(WeekRules.isPlannable(today.plusDays(17), today))
+        assertFalse(WeekRules.isPlannable(today.plusDays(16), today))
     }
 }

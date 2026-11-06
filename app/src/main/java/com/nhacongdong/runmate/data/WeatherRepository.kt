@@ -35,6 +35,8 @@ class WeatherRepository(
                 hourly = HOURLY,
                 forecastDays = FORECAST_DAYS,
                 timeFormat = "unixtime",
+                timeZone = TIME_ZONE,
+                pastDays = PAST_DAYS,
             ).hourly
             val index = hourly.time.indexOf(hourSeconds)
             if (index < 0) return ForecastResult.Failed
@@ -59,5 +61,7 @@ class WeatherRepository(
     private companion object {
         const val HOURLY = "temperature_2m,precipitation_probability,wind_speed_10m,uv_index"
         const val FORECAST_DAYS = 16
+        const val TIME_ZONE = "auto"
+        const val PAST_DAYS = 1
     }
 }

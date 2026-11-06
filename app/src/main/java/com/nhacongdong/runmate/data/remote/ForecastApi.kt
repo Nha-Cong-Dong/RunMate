@@ -15,6 +15,8 @@ interface ForecastApi {
         @Query("hourly") hourly: String,
         @Query("forecast_days") forecastDays: Int,
         @Query("timeformat") timeFormat: String,
+        @Query("timezone") timeZone: String,
+        @Query("past_days") pastDays: Int,
     ): ForecastResponse
 }
 

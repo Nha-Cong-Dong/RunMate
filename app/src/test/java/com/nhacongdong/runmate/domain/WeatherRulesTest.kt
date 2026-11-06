@@ -107,7 +107,7 @@ class WeatherRulesTest {
         assertEquals(setOf(Gear.HAT, Gear.WATER), result)
     }
 
-    // SPEC 5.2: giờ dự báo làm tròn xuống giờ chẵn
+    // SPEC 5.2: giờ dự báo làm tròn xuống giờ tròn
     private val zone: ZoneId = ZoneId.of("Asia/Ho_Chi_Minh")
 
     private fun millisAt(hour: Int, minute: Int): Long =
@@ -118,16 +118,20 @@ class WeatherRulesTest {
         assertEquals(millisAt(6, 0), WeatherRules.forecastHour(millisAt(6, 30), zone))
 
     @Test
-    fun forecastHour_seven_roundsToSix() =
-        assertEquals(millisAt(6, 0), WeatherRules.forecastHour(millisAt(7, 0), zone))
+    fun forecastHour_seven_unchanged() =
+        assertEquals(millisAt(7, 0), WeatherRules.forecastHour(millisAt(7, 0), zone))
 
     @Test
-    fun forecastHour_evenHour_unchanged() =
+    fun forecastHour_sevenThirty_roundsToSeven() =
+        assertEquals(millisAt(7, 0), WeatherRules.forecastHour(millisAt(7, 30), zone))
+
+    @Test
+    fun forecastHour_exactHour_unchanged() =
         assertEquals(millisAt(6, 0), WeatherRules.forecastHour(millisAt(6, 0), zone))
 
     @Test
-    fun forecastHour_oneThirty_roundsToMidnight() =
-        assertEquals(millisAt(0, 0), WeatherRules.forecastHour(millisAt(1, 30), zone))
+    fun forecastHour_oneThirty_roundsToOne() =
+        assertEquals(millisAt(1, 0), WeatherRules.forecastHour(millisAt(1, 30), zone))
 
     // SPEC 5.2: dữ liệu đã lưu hơn 3 giờ thì lấy lại
     @Test
