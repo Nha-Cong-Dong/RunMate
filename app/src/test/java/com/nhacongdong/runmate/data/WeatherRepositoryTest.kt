@@ -28,6 +28,8 @@ class WeatherRepositoryTest {
             hourly: String,
             forecastDays: Int,
             timeFormat: String,
+            timeZone: String,
+            pastDays: Int,
         ): ForecastResponse = answer()
     }
 

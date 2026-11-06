@@ -40,12 +40,12 @@ class PlanRulesTest {
 
     // BR-02
     @Test
-    fun startExactly16DaysAhead_isValid() =
-        assertEquals(emptyList<PlanError>(), distance(5_000, startTime = now + 16 * day))
+    fun startExactly15DaysAhead_isValid() =
+        assertEquals(emptyList<PlanError>(), distance(5_000, startTime = now + 15 * day))
 
     @Test
-    fun startMoreThan16DaysAhead_isTooFar() =
-        assertEquals(listOf(PlanError.START_TOO_FAR), distance(5_000, startTime = now + 16 * day + minute))
+    fun startMoreThan15DaysAhead_isTooFar() =
+        assertEquals(listOf(PlanError.START_TOO_FAR), distance(5_000, startTime = now + 15 * day + minute))
 
     // BR-04
     @Test
