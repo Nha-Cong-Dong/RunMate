@@ -17,6 +17,7 @@ import com.nhacongdong.runmate.service.RunServiceControl
 import com.nhacongdong.runmate.ui.location.hasLocationPermission
 import com.nhacongdong.runmate.ui.location.isLocationOn
 import com.nhacongdong.runmate.service.RunTrackingService
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -48,6 +49,7 @@ class RunMateAppViewModel(
     private val pauseRun: PauseRun,
     private val onAutoPaused: () -> Unit,
     private val isLocationReady: () -> Boolean,
+    private val isServiceRunning: () -> Boolean = { RunTrackingService.isRunning },
     private val clock: () -> Long = System::currentTimeMillis,
 ) : ViewModel() {
 
@@ -64,41 +66,39 @@ class RunMateAppViewModel(
 
     // Gọi mỗi khi app hiện lên (SPEC 10.1, 10.2a). Buổi đang ghi mà thiếu quyền vị trí hoặc công tắc Vị trí tắt,
     // hoặc service đã mất, thì tự chuyển sang tạm dừng rồi báo người dùng. Buổi đang ghi bình thường thì không làm gì
-    fun refresh() {
-        viewModelScope.launch {
-            val found = sessions.getActiveSession() ?: run {
-                _interrupted.value = null
-                return@launch
-            }
-            val serviceRunning = RunTrackingService.isRunning
-            val needsAutoPause = RunRules.needsAutoPause(found.status, serviceRunning, isLocationReady())
-            if (serviceRunning && !needsAutoPause) {
-                _interrupted.value = null
-                return@launch
-            }
-            val active = if (needsAutoPause) {
-                if (serviceRunning) pauseService()
-                if (pauseRun(found.id)) {
-                    onAutoPaused()
-                    found.copy(status = SessionStatus.PAUSED)
-                } else {
-                    found
-                }
+    fun refresh(): Job = viewModelScope.launch {
+        val found = sessions.getActiveSession() ?: run {
+            _interrupted.value = null
+            return@launch
+        }
+        val serviceRunning = isServiceRunning()
+        val needsAutoPause = RunRules.needsAutoPause(found.status, serviceRunning, isLocationReady())
+        if (serviceRunning && !needsAutoPause) {
+            _interrupted.value = null
+            return@launch
+        }
+        val active = if (needsAutoPause) {
+            if (serviceRunning) pauseService()
+            if (pauseRun(found.id)) {
+                onAutoPaused()
+                found.copy(status = SessionStatus.PAUSED)
             } else {
                 found
             }
-            val points = sessions.getTrackPoints(active.id)
-            val lastPointTime = sessions.lastPoint(active.id)?.timestamp
-            _interrupted.value = InterruptedRun(
-                sessionId = active.id,
-                status = active.status,
-                startedAt = active.startedAt,
-                distanceM = TrackRules.totalDistanceM(points),
-                durationMs = TrackRules.activeDurationMs(points),
-                canResume = RunRules.canResumeInterrupted(lastPointTime, active.startedAt, clock()),
-                endedAt = RunRules.endedAtAfterInterruption(lastPointTime, active.startedAt),
-            )
+        } else {
+            found
         }
+        val points = sessions.getTrackPoints(active.id)
+        val lastPointTime = sessions.lastPoint(active.id)?.timestamp
+        _interrupted.value = InterruptedRun(
+            sessionId = active.id,
+            status = active.status,
+            startedAt = active.startedAt,
+            distanceM = TrackRules.totalDistanceM(points),
+            durationMs = TrackRules.activeDurationMs(points),
+            canResume = RunRules.canResumeInterrupted(lastPointTime, active.startedAt, clock()),
+            endedAt = RunRules.endedAtAfterInterruption(lastPointTime, active.startedAt),
+        )
     }
 
     // Tiếp tục: bật lại service với đúng buổi chạy, mở S6. Buổi đang tạm dừng thì vẫn tạm dừng
@@ -111,10 +111,10 @@ class RunMateAppViewModel(
     }
 
     // Kết thúc: lưu hoặc xoá theo BR-36, giờ kết thúc là điểm GPS cuối
-    fun finish() {
-        val run = _interrupted.value ?: return
+    fun finish(): Job? {
+        val run = _interrupted.value ?: return null
         _interrupted.value = null
-        viewModelScope.launch {
+        return viewModelScope.launch {
             finishRun(run.sessionId, run.endedAt)
         }
     }
