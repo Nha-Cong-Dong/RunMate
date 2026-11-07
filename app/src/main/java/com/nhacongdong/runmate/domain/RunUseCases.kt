@@ -3,6 +3,7 @@ package com.nhacongdong.runmate.domain
 import com.nhacongdong.runmate.data.PlanRepository
 import com.nhacongdong.runmate.data.SessionRepository
 import com.nhacongdong.runmate.data.local.RunSession
+import com.nhacongdong.runmate.data.local.WeatherSnapshot
 import com.nhacongdong.runmate.data.model.GoalType
 import com.nhacongdong.runmate.data.model.SessionStatus
 import kotlinx.coroutines.flow.first
@@ -47,6 +48,7 @@ class StartFreeRun(
         longitude: Double,
         goalType: GoalType,
         goalValue: Int,
+        weather: WeatherSnapshot? = null,
     ): Long? {
         val session = RunSession(
             planId = null,
@@ -57,7 +59,7 @@ class StartFreeRun(
             longitude = longitude,
             goalType = goalType,
             goalValue = goalValue,
-            weather = null,
+            weather = weather,
         )
         return sessions.startSession(session, planId = null, planStatus = null)
     }

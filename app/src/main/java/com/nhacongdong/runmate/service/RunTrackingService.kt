@@ -15,6 +15,7 @@ import com.nhacongdong.runmate.MainActivity
 import com.nhacongdong.runmate.RunMateApplication
 import com.nhacongdong.runmate.domain.RecordTrackPoint
 import com.nhacongdong.runmate.ui.location.hasLocationPermission
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -57,10 +58,15 @@ class RunTrackingService : Service() {
             return START_NOT_STICKY
         }
         // Phải gọi startForeground trong vòng 5 giây sau khi service được khởi động
+        val notificationTextRes = when {
+            !hasPermission -> R.string.notification_no_permission
+            intent?.action == ACTION_PAUSE -> R.string.notification_paused
+            else -> R.string.notification_recording
+        }
         ServiceCompat.startForeground(
             this,
             NOTIFICATION_ID,
-            buildNotification(if (hasPermission) R.string.notification_recording else R.string.notification_no_permission),
+            buildNotification(notificationTextRes),
             ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION,
         )
         foregroundStarted = true
@@ -69,7 +75,10 @@ class RunTrackingService : Service() {
                 sessionId = intent.getLongExtra(EXTRA_SESSION_ID, -1L)
                 startLocation(hasPermission)
             }
-            ACTION_PAUSE -> locationSource.stop()
+            ACTION_PAUSE -> {
+                locationSource.stop()
+                updateNotification(R.string.notification_paused)
+            }
             ACTION_RESUME -> {
                 // Có mã buổi chạy trong lệnh thì dùng mã đó, để điểm mới luôn vào đúng buổi
                 val id = intent.getLongExtra(EXTRA_SESSION_ID, -1L)
@@ -117,6 +126,10 @@ class RunTrackingService : Service() {
                         // Buổi chạy đã bị xoá hoặc không còn (lỗi FOREIGN KEY): không còn gì để ghi, nên dừng GPS và service
                         // thay vì để lỗi làm app đóng
                         stopRecording()
+                    } catch (e: CancellationException) {
+                        throw e
+                    } catch (e: Exception) {
+                        // Tránh để lỗi bất ngờ trong coroutine làm sập app
                     }
                 }
             }

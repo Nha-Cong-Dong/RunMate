@@ -134,6 +134,23 @@ class PlacePickerViewModelTest {
     }
 
     @Test
+    fun locateThrowsException_sendsLocateFailed() = runTest(dispatcher) {
+        val vm = viewModel(
+            geocoder = FakeSearch { emptyList() },
+            locate = { throw RuntimeException("Google Play Services not available") },
+        )
+        val events = mutableListOf<PlacePickerEvent>()
+        val collector = launchCollector(this, vm, events)
+
+        vm.useCurrentLocation()
+        advanceUntilIdle()
+        collector.cancel()
+
+        assertEquals(listOf(PlacePickerEvent.LocateFailed), events)
+        assertFalse(vm.uiState.value.isLocating)
+    }
+
+    @Test
     fun denied_sendsPermissionDenied() = runTest(dispatcher) {
         val vm = viewModel(FakeSearch { emptyList() })
         val events = mutableListOf<PlacePickerEvent>()
