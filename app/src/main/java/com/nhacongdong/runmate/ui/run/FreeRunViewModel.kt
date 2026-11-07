@@ -22,6 +22,7 @@ import com.nhacongdong.runmate.domain.model.Place
 import com.nhacongdong.runmate.ui.components.DEFAULT_DISTANCE_M
 import com.nhacongdong.runmate.ui.components.DEFAULT_DURATION_S
 import com.nhacongdong.runmate.ui.place.PlacePickerViewModel
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.sync.Mutex
@@ -91,7 +92,9 @@ class FreeRunViewModel(
         viewModelScope.launch {
             val location = try {
                 locate()
-            } catch (e: SecurityException) {
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
                 null
             }
             if (location == null) {
@@ -138,6 +141,7 @@ class FreeRunViewModel(
                 longitude = location.longitude,
                 goalType = state.goalType,
                 goalValue = state.goalValue,
+                weather = state.weather,
             )
         } finally {
             startLock.unlock()

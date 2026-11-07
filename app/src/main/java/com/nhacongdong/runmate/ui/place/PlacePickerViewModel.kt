@@ -9,6 +9,7 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.nhacongdong.runmate.RunMateApplication
 import com.nhacongdong.runmate.data.place.PlaceRepository
 import com.nhacongdong.runmate.domain.model.Place
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
@@ -83,7 +84,9 @@ class PlacePickerViewModel(
         viewModelScope.launch {
             val location = try {
                 locate()
-            } catch (e: SecurityException) {
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
                 null
             }
             _uiState.update { it.copy(isLocating = false) }

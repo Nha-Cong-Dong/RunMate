@@ -60,6 +60,7 @@
     <!-- Thông báo khi đang ghi buổi chạy (SPEC 10.2) -->
     <string name="notification_channel_name">Ghi buổi chạy</string>
     <string name="notification_recording">Đang ghi buổi chạy</string>
+    <string name="notification_paused">Đã tạm dừng</string>
     <string name="notification_no_permission">Không có quyền vị trí, quãng đường không được ghi</string>
     <string name="notification_paused_no_permission">Đã tạm dừng: không có quyền vị trí</string>
     <string name="notification_paused_app_stopped">Buổi chạy đã tạm dừng vì app đã bị dừng</string>
