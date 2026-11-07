@@ -62,6 +62,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -411,10 +412,16 @@ private fun RingContent(number: String, unit: String, percentLine: String) {
     }
 }
 
-// Số chính cỡ displayLarge. Cách cuộn (SCROLL_DIGITS): chỉ chữ số đổi mới trượt từ dưới lên, dấu phẩy và dấu hai chấm đứng yên
+// Số chính cỡ displayLarge (hoặc tự co theo độ dài chuỗi để luôn vừa GoalRing 280dp mà không tràn viền).
+// Cách cuộn (SCROLL_DIGITS): chỉ chữ số đổi mới trượt từ dưới lên, dấu phẩy và dấu hai chấm đứng yên
 @Composable
 private fun BigNumber(text: String) {
-    val style = MaterialTheme.typography.displayLarge.tabular()
+    val baseStyle = when {
+        text.length >= 6 -> MaterialTheme.typography.displayMedium.copy(fontSize = 54.sp, lineHeight = 54.sp)
+        text.length == 5 -> MaterialTheme.typography.displayLarge.copy(fontSize = 64.sp, lineHeight = 64.sp)
+        else -> MaterialTheme.typography.displayLarge
+    }
+    val style = baseStyle.tabular()
     val color = MaterialTheme.colorScheme.onSurface
     if (!SCROLL_DIGITS) {
         Text(text, style = style, maxLines = 1, softWrap = false, color = color)
@@ -578,4 +585,48 @@ private fun RunRecordingPreview() = RunPreviewScreen(
 @Composable
 private fun RunPausedPreview() = RunPreviewScreen(
     RunUiState(sessionId = 1L, status = SessionStatus.PAUSED, summary = PreviewSummary, goalType = GoalType.DISTANCE, goalValue = 5_000),
+)
+
+private val PreviewSummaryLarge = RunSummary(
+    distanceM = 11_240.0,            // 11,2 km (> 10 km)
+    durationMs = 3_924_000L,         // 1 giờ 05 phút 24 giây (> 1 giờ)
+    paceSecPerKm = 349.0,            // 5:49 /km
+    progress = 0.749,                // 75%
+    goalReached = false,
+)
+
+@Preview(name = "Đang chạy >1h · Mục tiêu km (Sáng)", widthDp = 360, heightDp = 720, showBackground = true)
+@Preview(name = "Đang chạy >1h · Mục tiêu km (Tối)", widthDp = 360, heightDp = 720, showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+private fun RunOverOneHourDistancePreview() = RunPreviewScreen(
+    RunUiState(sessionId = 1L, status = SessionStatus.RECORDING, summary = PreviewSummaryLarge, goalType = GoalType.DISTANCE, goalValue = 15_000),
+)
+
+@Preview(name = "Đang chạy >1h · Mục tiêu giờ (Sáng)", widthDp = 360, heightDp = 720, showBackground = true)
+@Preview(name = "Đang chạy >1h · Mục tiêu giờ (Tối)", widthDp = 360, heightDp = 720, showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+private fun RunOverOneHourDurationPreview() = RunPreviewScreen(
+    RunUiState(sessionId = 1L, status = SessionStatus.RECORDING, summary = PreviewSummaryLarge, goalType = GoalType.DURATION, goalValue = 5_400),
+)
+
+private val PreviewSummary22m30s = RunSummary(
+    distanceM = 4_240.0,             // 4,24 km
+    durationMs = 1_350_000L,         // 22 phút 30 giây (1350s)
+    paceSecPerKm = 318.0,            // 5:18 /km
+    progress = 0.848,                // 85%
+    goalReached = false,
+)
+
+@Preview(name = "Đang chạy 22m30s · Mục tiêu km (Sáng)", widthDp = 360, heightDp = 720, showBackground = true)
+@Preview(name = "Đang chạy 22m30s · Mục tiêu km (Tối)", widthDp = 360, heightDp = 720, showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+private fun Run22m30sDistancePreview() = RunPreviewScreen(
+    RunUiState(sessionId = 1L, status = SessionStatus.RECORDING, summary = PreviewSummary22m30s, goalType = GoalType.DISTANCE, goalValue = 5_000),
+)
+
+@Preview(name = "Đang chạy 22m30s · Mục tiêu phút (Sáng)", widthDp = 360, heightDp = 720, showBackground = true)
+@Preview(name = "Đang chạy 22m30s · Mục tiêu phút (Tối)", widthDp = 360, heightDp = 720, showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+private fun Run22m30sDurationPreview() = RunPreviewScreen(
+    RunUiState(sessionId = 1L, status = SessionStatus.RECORDING, summary = PreviewSummary22m30s, goalType = GoalType.DURATION, goalValue = 1_800),
 )
