@@ -1,6 +1,6 @@
 # RunMate: Đặc tả sản phẩm (SPEC)
 
-> Trạng thái: **chờ duyệt**. Đã viết xong mục 1–10.
+> Trạng thái: **Đã duyệt** (hoàn thiện mục 1–10 cho MVP).
 
 ## Mục lục
 

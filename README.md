@@ -30,14 +30,14 @@ Mục tiêu chính: học qua vibe code. Hiểu được thứ AI viết ra quan
 ## Tính năng
 
 ### MVP
-- [ ] **Lên kế hoạch chạy:** chọn ngày, giờ, vị trí và mục tiêu (số km hoặc thời gian chạy)
-- [ ] **Đánh giá thời tiết** tại thời điểm và vị trí đã chọn
+- [x] **Lên kế hoạch chạy:** chọn ngày, giờ, vị trí và mục tiêu (số km hoặc thời gian chạy)
+- [x] **Đánh giá thời tiết** tại thời điểm và vị trí đã chọn
   - Dự báo: nhiệt độ, khả năng mưa, gió, chỉ số UV
   - Cảnh báo khi thời tiết xấu (mưa, quá nóng, gió mạnh, UV cao)
   - Gợi ý vật dụng nên mang (áo mưa, mũ, kem chống nắng, nước…)
-- [ ] **Ghi một buổi chạy:** theo kế hoạch hoặc chạy tự do. GPS, quãng đường, thời gian, pace, tiến độ so với mục tiêu
-- [ ] **Xem lại quỹ đạo** sau khi chạy (vẽ đường chạy, chưa có bản đồ nền)
-- [ ] **Lịch sử và thống kê:** xem các buổi đã chạy trên lịch tuần cùng kế hoạch, thống kê theo tuần hoặc tháng
+- [x] **Ghi một buổi chạy:** theo kế hoạch hoặc chạy tự do. GPS, quãng đường, thời gian, pace, tiến độ so với mục tiêu
+- [x] **Xem lại quỹ đạo** sau khi chạy (vẽ đường chạy, chưa có bản đồ nền)
+- [x] **Lịch sử và thống kê:** xem các buổi đã chạy trên lịch tuần cùng kế hoạch, thống kê theo tuần hoặc tháng
 
 ### Sau MVP
 - [ ] Thông báo trước giờ chạy 30 phút, kèm dự báo lại thời tiết
@@ -89,6 +89,13 @@ Build APK từ dòng lệnh:
 ./gradlew assembleDebug
 ```
 
+### Cài đặt nhanh file APK demo
+
+Nếu không muốn cài đặt Android Studio hay tự biên dịch mã nguồn, bạn có thể tải trực tiếp file APK đã dựng sẵn:
+1. Vào mục [Releases](https://github.com/Nha-Cong-Dong/RunMate/releases) trên GitHub của dự án.
+2. Tải file `app-debug.apk` về điện thoại Android (hỗ trợ Android 8.0 trở lên).
+3. Mở file APK trên điện thoại và chọn **Cài đặt** (cho phép cài đặt từ nguồn không xác định nếu thiết bị yêu cầu).
+
 > MVP không cần API key nào: Open-Meteo không yêu cầu key, và quỹ đạo được vẽ không dùng bản đồ.
 
 ## Cấu trúc thư mục
@@ -100,23 +107,36 @@ RunMate/
 │       ├── java/com/nhacongdong/runmate/
 │       │   ├── ui/          # Màn hình Compose, ViewModel, điều hướng, theme
 │       │   ├── domain/      # Quy tắc nghiệp vụ (BR-xx), use case
-│       │   ├── data/        # Repository, Room, Retrofit
+│       │   ├── data/        # Repository, Room 3, Retrofit
 │       │   └── service/     # Ghi GPS chạy nền (Foreground Service)
-│       ├── res/             # Chữ hiển thị, theme, icon
+│       ├── res/             # Tài nguyên giao diện (strings, drawable, font)
 │       └── AndroidManifest.xml
 ├── docs/
-│   └── SPEC.md     # Đặc tả sản phẩm
+│   └── SPEC.md              # Đặc tả sản phẩm và quy tắc nghiệp vụ chi tiết
 ├── gradle/
-│   └── libs.versions.toml   # Phiên bản thư viện
+│   └── libs.versions.toml   # Quản lý phiên bản thư viện
 ├── build.gradle.kts
 └── settings.gradle.kts
 ```
 
-Hiện mới có `ui/`. Các thư mục `domain/`, `data/`, `service/` sẽ có khi làm các tính năng. Chi tiết kiến trúc xem `docs/SPEC.md` mục 8.5.
+Mã nguồn được tổ chức theo kiến trúc phân tầng sạch (Clean Architecture) với luồng phụ thuộc một chiều (`ui` → `domain` → `data`):
+
+- **`ui/` (Giao diện & Trình bày):** Toàn bộ các màn hình Jetpack Compose theo mô hình MVVM (Lịch S1, Lên kế hoạch S2, Chọn địa điểm S3, Chi tiết kế hoạch S4, Chuẩn bị chạy S5, Màn hình đang chạy S6, Chi tiết kết quả S7, Thống kê S8), ViewModel, quản lý luồng trạng thái (`StateFlow`), điều hướng (Navigation Compose) và hệ thống thiết kế (màu sắc, kiểu chữ, khoảng cách).
+- **`domain/` (Quy tắc nghiệp vụ):** Các hàm xử lý nghiệp vụ thuần Kotlin, không phụ thuộc Android framework:
+  - Đánh giá thời tiết, phát cảnh báo thời tiết xấu và gợi ý vật dụng mang theo (`WeatherRules`).
+  - Bộ lọc toạ độ GPS (loại điểm sai số cao, nhảy vọt vô lý), ngắt đoạn khi tạm dừng, tính quãng đường và pace (`TrackRules`).
+  - Kiểm tra tính hợp lệ và chuyển trạng thái kế hoạch/buổi chạy (`PlanRules`, `RunRules`, `WeekRules`).
+  - Các Use Case điều phối vòng đời buổi chạy (`StartPlanRun`, `StartFreeRun`, `PauseRun`, `ResumeRun`, `FinishRun`).
+- **`data/` (Tầng dữ liệu & Kho lưu trữ):**
+  - **Lưu trữ offline (Room 3):** Quản lý bảng kế hoạch (`RunPlan`), buổi chạy (`RunSession`) và các điểm GPS (`TrackPoint`).
+  - **Gọi mạng (Retrofit):** Tích hợp Open-Meteo API để lấy dự báo thời tiết theo giờ và toạ độ.
+  - **Tìm kiếm địa điểm:** Sử dụng Android Geocoder và cơ chế dự phòng qua Open-Meteo Geocoding API.
+  - **Repository:** Cung cấp dữ liệu sạch cho ViewModel (`PlanRepository`, `SessionRepository`, `WeatherRepository`, `PlaceRepository`).
+- **`service/` (Dịch vụ nền):** `RunTrackingService` là một Android Foreground Service loại `location`, phụ trách duy trì việc nhận GPS liên tục qua Fused Location Provider, lọc điểm và lưu vào cơ sở dữ liệu ngay cả khi người dùng tắt màn hình hoặc chuyển app.
 
 ## Lộ trình
 
-- [ ] **MVP:** lên kế hoạch kèm đánh giá thời tiết, ghi buổi chạy, xem quỹ đạo, lịch sử trên lịch tuần và thống kê
+- [x] **MVP:** lên kế hoạch kèm đánh giá thời tiết, ghi buổi chạy, xem quỹ đạo, lịch sử trên lịch tuần và thống kê
 - [ ] **v1.1:** thông báo trước giờ chạy 30 phút và dự báo lại thời tiết
 - [ ] **v1.2:** bản đồ nền và vẽ đường theo thời gian thực
 

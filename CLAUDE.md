@@ -33,7 +33,7 @@ Mỗi khi đề xuất một thư viện, công nghệ, ý tưởng hay cách l�
 | **Lý do chọn**          | Vì sao phù hợp với RunMate                                        |
 | **Phương án khác**      | 1–2 lựa chọn thay thế và vì sao không chọn                        |
 
-Phần này dùng để tôi đưa vào `README.md` (mục Công nghệ) và `docs/SPEC.md` (mục 7: Kiến trúc & công nghệ).
+Phần này dùng để tôi đưa vào `README.md` (mục Công nghệ) và `docs/SPEC.md` (mục 8: API và công nghệ).
 
 - Ưu tiên tài liệu **chính thức**; nếu không chắc về phiên bản hay API, nói rõ là chưa chắc, không tự bịa.
 
