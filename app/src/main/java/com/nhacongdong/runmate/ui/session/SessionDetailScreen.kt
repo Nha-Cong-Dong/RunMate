@@ -246,7 +246,7 @@ private fun DeletePlanCard(time: String, distance: String, onConfirm: () -> Unit
 @Composable
 private fun Header(session: RunSession, zone: ZoneId) {
     val date = DayAgenda.dateOf(session.startedAt, zone)
-    Column {
+    Column(Modifier.padding(horizontal = Dimens.space2)) {
         Text(
             "${RunFormat.formatDayTitle(date)} · ${RunFormat.formatTime(session.startedAt, zone)}",
             style = MaterialTheme.typography.labelMedium,
@@ -269,7 +269,7 @@ private fun Header(session: RunSession, zone: ZoneId) {
 @Composable
 private fun ResultRow(summary: RunSummary) {
     val km = stringResource(R.string.run_distance_unit)
-    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+    Row(Modifier.fillMaxWidth().padding(horizontal = Dimens.space2), verticalAlignment = Alignment.CenterVertically) {
         // Số km và chữ "km" căn theo đường nền chữ, nằm cùng một hàng
         Row(Modifier.weight(1f)) {
             Text(
@@ -470,4 +470,43 @@ private fun SessionDetailTimeGoalPreview() = RunMateTheme {
 @Composable
 private fun SessionDetailTimeGoalNotReachedPreview() = RunMateTheme {
     SessionDetailScreen(state = previewTimeGoal(goalSeconds = 2_700), onBack = {})
+}
+
+// Buổi chạy 22 phút 30 giây, 4,24 km (mục tiêu 5 km)
+private fun preview22m30s(): SessionDetailUiState {
+    val points = (0 until 50).map { i ->
+        val a = i * 2 * PI / 45
+        TrackPoint(
+            sessionId = 4L,
+            segmentIndex = 0,
+            timestamp = previewMillis(6, 10) + i * 27_000L,
+            latitude = 21.028 + 0.005 * sin(a),
+            longitude = 105.852 + 0.007 * cos(a),
+            accuracyM = 5f,
+        )
+    }
+    val session = RunSession(
+        id = 4L,
+        planId = null,
+        status = SessionStatus.FINISHED,
+        startedAt = previewMillis(6, 10),
+        endedAt = previewMillis(6, 32) + 30_000L,
+        locationName = "Hồ Hoàn Kiếm",
+        latitude = 21.028,
+        longitude = 105.852,
+        goalType = GoalType.DISTANCE,
+        goalValue = 5_000,
+        distanceMeters = 4_240.0,
+        activeDurationSec = 1_350L,
+        weather = null,
+    )
+    val summary = com.nhacongdong.runmate.domain.RunSummaryRules.summarize(points, session.goalType, session.goalValue)
+    return SessionDetailUiState(session, points, summary)
+}
+
+@Preview(name = "Buổi chạy 22m30s (4,24km) · Sáng", widthDp = 360, heightDp = 720, showBackground = true)
+@Preview(name = "Buổi chạy 22m30s (4,24km) · Tối", widthDp = 360, heightDp = 720, showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+private fun SessionDetail22m30sPreview() = RunMateTheme {
+    SessionDetailScreen(state = preview22m30s(), onBack = {})
 }
